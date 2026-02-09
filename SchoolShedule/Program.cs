@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SchoolShedule.Data;
 using SchoolShedule.Entities;
 using SchoolShedule.Providers;
@@ -18,13 +19,12 @@ namespace SchoolShedule
 
             // Подключаю адаптер "Логирование"
             LoggingProviderFactory.Configure(builder.Logging, builder.Configuration);
+            var logger = LoggerFactory.Create(logging =>
+                LoggingProviderFactory.Configure(logging, builder.Configuration))
+              .CreateLogger<Program>();
 
             // Подключаю адаптер "БД"
-            DbProviderFactory.Configure(builder.Configuration, builder.Services,
-            LoggerFactory.Create(logging =>
-                LoggingProviderFactory.Configure(logging, builder.Configuration))
-              .CreateLogger<Program>()
-              );
+            DbProviderFactory.Configure(builder.Configuration, builder.Services, logger);
 
             // Identity + EF Core
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
@@ -46,6 +46,37 @@ namespace SchoolShedule
             builder.Services.AddRazorPages();
 
             var app = builder.Build();
+
+            // Проверка подключения к нашей Базе и применение миграций 
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<SheduleDbContext>();
+                try
+                {
+                    if (builder.Environment.IsDevelopment())
+                    { // В DEV - использую 
+                      // EnsureCreated — чтобы быстро поднять пустую базу 
+                        if (db.Database.EnsureCreated())
+                            logger.LogInformation("[DB-TEST] База создана через EnsureCreated.");
+                        else
+                            logger.LogInformation("[DB-TEST] База уже существует.");
+                    }
+                    else
+                    {
+                        // В PROD — всегда миграции 
+                        db.Database.Migrate();
+                        logger.LogInformation("[DB-TEST] Миграции применены успешно.");
+                    }
+                    //Проверочка внутряночки
+                    if (!db.Users.Any() && !db.Subjects.Any())
+                        logger.LogInformation("[DB-TEST] База пустая — можно запускать DbInitializer.");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "[DB-TEST] Ошибка применения миграций!");
+                    throw;
+                }
+            }
 
             app.UseExceptionHandler("/Home/Error");
 

@@ -1,6 +1,7 @@
-using System.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using SchoolShedule.Models;
+using System.Diagnostics;
 
 namespace SchoolShedule.Controllers
 {
@@ -26,7 +27,18 @@ namespace SchoolShedule.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var feature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
+
+            var model = new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                ShowRequestId = User.IsInRole("Administrator"),
+                ExceptionMessage = feature?.Error.Message,
+                StackTrace = feature?.Error.StackTrace
+            };
+
+            return View(model);
         }
+
     }
 }

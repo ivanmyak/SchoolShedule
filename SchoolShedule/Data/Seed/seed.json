@@ -1,0 +1,391 @@
+{
+  "Users": [
+    {
+      "Id": "11111111-1111-1111-1111-111111111111",
+      "FirstName": "Иван",
+      "LastName": "Петров",
+      "MiddleName": "Алексеевич",
+      "UserName": "ivan.petrov.teacher",
+      "NormalizedUserName": "IVAN.PETROV.TEACHER",
+      "Email": "ivan.petrov.teacher@guestmail.com",
+      "NormalizedEmail": "IVAN.PETROV.TEACHER@GUESTMAIL.COM"
+    },
+    {
+      "Id": "22222222-2222-2222-2222-222222222222",
+      "FirstName": "Мария",
+      "LastName": "Сидорова",
+      "MiddleName": "Игоревна",
+      "UserName": "maria.sidorova.teacher",
+      "NormalizedUserName": "MARIA.SIDOROVA.TEACHER",
+      "Email": "maria.sidorova.teacher@guestmail.com",
+      "NormalizedEmail": "MARIA.SIDOROVA.TEACHER@GUESTMAIL.COM"
+    },
+    {
+      "Id": "33333333-3333-3333-3333-333333333333",
+      "FirstName": "Алексей",
+      "LastName": "Кузнецов",
+      "MiddleName": "Сергеевич",
+      "UserName": "alexey.kuznetsov.teacher",
+      "NormalizedUserName": "ALEXEY.KUZNETSOV.TEACHER",
+      "Email": "alexey.kuznetsov.teacher@guestmail.com",
+      "NormalizedEmail": "ALEXEY.KUZNETSOV.TEACHER@GUESTMAIL.COM"
+    },
+    {
+      "Id": "44444444-4444-4444-4444-444444444444",
+      "FirstName": "Ольга",
+      "LastName": "Иванова",
+      "MiddleName": "Павловна",
+      "UserName": "olga.ivanova.teacher",
+      "NormalizedUserName": "OLGA.IVANOVA.TEACHER",
+      "Email": "olga.ivanova.teacher@guestmail.com",
+      "NormalizedEmail": "OLGA.IVANOVA.TEACHER@GUESTMAIL.COM"
+    },
+    {
+      "Id": "55555555-5555-5555-5555-555555555555",
+      "FirstName": "Сергей",
+      "LastName": "Михайлов",
+      "MiddleName": "Владимирович",
+      "UserName": "sergey.mikhailov.teacher",
+      "NormalizedUserName": "SERGEY.MIKHAILOV.TEACHER",
+      "Email": "sergey.mikhailov.teacher@guestmail.com",
+      "NormalizedEmail": "SERGEY.MIKHAILOV.TEACHER@GUESTMAIL.COM"
+    },
+
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000001",
+      "FirstName": "Анна",
+      "LastName": "Ковалева",
+      "UserName": "anna.kovaleva.student",
+      "NormalizedUserName": "ANNA.KOVALEVA.STUDENT",
+      "Email": "anna.kovaleva.student@guestmail.com",
+      "NormalizedEmail": "ANNA.KOVALEVA.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000002",
+      "FirstName": "Дмитрий",
+      "LastName": "Смирнов",
+      "UserName": "dmitry.smirnov.student",
+      "NormalizedUserName": "DMITRY.SMIRNOV.STUDENT",
+      "Email": "dmitry.smirnov.student@guestmail.com",
+      "NormalizedEmail": "DMITRY.SMIRNOV.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000003",
+      "FirstName": "Елена",
+      "LastName": "Фролова",
+      "UserName": "elena.frolova.student",
+      "NormalizedUserName": "ELENA.FROLOVA.STUDENT",
+      "Email": "elena.frolova.student@guestmail.com",
+      "NormalizedEmail": "ELENA.FROLOVA.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000004",
+      "FirstName": "Николай",
+      "LastName": "Соловьев",
+      "UserName": "nikolay.solovyev.student",
+      "NormalizedUserName": "NIKOLAY.SOLOVYEV.STUDENT",
+      "Email": "nikolay.solovyev.student@guestmail.com",
+      "NormalizedEmail": "NIKOLAY.SOLOVYEV.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000005",
+      "FirstName": "Ирина",
+      "LastName": "Козлова",
+      "UserName": "irina.kozlova.student",
+      "NormalizedUserName": "IRINA.KOZLOVA.STUDENT",
+      "Email": "irina.kozlova.student@guestmail.com",
+      "NormalizedEmail": "IRINA.KOZLOVA.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000006",
+      "FirstName": "Павел",
+      "LastName": "Орлов",
+      "UserName": "pavel.orlov.student",
+      "NormalizedUserName": "PAVEL.ORLOV.STUDENT",
+      "Email": "pavel.orlov.student@guestmail.com",
+      "NormalizedEmail": "PAVEL.ORLOV.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000007",
+      "FirstName": "Светлана",
+      "LastName": "Громова",
+      "UserName": "svetlana.gromova.student",
+      "NormalizedUserName": "SVETLANA.GROMOVA.STUDENT",
+      "Email": "svetlana.gromova.student@guestmail.com",
+      "NormalizedEmail": "SVETLANA.GROMOVA.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000008",
+      "FirstName": "Виктор",
+      "LastName": "Егоров",
+      "UserName": "victor.egorov.student",
+      "NormalizedUserName": "VICTOR.EGOROV.STUDENT",
+      "Email": "victor.egorov.student@guestmail.com",
+      "NormalizedEmail": "VICTOR.EGOROV.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000009",
+      "FirstName": "Татьяна",
+      "LastName": "Лебедева",
+      "UserName": "tatiana.lebedeva.student",
+      "NormalizedUserName": "TATIANA.LEBEDEVA.STUDENT",
+      "Email": "tatiana.lebedeva.student@guestmail.com",
+      "NormalizedEmail": "TATIANA.LEBEDEVA.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000010",
+      "FirstName": "Андрей",
+      "LastName": "Новиков",
+      "UserName": "andrey.novikov.student",
+      "NormalizedUserName": "ANDREY.NOVIKOV.STUDENT",
+      "Email": "andrey.novikov.student@guestmail.com",
+      "NormalizedEmail": "ANDREY.NOVIKOV.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000011",
+      "FirstName": "Юлия",
+      "LastName": "Морозова",
+      "UserName": "yulia.morozova.student",
+      "NormalizedUserName": "YULIA.MOROZOVA.STUDENT",
+      "Email": "yulia.morozova.student@guestmail.com",
+      "NormalizedEmail": "YULIA.MOROZOVA.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000012",
+      "FirstName": "Олег",
+      "LastName": "Васильев",
+      "UserName": "oleg.vasiliev.student",
+      "NormalizedUserName": "OLEG.VASILIEV.STUDENT",
+      "Email": "oleg.vasiliev.student@guestmail.com",
+      "NormalizedEmail": "OLEG.VASILIEV.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000013",
+      "FirstName": "Наталья",
+      "LastName": "Попова",
+      "UserName": "natalia.popova.student",
+      "NormalizedUserName": "NATALIA.POPOVA.STUDENT",
+      "Email": "natalia.popova.student@guestmail.com",
+      "NormalizedEmail": "NATALIA.POPOVA.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000014",
+      "FirstName": "Максим",
+      "LastName": "Зайцев",
+      "UserName": "maxim.zaytsev.student",
+      "NormalizedUserName": "MAXIM.ZAYTSEV.STUDENT",
+      "Email": "maxim.zaytsev.student@guestmail.com",
+      "NormalizedEmail": "MAXIM.ZAYTSEV.STUDENT@GUESTMAIL.COM"
+    },
+    {
+      "Id": "aaaaaaaa-0000-0000-0000-000000000015",
+      "FirstName": "Валерия",
+      "LastName": "Соколова",
+      "UserName": "valeria.sokolova.student",
+      "NormalizedUserName": "VALERIA.SOKOLOVA.STUDENT",
+      "Email": "valeria.sokolova.student@guestmail.com",
+      "NormalizedEmail": "VALERIA.SOKOLOVA.STUDENT@GUESTMAIL.COM"
+    }
+  ],
+
+  "Teachers": [
+    { "UserId": "11111111-1111-1111-1111-111111111111", "Specialization": "Математика" },
+    { "UserId": "22222222-2222-2222-2222-222222222222", "Specialization": "Физика" },
+    { "UserId": "33333333-3333-3333-3333-333333333333", "Specialization": "Химия / Биология" },
+    { "UserId": "44444444-4444-4444-4444-444444444444", "Specialization": "История / Русский язык / Русская литература" },
+    { "UserId": "55555555-5555-5555-5555-555555555555", "Specialization": "Английский язык / Физическая культура" }
+  ],
+
+  "ClassGroups": [
+    { "Id": 1, "Grade": 5, "Letter": "А" },
+    { "Id": 2, "Grade": 6, "Letter": "Б" },
+    { "Id": 3, "Grade": 7, "Letter": "А" }
+  ],
+
+  "Students": [
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000001", "ClassGroupId": 1 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000002", "ClassGroupId": 1 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000003", "ClassGroupId": 1 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000004", "ClassGroupId": 1 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000005", "ClassGroupId": 1 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000006", "ClassGroupId": 1 },
+
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000007", "ClassGroupId": 2 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000008", "ClassGroupId": 2 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000009", "ClassGroupId": 2 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000010", "ClassGroupId": 2 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000011", "ClassGroupId": 2 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000012", "ClassGroupId": 2 },
+
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000013", "ClassGroupId": 3 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000014", "ClassGroupId": 3 },
+    { "UserId": "aaaaaaaa-0000-0000-0000-000000000015", "ClassGroupId": 3 }
+  ],
+
+  "Subjects": [
+    { "Id": 1, "Name": "Математика", "Code": "MATH" },
+    { "Id": 2, "Name": "Физика", "Code": "PHYS" },
+    { "Id": 3, "Name": "Химия", "Code": "CHEM" },
+    { "Id": 4, "Name": "История", "Code": "HIST" },
+    { "Id": 5, "Name": "Физическая культура", "Code": "PE" },
+    { "Id": 6, "Name": "Русский язык", "Code": "RUS" },
+    { "Id": 7, "Name": "Русская литература", "Code": "RUSLIT" },
+    { "Id": 8, "Name": "Английский язык", "Code": "ENG" },
+    { "Id": 9, "Name": "Биология", "Code": "BIO" }
+  ],
+
+  "Rooms": [
+    { "Id": 1, "Floor": 2, "Number": 25 },
+    { "Id": 2, "Floor": 3, "Number": 24 },
+    { "Id": 3, "Floor": 2, "Number": 18 },
+    { "Id": 4, "Floor": 1, "Number": 5 },
+    { "Id": 5, "Floor": 0, "Number": 1 }
+  ],
+
+  "TimeSlots": [
+    { "Id": 1, "DayOfWeek": 0, "Period": 1 },
+    { "Id": 2, "DayOfWeek": 0, "Period": 2 },
+    { "Id": 3, "DayOfWeek": 0, "Period": 3 },
+
+    { "Id": 4, "DayOfWeek": 1, "Period": 1 },
+    { "Id": 5, "DayOfWeek": 1, "Period": 2 },
+    { "Id": 6, "DayOfWeek": 1, "Period": 3 },
+
+    { "Id": 7, "DayOfWeek": 2, "Period": 1 },
+    { "Id": 8, "DayOfWeek": 2, "Period": 2 },
+    { "Id": 9, "DayOfWeek": 2, "Period": 3 },
+
+    { "Id": 10, "DayOfWeek": 3, "Period": 1 },
+    { "Id": 11, "DayOfWeek": 3, "Period": 2 },
+    { "Id": 12, "DayOfWeek": 3, "Period": 3 },
+
+    { "Id": 13, "DayOfWeek": 4, "Period": 1 },
+    { "Id": 14, "DayOfWeek": 4, "Period": 2 },
+    { "Id": 15, "DayOfWeek": 4, "Period": 3 }
+  ],
+
+  "Lessons": [
+    {
+      "Id": 1,
+      "SubjectId": 1,
+      "TeacherId": "11111111-1111-1111-1111-111111111111",
+      "ClassGroupId": 1,
+      "RoomId": 1,
+      "TimeSlotId": 1
+    },
+    {
+      "Id": 2,
+      "SubjectId": 6,
+      "TeacherId": "44444444-4444-4444-4444-444444444444",
+      "ClassGroupId": 1,
+      "RoomId": 2,
+      "TimeSlotId": 2
+    },
+    {
+      "Id": 3,
+      "SubjectId": 8,
+      "TeacherId": "55555555-5555-5555-5555-555555555555",
+      "ClassGroupId": 1,
+      "RoomId": 3,
+      "TimeSlotId": 3
+    },
+    {
+      "Id": 4,
+      "SubjectId": 2,
+      "TeacherId": "22222222-2222-2222-2222-222222222222",
+      "ClassGroupId": 1,
+      "RoomId": 1,
+      "TimeSlotId": 4
+    },
+    {
+      "Id": 5,
+      "SubjectId": 9,
+      "TeacherId": "33333333-3333-3333-3333-333333333333",
+      "ClassGroupId": 1,
+      "RoomId": 2,
+      "TimeSlotId": 5
+    },
+
+    {
+      "Id": 6,
+      "SubjectId": 1,
+      "TeacherId": "11111111-1111-1111-1111-111111111111",
+      "ClassGroupId": 2,
+      "RoomId": 3,
+      "TimeSlotId": 6
+    },
+    {
+      "Id": 7,
+      "SubjectId": 7,
+      "TeacherId": "44444444-4444-4444-4444-444444444444",
+      "ClassGroupId": 2,
+      "RoomId": 2,
+      "TimeSlotId": 7
+    },
+    {
+      "Id": 8,
+      "SubjectId": 3,
+      "TeacherId": "33333333-3333-3333-3333-333333333333",
+      "ClassGroupId": 2,
+      "RoomId": 1,
+      "TimeSlotId": 8
+    },
+    {
+      "Id": 9,
+      "SubjectId": 5,
+      "TeacherId": "55555555-5555-5555-5555-555555555555",
+      "ClassGroupId": 2,
+      "RoomId": 4,
+      "TimeSlotId": 9
+    },
+    {
+      "Id": 10,
+      "SubjectId": 2,
+      "TeacherId": "22222222-2222-2222-2222-222222222222",
+      "ClassGroupId": 2,
+      "RoomId": 5,
+      "TimeSlotId": 10
+    },
+
+    {
+      "Id": 11,
+      "SubjectId": 1,
+      "TeacherId": "11111111-1111-1111-1111-111111111111",
+      "ClassGroupId": 3,
+      "RoomId": 2,
+      "TimeSlotId": 11
+    },
+    {
+      "Id": 12,
+      "SubjectId": 6,
+      "TeacherId": "44444444-4444-4444-4444-444444444444",
+      "ClassGroupId": 3,
+      "RoomId": 3,
+      "TimeSlotId": 12
+    },
+    {
+      "Id": 13,
+      "SubjectId": 8,
+      "TeacherId": "55555555-5555-5555-5555-555555555555",
+      "ClassGroupId": 3,
+      "RoomId": 1,
+      "TimeSlotId": 13
+    },
+    {
+      "Id": 14,
+      "SubjectId": 3,
+      "TeacherId": "33333333-3333-3333-3333-333333333333",
+      "ClassGroupId": 3,
+      "RoomId": 4,
+      "TimeSlotId": 14
+    },
+    {
+      "Id": 15,
+      "SubjectId": 9,
+      "TeacherId": "33333333-3333-3333-3333-333333333333",
+      "ClassGroupId": 3,
+      "RoomId": 5,
+      "TimeSlotId": 15
+    }
+  ]
+}

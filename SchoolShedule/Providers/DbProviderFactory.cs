@@ -2,8 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using SchoolShedule.Data;
+using System.Data.Common;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace SchoolShedule.Providers
 {
@@ -11,7 +14,7 @@ namespace SchoolShedule.Providers
     {
         public static void Configure(IConfiguration cfg, IServiceCollection services, ILogger logger)
         {
-            var providers = new Dictionary<string, Action>
+            var providers = new Dictionary<string, Func<bool>>
             {
                 ["Postgres"] = () => ConfigurePostgres(cfg, services, logger),
                 ["MSSQL"] = () => ConfigureMssql(cfg, services, logger),
@@ -22,44 +25,130 @@ namespace SchoolShedule.Providers
             {
                 try
                 {
-                    pv.Value();
-                    logger.LogInformation("[DB] {Provider} настроен успешно!.", pv.Key);
-                    return; // первый успешный — используем
+                    if (!pv.Value())
+                    {
+                        logger.LogWarning("[DB-PROV] {Provider} не удалось настроить - переходим к следующему!", pv.Key);
+                        continue;
+                    }
+
+                    logger.LogInformation("[DB-PROV] {Provider} настроен успешно!.", pv.Key);
+                    return; // первый успешный(существующую строку) — используем
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning("[DB] {Provider} failed: {Message}", pv.Key, ex.Message);
+                    logger.LogError("[DB-PROV] {Provider} failed: {Message}", pv.Key, ex.Message);
                 }
             }
+            logger.LogWarning("[DB-PROV] Отсутствуют 'работающие' провайдеры БД!");
+            throw new InvalidOperationException("[DB-PROV] Отсутствуют 'работающие' провайдеры БД!");
+        }
 
-            throw new InvalidOperationException("[DB] Отсутствуют 'работающие' провайдеры БД!");
+        private static bool ConfigurePostgres(IConfiguration cfg, IServiceCollection services, ILogger logger)
+        {
+            try
+            {
+                var conn = cfg.GetConnectionString("PostgresDB") ?? throw new InvalidOperationException("Нет строки PostgresDB!");
+                var goodConn = getGoodConnectString(conn, cfg, logger);
+                var connBuilder = new NpgsqlConnectionStringBuilder(goodConn);
+                connBuilder.Database = "postgres";
+
+                if (TestConnection(connBuilder.ConnectionString, logger, "Postgres"))
+                {
+                    services.AddDbContext<SheduleDbContext>(opt => opt.UseNpgsql(goodConn));
+                    return true;
+                }
+                else
+                    return false;
+
+            }
+            catch (Exception)
+            {
+                logger.LogError("[DB-CONF] Произошла ошибка при настройки PostgresDB");
+                throw;
+            }
 
         }
 
-        private static void ConfigurePostgres(IConfiguration cfg, IServiceCollection services, ILogger logger)
+        private static bool TestPostgres(string conn, ILogger logger)
         {
-            var raw = cfg.GetConnectionString("PostgresDB") ?? throw new InvalidOperationException("Нет строки PostgresDB!");
-            var conn = getGoodConnectString(raw, cfg, logger);
+            try
+            {
+                using var c = new NpgsqlConnection(conn);
+                c.Open();
 
-            using var c = new Npgsql.NpgsqlConnection(conn);
-            c.Open(); // проверка
+                // проверка доступности сервиса
+                var options = new DbContextOptionsBuilder<SheduleDbContext>()
+                    .UseNpgsql(conn)
+                    .Options;
 
-            services.AddDbContext<SheduleDbContext>(opt => opt.UseNpgsql(conn));
+                using var db = new SheduleDbContext(options);
+                // проверка миграций и схемы
+                db.Database.Migrate();
+                logger.LogInformation("[DB-TEST] Postgres миграции применены успешно.");
+                if (!db.Users.Any() && !db.Subjects.Any())
+                    logger.LogInformation("[DB-TEST] Postgres пуст — можно запускать DbInitializer.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning("[DB-TEST] Postgres failed: {Message}", ex.Message);
+                return false;
+            }
         }
 
-        private static void ConfigureMssql(IConfiguration cfg, IServiceCollection services, ILogger logger)
+        private static bool ConfigureMssql(IConfiguration cfg, IServiceCollection services, ILogger logger)
         {
-            var raw = cfg.GetConnectionString("MSSQLDB") ?? throw new InvalidOperationException("Нет строки MSSQLDB!");
-            //Танцы с бубном, чтобы БД лежала в папке c проектом 
-            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", $"{cfg["DB_NAME"]}.mdf");
+            try
+            {
+                var conn = cfg.GetConnectionString("MSSQLDB")
+                                ?? throw new InvalidOperationException("Нет строки MSSQLDB!");
+                //Танцы с бубном, чтобы БД лежала в папке c проектом 
+                string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", $"{cfg["DB_NAME"]}.mdf");
+                var goodConn = getGoodConnectString(conn.Replace("${MSSQL_DB_FILE_LOCATION}", dbPath), cfg, logger);
+                var connBuilder = new SqlConnectionStringBuilder(goodConn);
+                connBuilder.AttachDBFilename = ""; // убираем, чтобы не искал файл
+                connBuilder.InitialCatalog = "master";
+                if (TestConnection(connBuilder.ConnectionString, logger, "MSSQL"))
+                {
+                    services.AddDbContext<SheduleDbContext>(opt => opt.UseSqlServer(goodConn));
+                    return true;
+                }
+                else
+                    return false;
 
-            var goodConn = getGoodConnectString(raw.Replace("${MSSQL_DB_FILE_LOCATION}", dbPath), cfg, logger);
+            }
+            catch (Exception)
+            {
 
-            services.AddDbContext<SheduleDbContext>(opt => opt.UseSqlServer(goodConn));
+                throw;
+            }
 
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<SheduleDbContext>();
-            db.Database.EnsureCreated();
+
+        }
+
+        private static bool TestMssql(string conn, ILogger logger)
+        {
+            try
+            {
+                using var c = new SqlConnection(conn); c.Open();
+                // проверка доступности сервиса
+                var options = new DbContextOptionsBuilder<SheduleDbContext>()
+                    .UseSqlServer(conn)
+                    .Options;
+                using var db = new SheduleDbContext(options);
+                db.Database.Migrate();
+                logger.LogInformation("[DB-TEST] MSSQL миграции применены успешно.");
+
+                // проверка схемы 
+                if (!db.Users.Any() && !db.Subjects.Any())
+                    logger.LogInformation("[DB-TEST] MSSQL пуст — можно запускать DbInitializer.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "[DB-TEST] Ошибка при проверке подключения к MSSQL!");
+                throw;
+            }
         }
 
         /// <summary>
@@ -72,8 +161,8 @@ namespace SchoolShedule.Providers
 
             if (string.IsNullOrEmpty(raw))
             {
-                logger.LogError("[DB] Строка подключения пуста!");
-                throw new ArgumentException("[DB] Строка подключения пуста!");
+                logger.LogError("[DB-STR] Строка подключения пуста!");
+                throw new ArgumentException("[DB-STR] Строка подключения пуста!");
             }
 
 
@@ -91,10 +180,34 @@ namespace SchoolShedule.Providers
             }
             if (missing.Count > 0)
             {
-                logger.LogError("[DB] Не найдены значения для переменных: {Vars}", string.Join(", ", missing));
+                logger.LogError("[DB-STR] Не найдены значения для переменных: {Vars}", string.Join(", ", missing));
                 throw new InvalidOperationException($"Отсутствуют переменные: {string.Join(", ", missing)}");
             }
             return result;
+        }
+
+        /// <summary>
+        /// Проверка успешности подключения к сервису с БД
+        /// </summary>
+        /// <remarks>Для каждого сервиса - пробуем подключиться не к нужной БД, а к СИСТЕМНОЙ</remarks>
+        /// <param name="conn"> Переопределённая строка подключения к сервису с БД</param>
+        /// <param name="logger">сервис-логгер</param>
+        /// <param name="providerName">Провайдер, который мы сейчас пытаемся настроить</param>
+        /// <returns><see langword="true"/> - Удалось подключиться, <see langword="false"/> - нет</returns>
+        private static bool TestConnection(string conn, ILogger logger, string providerName)
+        {
+            try
+            {
+                using var dbConn = providerName == "Postgres" ? new NpgsqlConnection(conn) as DbConnection : new SqlConnection(conn);
+                dbConn.Open();
+                logger.LogInformation("[DB-TEST] {Provider} соединение успешно установлено.", providerName);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning("[DB-TEST] {Provider} соединение не удалось: {Message}", providerName, ex.Message);
+                return false;
+            }
         }
     }
 

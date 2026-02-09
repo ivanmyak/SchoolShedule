@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SchoolShedule.Data;
 using SchoolShedule.Entities;
 using SchoolShedule.Models;
 
@@ -7,13 +10,19 @@ namespace SchoolShedule.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly ILogger<AccountController> _logger;
+        private readonly SheduleDbContext _context;
+
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(SheduleDbContext context, UserManager<User> userManager, SignInManager<User> signInManager, ILogger<AccountController> logger)
         {
+            _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
+
+            _logger = logger;
         }
 
 
@@ -83,8 +92,21 @@ namespace SchoolShedule.Controllers
                 throw;
             }
             return RedirectToAction("Login");
-
         }
 
+        [Authorize(Roles = "Administrator")]
+        [Route("Account/initdb")]
+        public async Task<IActionResult> InitSeedDb()
+        {
+            await Data.Seed.DbInitializer.SeedAsync(_context, _logger);
+            return Ok(new { message = "Инициализация выполнена" });
+        }
+
+        [Route("GodHasDick")]
+        public async Task<IActionResult> InitAdminDb([FromServices] RoleManager<IdentityRole<Guid>> roleManager)
+        {
+            await Data.Seed.DbInitializer.InitAdminAsync(_userManager, roleManager, _logger);
+            return Ok(new { message = "Инициализация выполнена" });
+        }
     }
 }
