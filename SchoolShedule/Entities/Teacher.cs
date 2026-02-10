@@ -25,7 +25,7 @@ namespace SchoolShedule.Entities
         /// </summary>
         /// <example>Русская литература / Русский язык</example>
         public string SubjectsToString =>
-    string.Join("/ ", Subjects.Select(s => s.Name));
+    string.Join(" / ", Subjects.Select(s => s.Name));
     }
 
 }
