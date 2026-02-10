@@ -4,7 +4,7 @@ using System.ComponentModel;
 namespace SchoolShedule.Entities
 {
     /// <summary>
-    /// Учебное занятие 
+    /// Учебное занятие (только параметры периода - более подробно - в <see cref="Lesson"/>)
     /// </summary>
     public class TimeSlot
     {

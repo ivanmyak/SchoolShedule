@@ -27,12 +27,17 @@
                         }
                     </ul>
                     <ul class="navbar-nav d-flex">
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            @* <li class="nav-item">
+                                <a class="nav-link text-danger" asp-area="" asp-controller="Account" asp-action="initdb">Initialize</a>
+                            </li> *@
+                        }
                         <li class="nav-item">
                             @if (User.Identity?.IsAuthenticated ?? false)
                             {
-
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="nav-link btn btn-link text-dark" title="Выход из системы">Выход</button>
+                                    <button type="submit" class="nav-link btn btn-warning text-dark" title="Выход из системы">Выход</button>
                                 </form>
                             }
                             else

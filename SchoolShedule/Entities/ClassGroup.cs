@@ -32,8 +32,7 @@ namespace SchoolShedule.Entities
         /// <example>3-А или 1 </example>
         public string Name =>
     Letter.HasValue
-        ? $"{Grade}"
-        : $"{Grade}-{Letter}";
-
+        ? $"{Grade}-{Letter}"
+        : $"{Grade}";
     }
 }

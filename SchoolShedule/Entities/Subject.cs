@@ -12,14 +12,16 @@ namespace SchoolShedule.Entities
         /// <summary>
         /// Наименование предмета
         /// </summary>
+        [Required]
         public string Name { get; set; } = default!;
 
         /// <summary>
         /// Короткий код предмета
         /// </summary>
         /// <example>MATH = Математика</example>
-        [MaxLength(10)] 
-        public string? Code { get; set; }
+        [MaxLength(10)]
+        [Required]
+        public string Code { get; set; } = default!;
 
     }
 }
