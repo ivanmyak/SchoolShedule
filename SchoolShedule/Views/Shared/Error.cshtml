@@ -11,12 +11,6 @@
         </p>
     </div>
 
-    @if (Model.ShowRequestId)
-    {
-        <div class="alert alert-secondary mt-3">
-            <strong>Request ID:</strong> <code>@Model.RequestId</code>
-        </div>
-    }
 
     @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
     {
@@ -24,6 +18,12 @@
             <div class="card-header bg-warning text-dark">
                 Технические детали (Development Mode)
             </div>
+            @if (Model.ShowRequestId)
+            {
+                <div class="alert alert-secondary mt-3">
+                    <strong>Request ID:</strong> <code>@Model.RequestId</code>
+                </div>
+            }
             <div class="card-body">
                 <pre>@Model.StackTrace</pre>
             </div>

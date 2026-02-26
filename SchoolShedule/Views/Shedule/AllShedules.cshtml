@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SchoolShedule.Entities.Lesson>
+﻿@model AllSchedulesViewModel
 @using SchoolShedule.Enums
 @using SchoolShedule.Extensions
 
@@ -10,6 +10,16 @@
 }
 
 <h2 class="mb-4 text-center">📚 Расписание на полугодие</h2>
+
+<div class="d-flex justify-content-center mb-4">
+    <form method="get" asp-action="AllShedules" class="w-auto">
+        <select name="groupType" asp-for="SelectedGroupType"
+                asp-items="Html.GetEnumSelectList<GroupType>()"
+                class="form-select text-center"
+                onchange="this.form.submit()">
+        </select>
+    </form>
+</div>
 
 <div class="table-responsive">
     <table class="table table-bordered text-center align-middle shadow-sm">
@@ -29,7 +39,7 @@
                     <td class="fw-bold bg-light">@period</td>
                     @foreach (var day in days)
                     {
-                        var lessons = Model
+                        var lessons = Model.Lessons
                         .Where(l => l.TimeSlot.DayOfWeek == day && l.TimeSlot.Period == period)
                         .OrderBy(l => l.ClassGroup.Grade)
                         .ThenBy(l => l.ClassGroup.Letter)
