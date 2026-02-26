@@ -12,7 +12,7 @@
 <h2 class="mb-4 text-center">📚 Расписание на полугодие</h2>
 
 <div class="d-flex justify-content-center mb-4">
-    <form method="get" asp-action="AllShedules" class="w-auto">
+    <form method="get" asp-action="All" class="w-auto">
         <select name="groupType" asp-for="SelectedGroupType"
                 asp-items="Html.GetEnumSelectList<GroupType>()"
                 class="form-select text-center"

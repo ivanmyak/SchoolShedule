@@ -20,3 +20,53 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Контейнер details в навигации */
+.nav-details {
+    position: relative;
+    cursor: pointer;
+}
+
+    /* Summary стилизуем как обычную ссылку Bootstrap */
+    .nav-details > summary {
+        list-style: none;
+        padding: .5rem 1rem;
+        user-select: none;
+    }
+
+        .nav-details > summary::-webkit-details-marker {
+            display: none;
+        }
+
+/* Выпадающий список */
+.dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: .25rem;
+    padding: .5rem 0;
+    margin: 0;
+    list-style: none;
+    min-width: 200px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+
+/* Ссылки внутри выпадающего меню */
+.dropdown-item {
+    display: block;
+    padding: .5rem 1rem;
+    color: #212529;
+    text-decoration: none;
+}
+
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+/* Скрываем список, пока details закрыт */
+.nav-details:not([open]) .dropdown-list {
+    display: none;
+}

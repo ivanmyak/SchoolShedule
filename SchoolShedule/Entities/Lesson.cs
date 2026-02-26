@@ -16,6 +16,7 @@ namespace SchoolShedule.Entities
         /// <summary>
         /// Предмет урока
         /// </summary>
+        [Display(Name = "Предмет урока")]
         public Subject Subject { get; set; } = default!;
 
         [ForeignKey(name: nameof(Teacher))]
@@ -25,6 +26,7 @@ namespace SchoolShedule.Entities
         /// Учитель, преподающий предмет
         /// </summary>
         [Required]
+        [Display(Name = "Учитель")]
         public Teacher Teacher { get; set; } = default!;
 
         [ForeignKey(name: nameof(ClassGroup))]
@@ -34,6 +36,7 @@ namespace SchoolShedule.Entities
         /// Класс/Группа, которым преподаётся предмет
         /// </summary>
         [Required]
+        [Display(Name = "Класс/Группа")]
         public ClassGroup ClassGroup { get; set; } = default!;
 
         [ForeignKey(name: nameof(Room))]
@@ -42,6 +45,7 @@ namespace SchoolShedule.Entities
         /// <summary>
         /// Кабинет для урока
         /// </summary>
+        [Display(Name ="Кабинет для урока")]
         public Room Room { get; set; } = default!;
 
         [ForeignKey(name: nameof(TimeSlot))]
@@ -50,6 +54,7 @@ namespace SchoolShedule.Entities
         /// <summary>
         /// Время + Дата урока
         /// </summary>
+        [Display(Name = "День + Номер урока")]
         public TimeSlot TimeSlot { get; set; } = default!;
     }
 }

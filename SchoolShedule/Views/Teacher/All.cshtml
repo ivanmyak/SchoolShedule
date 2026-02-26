@@ -1,0 +1,39 @@
+﻿@model IEnumerable<SchoolShedule.Entities.Teacher>
+
+<h1>Все преподаватели</h1>
+
+<p>
+    <a asp-action="Create">Новый Преподаватель</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.User)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Subjects)
+            </th>
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.GetFIO)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SubjectsToString)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.UserId">Изменить</a> |
+                    <a asp-action="Details" asp-route-id="@item.UserId">Подробности</a> |
+                    <a asp-action="Delete" asp-route-id="@item.UserId">Удалить</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

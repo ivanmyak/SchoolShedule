@@ -8,7 +8,7 @@ namespace SchoolShedule.Enums
     public enum Day
     {
         [Display(Name = "Понедельник")]
-        Monday = 1,
+        Monday = 0,
 
         [Display(Name = "Вторник")]
         Tuesday,

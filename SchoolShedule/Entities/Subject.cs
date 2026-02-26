@@ -13,6 +13,7 @@ namespace SchoolShedule.Entities
         /// Наименование предмета
         /// </summary>
         [Required]
+        [Display(Name = "Наименование предмета")]
         public string Name { get; set; } = default!;
 
         /// <summary>
@@ -21,6 +22,7 @@ namespace SchoolShedule.Entities
         /// <example>MATH = Математика</example>
         [MaxLength(10)]
         [Required]
+        [Display(Name = "Код предмета")]
         public string Code { get; set; } = default!;
 
     }

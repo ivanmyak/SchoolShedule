@@ -19,7 +19,7 @@ namespace SchoolShedule.Controllers
         /// Расписание на полугодие 
         /// </summary> 
         /// <param name="groupType">Расписание какиой группы классов мы желаем</param>
-        public async Task<IActionResult> AllShedules(GroupType groupType = GroupType.Standart)
+        public async Task<IActionResult> All(GroupType groupType = GroupType.Standart)
         {
             IEnumerable<int> gradesRange = groupType switch
             {
@@ -49,6 +49,8 @@ namespace SchoolShedule.Controllers
             AllSchedulesViewModel model = new() { Lessons = lessons, SelectedGroupType = groupType };
             return View(model);
         }
+
+
 
 
     }

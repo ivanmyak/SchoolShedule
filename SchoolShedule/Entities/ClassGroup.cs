@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace SchoolShedule.Entities
 {
@@ -13,12 +14,14 @@ namespace SchoolShedule.Entities
         /// <summary>
         /// Буква класса
         /// </summary>
+        [Display(Name = "Буква класса")]
         public char? Letter { get; set; }
 
         /// <summary>
         /// Номер класса
         /// </summary>
         [Required]
+        [Display(Name = "Номер класса")]
         public int Grade { get; set; }
 
         /// <summary>

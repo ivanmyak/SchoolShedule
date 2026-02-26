@@ -1,5 +1,7 @@
 ﻿using SchoolShedule.Enums;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SchoolShedule.Entities
 {
@@ -23,5 +25,13 @@ namespace SchoolShedule.Entities
         /// <remarks>Ожидаем, что отсчёт будет с 1 урока. Предполагаем, что больше 8 уроков не будет (хотя особо разницы пока не вижу)</remarks>
         [DisplayName("Номер урока")]
         public int Period { get; set; }
+
+        /// <summary>
+        /// Позиция/ячейка урока
+        /// </summary>
+        /// <example> Понедельник, 3 урок -> 1-3</example>
+        [Required]
+        [Display(Name = "Номер кабинета")]
+        public string TimeSlotString => $"{(int)DayOfWeek + 1}-{Period}";
     }
 }
