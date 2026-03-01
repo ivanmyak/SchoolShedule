@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SchoolShedule.Data;
 using SchoolShedule.Entities;
+using SchoolShedule.Enums;
+using SchoolShedule.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SchoolShedule.Controllers
 {
@@ -56,36 +58,65 @@ namespace SchoolShedule.Controllers
             return View(lesson);
         }
 
-        // GET: Lesson/Create
-        public IActionResult Create()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="day"></param>
+        /// <param name="period"></param>
+        /// <returns></returns>
+        public IActionResult Create(Day? day, int? period, int? roomId, int? subjectId)
         {
-            ViewData["ClassGroupId"] = new SelectList(_context.ClassGroups, "Id", "Id");
-            ViewData["RoomId"] = new SelectList(_context.Rooms, "Id", "Id");
-            ViewData["SubjectId"] = new SelectList(_context.Subjects, "Id", "Code");
-            ViewData["TeacherId"] = new SelectList(_context.Teachers, "UserId", "UserId");
-            ViewData["TimeSlotId"] = new SelectList(_context.TimeSlots, "Id", "Id");
-            return View();
+            var vm = new LessonCreateViewModel
+            {
+                SelectedDay = day,
+                SelectedPeriod = period,
+                SelectedSubjectId = subjectId
+            };
+
+            FillLists(vm);
+            vm.SelectedRoomId = roomId;
+
+            ViewData["Title"] = "Новый Урок";
+            return View(vm);
         }
 
+
         // POST: Lesson/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,SubjectId,TeacherId,ClassGroupId,RoomId,TimeSlotId")] Lesson lesson)
+        public async Task<IActionResult> Create(LessonCreateViewModel vm)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(lesson);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                ViewData["Title"] = "Новый Урок";
+                return View(vm);
             }
-            ViewData["ClassGroupId"] = new SelectList(_context.ClassGroups, "Id", "Id", lesson.ClassGroupId);
-            ViewData["RoomId"] = new SelectList(_context.Rooms, "Id", "Id", lesson.RoomId);
-            ViewData["SubjectId"] = new SelectList(_context.Subjects, "Id", "Code", lesson.SubjectId);
-            ViewData["TeacherId"] = new SelectList(_context.Teachers, "UserId", "UserId", lesson.TeacherId);
-            ViewData["TimeSlotId"] = new SelectList(_context.TimeSlots, "Id", "Id", lesson.TimeSlotId);
-            return View(lesson);
+            var timeSlot = _context.TimeSlots.FirstOrDefault(t => t.DayOfWeek == vm.SelectedDay && t.Period == vm.SelectedPeriod);
+            if (timeSlot == null)
+            {
+                timeSlot = new TimeSlot
+                {
+                    DayOfWeek = vm.SelectedDay!.Value,
+                    Period = vm.SelectedPeriod!.Value
+                };
+
+                _context.TimeSlots.Add(timeSlot);
+                await _context.SaveChangesAsync();
+            }
+            var lesson = new Lesson
+            {
+                TeacherId = vm.SelectedTeacherId!.Value,
+                SubjectId = vm.SelectedSubjectId!.Value,
+                RoomId = vm.SelectedRoomId!.Value,
+                ClassGroupId = vm.SelectedClassGroupId!.Value,
+                TimeSlotId = timeSlot.Id
+            };
+
+            _context.Lessons.Add(lesson);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("AllSpec", "Shedule");
         }
 
         // GET: Lesson/Edit/5
@@ -191,5 +222,15 @@ namespace SchoolShedule.Controllers
         {
             return _context.Lessons.Any(e => e.Id == id);
         }
+
+        private void FillLists(LessonCreateViewModel vm)
+        {
+            vm.Teachers = _context.Teachers.Include(t => t.User).Include(t => t.Subjects).ToList();
+            vm.Subjects = _context.Subjects.ToList();
+            vm.Rooms = _context.Rooms.ToList();
+            vm.ClassGroups = _context.ClassGroups.ToList();
+            vm.TimeSlots = _context.TimeSlots.ToList();
+        }
+
     }
 }

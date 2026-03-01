@@ -1,48 +1,177 @@
-﻿@model SchoolShedule.Entities.Lesson
+﻿@using SchoolShedule.Extensions
+@model LessonCreateViewModel
 
-@{
-    ViewData["Title"] = "Create";
-}
+<h2 class="mb-4">Создание урока</h2>
 
-<h1>Create</h1>
+<link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
 
-<h4>Lesson</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="SubjectId" class="control-label"></label>
-                <select asp-for="SubjectId" class ="form-control" asp-items="ViewBag.SubjectId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="TeacherId" class="control-label"></label>
-                <select asp-for="TeacherId" class ="form-control" asp-items="ViewBag.TeacherId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="ClassGroupId" class="control-label"></label>
-                <select asp-for="ClassGroupId" class ="form-control" asp-items="ViewBag.ClassGroupId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="RoomId" class="control-label"></label>
-                <select asp-for="RoomId" class ="form-control" asp-items="ViewBag.RoomId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="TimeSlotId" class="control-label"></label>
-                <select asp-for="TimeSlotId" class ="form-control" asp-items="ViewBag.TimeSlotId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
+
+    <!-- День и урок -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label asp-for="SelectedDay" class="form-label">День</label>
+            <select asp-for="SelectedDay" class="form-select">
+                @foreach (var day in Model.Days)
+                {
+                    <option value="@day" selected="@(Model.SelectedDay == day)">
+                        @day.GetDisplayName()
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="SelectedPeriod" class="form-label">Урок</label>
+            <select asp-for="SelectedPeriod" class="form-select">
+                @foreach (var p in Model.Periods)
+                {
+                    <option value="@p" selected="@(Model.SelectedPeriod == p)">
+                        @p
+                    </option>
+                }
+            </select>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    <!-- Предмет и преподаватель -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Предмет</label>
+            <select asp-for="SelectedSubjectId" class="form-select subject-select">
+                @foreach (var subj in Model.GetSubjectsSorted())
+                {
+                    <option value="@subj.Id" selected="@(Model.SelectedSubjectId == subj.Id)">
+                        @subj.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Преподаватель</label>
+            <select asp-for="SelectedTeacherId" class="form-select teacher-select">
+                @foreach (var t in Model.GetTeachersSorted())
+                {
+                    var text = $"{t.GetFIO} ({t.SubjectsToString})";
+
+                    <option value="@t.UserId"
+                            data-subjects="@string.Join(",", t.Subjects.Select(s => s.Id))"
+                            selected="@(Model.SelectedTeacherId == t.UserId)">
+                        @text
+                    </option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- Класс и кабинет -->
+    <div class="row mb-3">
+
+        <div class="col-md-4">
+            <label class="form-label">Класс</label>
+            <select asp-for="SelectedClassGroupId" class="form-select class-select">
+                @foreach (var cg in Model.ClassGroups)
+                {
+                    <option value="@cg.Id" selected="@(Model.SelectedClassGroupId == cg.Id)">
+                        @cg.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Кабинет</label>
+            <select asp-for="SelectedRoomId" class="form-select room-select">
+                @foreach (var room in Model.Rooms)
+                {
+                    <option value="@room.Id" selected="@(Model.SelectedRoomId == room.Id)">
+                        @room.RoomNumber
+                    </option>
+                }
+            </select>
+        </div>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+</form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script src="~/lib/select2/js/select2.min.js"></script>
+
+    <script>
+
+        // ======= TEMPLATE: ПОДСВЕТКА УЧИТЕЛЕЙ =======
+        function highlightTeachers(option) {
+            if (!option.id) return option.text;
+
+            const subjects = ($(option.element).data('subjects') || '')
+                .toString()
+                .split(',')
+                .filter(x => x);
+
+            const selectedSubject = $('.subject-select').val();
+            const isProfile = subjects.includes(selectedSubject);
+
+            if (!isProfile) {
+                return $('<span class="bg-warning px-1">' + option.text + '</span>');
+            }
+
+            return option.text;
+        }
+
+        // ======= TEMPLATE: ПОДСВЕТКА ПРЕДМЕТОВ =======
+        function highlightSubjects(option) {
+            if (!option.id) return option.text;
+
+            const teacherSubjects = ($('.teacher-select option:selected').data('subjects') || '')
+                .toString()
+                .split(',')
+                .filter(x => x);
+
+            const isProfile = teacherSubjects.includes(option.id);
+
+            if (!isProfile) {
+                return $('<span class="bg-warning px-1">' + option.text + '</span>');
+            }
+
+            return option.text;
+        }
+
+        // ======= ИНИЦИАЛИЗАЦИЯ SELECT2 =======
+        $(".teacher-select").select2({
+            width: '100%',
+            templateResult: highlightTeachers,
+            templateSelection: highlightTeachers
+        });
+
+        $(".subject-select").select2({
+            width: '100%',
+            templateResult: highlightSubjects,
+            templateSelection: highlightSubjects
+        });
+
+        $(".class-select").select2({ width: '100%' });
+        $(".room-select").select2({ width: '100%' });
+
+        // ======= ОБНОВЛЕНИЕ ПОДСВЕТКИ =======
+        $('.subject-select').on('change', function () {
+            $(".teacher-select").select2('destroy').select2({
+                width: '100%',
+                templateResult: highlightTeachers,
+                templateSelection: highlightTeachers
+            });
+        });
+
+        $('.teacher-select').on('change', function () {
+            $(".subject-select").select2('destroy').select2({
+                width: '100%',
+                templateResult: highlightSubjects,
+                templateSelection: highlightSubjects
+            });
+        });
+
+    </script>
 }

@@ -54,8 +54,7 @@ namespace SchoolShedule
                 try
                 {
                     if (builder.Environment.IsDevelopment())
-                    { // В DEV - использую 
-                      // EnsureCreated — чтобы быстро поднять пустую базу 
+                    { // В DEV - использую EnsureCreated — чтобы быстро поднять пустую базу 
                         if (db.Database.EnsureCreated())
                             logger.LogInformation("[DB-TEST] База создана через EnsureCreated.");
                         else

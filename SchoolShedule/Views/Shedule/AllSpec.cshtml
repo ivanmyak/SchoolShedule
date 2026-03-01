@@ -1,0 +1,185 @@
+﻿@model AllSchedulesViewModel
+@using SchoolShedule.Enums
+@using SchoolShedule.Extensions
+
+@{
+    var days = Enum.GetValues(typeof(Day)).Cast<Day>().ToList();
+    int maxPeriods = 8;
+
+    var rows = Model.Lessons
+        .GroupBy(l => new { l.Subject, l.Room })
+        .OrderBy(g => g.Key.Subject.Code)
+        .ThenBy(g => g.Key.Room.Floor)
+        .ThenBy(g => g.Key.Room.Number)
+        .ToList();
+}
+
+<h2 class="mb-4 text-center">📚 Расписание на полугодие</h2>
+
+<div class="d-flex justify-content-center mb-4">
+    <form method="get" asp-action="AllSpec" class="w-auto">
+        <select name="groupType" asp-for="SelectedGroupType"
+                asp-items="Html.GetEnumSelectList<GroupType>()"
+                class="form-select text-center"
+                onchange="this.form.submit()">
+        </select>
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered text-center align-middle shadow-sm schedule-table">
+        <thead class="table-primary">
+            <tr>
+                <th rowspan="2" class="align-middle">Предмет</th>
+                <th rowspan="2" class="align-middle">Кабинет</th>
+                @foreach (var day in days)
+                {
+                    <th colspan="@maxPeriods">@day.GetDisplayName()</th>
+                }
+            </tr>
+            <tr>
+                @foreach (var day in days)
+                {
+                    for (int period = 1; period <= maxPeriods; period++)
+                    {
+                        <th>@period</th>
+                    }
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in rows)
+            {
+                <tr>
+                    <td class="fw-bold text-start">@row.Key.Subject.Name</td>
+                    <td class="fw-bold">@row.Key.Room.RoomNumber</td>
+
+                    @foreach (var day in days)
+                    {
+                        for (int period = 1; period <= maxPeriods; period++)
+                        {
+                            var lesson = row.FirstOrDefault(l =>
+                            l.TimeSlot.DayOfWeek == day &&
+                            l.TimeSlot.Period == period);
+
+                            <td class="lesson-cell"
+                                data-day="@day"
+                                data-period="@period"
+                                data-subject-id="@row.Key.Subject.Id"
+                                data-room-id="@row.Key.Room.Id">
+                                @await Html.PartialAsync("_AllLessonCell", lesson)
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+
+            <!-- ПУСТАЯ СТРОКА ДЛЯ СОЗДАНИЯ НОВЫХ УРОКОВ -->
+            <tr class="table-light">
+                <td class="text-muted fst-italic">Новый предмет</td>
+                <td class="text-muted fst-italic">Новый кабинет</td>
+
+                @foreach (var day in days)
+                {
+                    for (int period = 1; period <= maxPeriods; period++)
+                    {
+                        <td class="lesson-cell empty-cell"
+                            data-day="@day"
+                            data-period="@period">
+                            <span class="text-muted">—</span>
+                        </td>
+                    }
+                }
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Контекстное меню -->
+<div id="contextMenu" class="context-menu shadow">
+    <div class="context-item" data-action="create">Создать</div>
+    <div class="context-item disabled" data-action="edit">Изменить</div>
+    <div class="context-item disabled" data-action="delete">Удалить</div>
+</div>
+
+@section Scripts {
+    <script>
+        const menu = document.getElementById("contextMenu");
+        let currentCell = null;
+
+        document.addEventListener("contextmenu", function (e) {
+            const cell = e.target.closest(".lesson-cell");
+            if (!cell) return;
+
+            e.preventDefault();
+            currentCell = cell;
+
+            const hasLesson = cell.querySelector("[data-lesson-id]") !== null;
+
+            menu.querySelector("[data-action='edit']").classList.toggle("disabled", !hasLesson);
+            menu.querySelector("[data-action='delete']").classList.toggle("disabled", !hasLesson);
+
+            menu.style.top = e.pageY + "px";
+            menu.style.left = e.pageX + "px";
+            menu.style.display = "block";
+        });
+
+        document.addEventListener("click", () => menu.style.display = "none");
+
+        menu.addEventListener("click", function (e) {
+            const item = e.target.closest(".context-item");
+            if (!item || item.classList.contains("disabled") || !currentCell) return;
+
+            const action = item.dataset.action;
+            const day = currentCell.dataset.day;
+            const period = currentCell.dataset.period;
+            const subject = currentCell.dataset.subjectId;
+            const room = currentCell.dataset.roomId;
+
+            const params = new URLSearchParams();
+            if (day) params.append("day", day);
+            if (period) params.append("period", period);
+            if (subject) params.append("subjectId", subject);
+            if (room) params.append("roomId", room);
+
+            if (action === "create") {
+            const url = `/Lesson/Create?${params.toString()}`;
+                window.open(url, "_blank");
+            }
+
+            // edit/delete — потом
+        });
+    </script>
+
+    <style>
+        .context-menu {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: .25rem;
+            display: none;
+            z-index: 2000;
+            min-width: 150px;
+        }
+
+        .context-item {
+            padding: .5rem 1rem;
+            cursor: pointer;
+        }
+
+            .context-item:hover:not(.disabled) {
+                background: #f0f0f0;
+            }
+
+            .context-item.disabled {
+                color: #aaa;
+                cursor: default;
+            }
+
+        .lesson-cell {
+            position: relative;
+            min-width: 90px;
+            min-height: 60px;
+        }
+    </style>
+}

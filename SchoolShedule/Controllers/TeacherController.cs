@@ -53,6 +53,8 @@ namespace SchoolShedule.Controllers
         // GET: Teacher/Create
         public IActionResult Create()
         {
+            ViewData["Title"] = "Новый Преподаватель";
+
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "FirstName");
             return View();
         }
@@ -71,6 +73,7 @@ namespace SchoolShedule.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(All));
             }
+            ViewData["Title"] = "Новый Преподаватель";
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "FirstName", teacher.UserId);
             return View(teacher);
         }

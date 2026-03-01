@@ -48,6 +48,8 @@ namespace SchoolShedule.Controllers
         // GET: ClassGroup/Create
         public IActionResult Create()
         {
+            ViewData["Title"] = "Новый Класс";
+
             return View();
         }
 

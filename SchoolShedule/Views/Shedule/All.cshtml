@@ -52,9 +52,9 @@
                                 {
                                     bool isOwnSubject = lesson.Teacher.Subjects.Any(s => s.Code == lesson.Subject.Code);
 
-                                    var teacherShort = $"{lesson.Teacher.User.LastName} {lesson.Teacher.User.FirstName[0]}.{(lesson.Teacher.User.MiddleName != null ? lesson.Teacher.User.MiddleName[0] + "." : "")}";
+                                    var teacherShort = lesson.Teacher.GetFIO;
 
-                                    var specialization = string.Join(", ", lesson.Teacher.Subjects.Select(s => s.Name));
+                                    var specialization = lesson.Teacher.SubjectsToString;
                                     var modalId = $"modal_{modalCounter++}";
                                     var modalLabelId = $"{modalId}_Label";
 
@@ -73,7 +73,7 @@
                                             </div>
                                             <small>
                                                 @teacherShort<br />
-                                                Класс: @lesson.ClassGroup.Grade-@lesson.ClassGroup.Letter<br />
+                                                Класс: @lesson.ClassGroup.Name<br />
                                                 Кабинет: @lesson.Room.RoomNumber
                                             </small>
                                         </div>
