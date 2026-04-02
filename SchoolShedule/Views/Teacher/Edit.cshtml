@@ -1,29 +1,67 @@
-﻿@model SchoolShedule.Entities.Teacher
+﻿@model TeacherUpdateViewModel
 
-@{
-    ViewData["Title"] = "Edit";
-}
+<h2 class="mb-4">Редактирование преподавателя</h2>
 
-<h1>Edit</h1>
+<link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
 
-<h4>Teacher</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="UserId" />
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+<form asp-action="Edit" method="post" class="border p-4 rounded shadow-sm bg-light">
+
+    <input type="hidden" asp-for="Id" />
+
+    <!-- ФИО -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label asp-for="LastName" class="form-label"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="FirstName" class="form-label"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="MiddleName" class="form-label"></label>
+            <input asp-for="MiddleName" class="form-control" />
+            <span asp-validation-for="MiddleName" class="text-danger"></span>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    <!-- Email -->
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <!-- Предметы -->
+    <div class="mb-3">
+        <label asp-for="SelectedSubjectIds" class="form-label"></label>
+        <select asp-for="SelectedSubjectIds" class="form-select subject-select" multiple>
+            @foreach (var s in Model.Subjects)
+            {
+                <option value="@s.Id" selected="@(Model.SelectedSubjectIds.Contains(s.Id))">
+                    @s.Name
+                </option>
+            }
+        </select>
+        <span asp-validation-for="SelectedSubjectIds" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary">Сохранить</button>
+    <a asp-action="All" class="btn btn-secondary">Назад</a>
+</form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(".subject-select").select2({
+            width: '100%',
+            placeholder: "Выберите предметы"
+        });
+    </script>
 }

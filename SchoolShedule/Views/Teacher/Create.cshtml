@@ -1,26 +1,83 @@
-﻿@model SchoolShedule.Entities.Teacher
+﻿@model TeacherCreateViewModel
 
-<h1>Новый Преподаватель</h1>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class ="form-control" asp-items="ViewBag.UserId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Создать" class="btn btn-primary" />
-            </div>
-        </form>
+<h2 class="mb-4">Создание преподавателя</h2>
+
+<link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
+
+<form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
+
+    <!-- ФИО -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label asp-for="LastName" class="form-label"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="FirstName" class="form-label"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="MiddleName" class="form-label"></label>
+            <input asp-for="MiddleName" class="form-control" />
+            <span asp-validation-for="MiddleName" class="text-danger"></span>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">К списку</a>
-</div>
+    <!-- Предметы -->
+    <div class="mb-3">
+        <label class="form-label">Основные предметы</label>
+        <select asp-for="SelectedSubjectIds" class="form-select subject-select" multiple>
+            @foreach (var s in Model.Subjects)
+            {
+                <option value="@s.Id">@s.Name</option>
+            }
+        </select>
+        <span asp-validation-for="SelectedSubjectIds" class="text-danger"></span>
+    </div>
+
+    <!-- Автогенерация -->
+    <div class="form-check form-switch mb-3">
+        <input asp-for="AutoGenerateCredentials" class="form-check-input" id="autoGenSwitch" />
+        <label class="form-check-label" for="autoGenSwitch">
+            Сгенерировать Email и пароль автоматически
+        </label>
+    </div>
+
+    <!-- Email -->
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" id="emailField" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <!-- Пароль -->
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" id="passwordField" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary">Создать</button>
+</form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(".subject-select").select2({ width: '100%' });
+
+        function toggleCredentials() {
+            const auto = $("#autoGenSwitch").is(":checked");
+            $("#emailField").prop("disabled", auto);
+            $("#passwordField").prop("disabled", auto);
+        }
+
+        $("#autoGenSwitch").on("change", toggleCredentials);
+        toggleCredentials();
+    </script>
 }

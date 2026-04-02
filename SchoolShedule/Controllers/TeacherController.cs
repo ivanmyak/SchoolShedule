@@ -1,22 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SchoolShedule.Data;
 using SchoolShedule.Entities;
+using SchoolShedule.Interfaces;
+using SchoolShedule.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SchoolShedule.Controllers
 {
     public class TeacherController : Controller
     {
         private readonly SheduleDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public TeacherController(SheduleDbContext context)
+        private readonly ILogger<TeacherController> _logger;
+        private readonly ICredentialsGenerator _generator;
+
+        public TeacherController(SheduleDbContext context, UserManager<User> userManager, ILogger<TeacherController> logger, ICredentialsGenerator generator)
         {
             _context = context;
+            _logger = logger;
+            _userManager = userManager;
+            _generator = generator;
         }
 
         // GET: Teacher
@@ -41,94 +51,164 @@ namespace SchoolShedule.Controllers
 
             var teacher = await _context.Teachers
                 .Include(t => t.User)
+                .Include(t => t.Subjects)
                 .FirstOrDefaultAsync(m => m.UserId == id);
             if (teacher == null)
             {
                 return NotFound();
             }
 
+            ViewData["Title"] = $"{teacher.GetFIO} - инфо";
             return View(teacher);
         }
 
-        // GET: Teacher/Create
-        public IActionResult Create()
+        [HttpGet]
+        public async Task<IActionResult> CreateAsync()
         {
             ViewData["Title"] = "Новый Преподаватель";
 
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "FirstName");
-            return View();
+            var model = new TeacherCreateViewModel
+            {
+                Subjects = await _context.Subjects.ToListAsync()
+            };
+
+            return View(model);
         }
 
-        // POST: Teacher/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserId")] Teacher teacher)
+        public async Task<IActionResult> CreateAsync(TeacherCreateViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                teacher.UserId = Guid.NewGuid();
-                _context.Add(teacher);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(All));
+                model.Subjects = await _context.Subjects.ToListAsync();
+                return View(model);
             }
-            ViewData["Title"] = "Новый Преподаватель";
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "FirstName", teacher.UserId);
-            return View(teacher);
+
+            // 1. Генерация логина/почты/пароля
+            string userName;
+            string email;
+            string password;
+
+            if (model.AutoGenerateCredentials)
+            {
+                userName = await _generator.GenerateUserNameAsync(model.FirstName, model.LastName);
+                email = await _generator.GenerateEmailAsync(userName);
+                password = _generator.GeneratePassword(model.FirstName, model.LastName);
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+                {
+                    ModelState.AddModelError("", "Email и пароль обязательны, если отключена автогенерация");
+                    model.Subjects = await _context.Subjects.ToListAsync();
+                    return View(model);
+                }
+
+                userName = model.Email;
+                email = model.Email;
+                password = model.Password;
+            }
+
+            // 2. Создаём пользователя
+            var user = new User
+            {
+                UserName = userName,
+                Email = email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                MiddleName = model.MiddleName,
+                RegisteredAt = DateTimeOffset.UtcNow
+            };
+
+            var userResult = await _userManager.CreateAsync(user, password);
+
+            if (!userResult.Succeeded)
+            {
+                foreach (var error in userResult.Errors)
+                    ModelState.AddModelError("", error.Description);
+
+                model.Subjects = await _context.Subjects.ToListAsync();
+                return View(model);
+            }
+
+            // 3. Создаём учителя
+            var teacher = new Teacher
+            {
+                UserId = user.Id,
+                Subjects = await _context.Subjects
+                    .Where(s => model.SelectedSubjectIds.Contains(s.Id))
+                    .ToListAsync()
+            };
+
+            _context.Teachers.Add(teacher);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(All));
         }
 
-        // GET: Teacher/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var teacher = await _context.Teachers.FindAsync(id);
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var teacher = await _context.Teachers
+                .Include(t => t.User)
+                .Include(t => t.Subjects)
+                .FirstOrDefaultAsync(t => t.UserId == id);
+
             if (teacher == null)
-            {
                 return NotFound();
-            }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "FirstName", teacher.UserId);
-            return View(teacher);
+
+            var model = new TeacherUpdateViewModel
+            {
+                Id = teacher.UserId,
+                FirstName = teacher.User.FirstName,
+                LastName = teacher.User.LastName,
+                MiddleName = teacher.User.MiddleName,
+                Email = teacher.User.Email!,
+                SelectedSubjectIds = teacher.Subjects.Select(s => s.Id).ToList(),
+                Subjects = await _context.Subjects.ToListAsync()
+            };
+
+            ViewData["Title"] = $"{teacher.GetFIO}-изменение";
+            return View(model);
         }
 
-        // POST: Teacher/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("UserId")] Teacher teacher)
+        public async Task<IActionResult> Edit(TeacherUpdateViewModel model)
         {
-            if (id != teacher.UserId)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                model.Subjects = await _context.Subjects.ToListAsync();
+                return View(model);
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(teacher);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TeacherExists(teacher.UserId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(All));
-            }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "FirstName", teacher.UserId);
-            return View(teacher);
+            var teacher = await _context.Teachers
+                .Include(t => t.User)
+                .Include(t => t.Subjects)
+                .FirstOrDefaultAsync(t => t.UserId == model.Id);
+
+            if (teacher == null)
+                return NotFound();
+
+            // 1. Обновляем User
+            teacher.User.FirstName = model.FirstName;
+            teacher.User.LastName = model.LastName;
+            teacher.User.MiddleName = model.MiddleName;
+            teacher.User.Email = model.Email;
+            teacher.User.UserName = model.Email;
+
+            await _userManager.UpdateAsync(teacher.User);
+
+            // 2. Обновляем предметы
+            teacher.Subjects = await _context.Subjects
+                .Where(s => model.SelectedSubjectIds.Contains(s.Id))
+                .ToListAsync();
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(All));
         }
 
         // GET: Teacher/Delete/5
@@ -146,6 +226,7 @@ namespace SchoolShedule.Controllers
             {
                 return NotFound();
             }
+            ViewData["Title"] = $"! {teacher.GetFIO}-удаление !";
 
             return View(teacher);
         }
@@ -163,11 +244,6 @@ namespace SchoolShedule.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(All));
-        }
-
-        private bool TeacherExists(Guid id)
-        {
-            return _context.Teachers.Any(e => e.UserId == id);
         }
     }
 }

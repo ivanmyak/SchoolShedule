@@ -397,6 +397,26 @@
       "DayOfWeek": 0,
       "Period": 3
     },
+	{
+      "DayOfWeek": 0,
+      "Period": 4
+    },
+    {
+      "DayOfWeek": 0,
+      "Period": 5
+    },
+    {
+      "DayOfWeek": 0,
+      "Period": 6
+    },
+	{
+      "DayOfWeek": 0,
+      "Period": 7
+    },
+    {
+      "DayOfWeek": 0,
+      "Period": 8
+    },
 
     {
       "DayOfWeek": 1,
@@ -409,6 +429,26 @@
     {
       "DayOfWeek": 1,
       "Period": 3
+    },
+	{
+      "DayOfWeek": 1,
+      "Period": 4
+    },
+    {
+      "DayOfWeek": 1,
+      "Period": 5
+    },
+    {
+      "DayOfWeek": 1,
+      "Period": 6
+    },
+	{
+      "DayOfWeek": 1,
+      "Period": 7
+    },
+    {
+      "DayOfWeek": 1,
+      "Period": 8
     },
 
     {
@@ -423,6 +463,26 @@
       "DayOfWeek": 2,
       "Period": 3
     },
+	{
+      "DayOfWeek": 2,
+      "Period": 4
+    },
+    {
+      "DayOfWeek": 2,
+      "Period": 5
+    },
+    {
+      "DayOfWeek": 2,
+      "Period": 6
+    },
+	{
+      "DayOfWeek": 2,
+      "Period": 7
+    },
+    {
+      "DayOfWeek": 2,
+      "Period": 8
+    },
 
     {
       "DayOfWeek": 3,
@@ -436,6 +496,26 @@
       "DayOfWeek": 3,
       "Period": 3
     },
+	{
+      "DayOfWeek": 3,
+      "Period": 4
+    },
+    {
+      "DayOfWeek": 3,
+      "Period": 5
+    },
+    {
+      "DayOfWeek": 3,
+      "Period": 6
+    },
+	{
+      "DayOfWeek": 3,
+      "Period": 7
+    },
+    {
+      "DayOfWeek": 3,
+      "Period": 8
+    },
 
     {
       "DayOfWeek": 4,
@@ -448,7 +528,27 @@
     {
       "DayOfWeek": 4,
       "Period": 3
-    }
+    },
+	{
+      "DayOfWeek": 4,
+      "Period": 4
+    },
+    {
+      "DayOfWeek": 4,
+      "Period": 5
+    },
+    {
+      "DayOfWeek": 4,
+      "Period": 6
+    },
+	{
+      "DayOfWeek": 4,
+      "Period": 7
+    },
+    {
+      "DayOfWeek": 4,
+      "Period": 8
+    },
   ],
 
   "Lessons": [

@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolShedule.Data;
 using SchoolShedule.Entities;
+using SchoolShedule.Interfaces;
 using SchoolShedule.Providers;
+using SchoolShedule.Services;
 
 namespace SchoolShedule
 {
@@ -41,7 +43,11 @@ namespace SchoolShedule
                 .AddDefaultTokenProviders();
             builder.Services.AddAuthorization();
 
-            // Add services to the container.
+            // DI-связкb интерфейса и сервиса 
+            builder.Services.AddScoped<ITranslit, TranslitService>();
+            builder.Services.AddScoped<ICredentialsGenerator, CredentialsGeneratorService>();
+
+            // Скервисы по-умолчанию
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 

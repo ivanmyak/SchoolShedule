@@ -1,24 +1,39 @@
-﻿@model SchoolShedule.Entities.Teacher
+﻿@model Teacher
 
-@{
-    ViewData["Title"] = "Details";
-}
+<h2 class="mb-4">Информация о преподавателе</h2>
 
-<h1>Details</h1>
+<div class="card shadow-sm">
+    <div class="card-body">
 
-<div>
-    <h4>Teacher</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.FirstName)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.UserId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+        <h4 class="card-title">@Model.GetFIO</h4>
+        <p class="text-muted">@Model.User.Email</p>
+
+        <hr />
+
+        <dl class="row">
+
+            <dt class="col-sm-3">Фамилия</dt>
+            <dd class="col-sm-9">@Model.User.LastName</dd>
+
+            <dt class="col-sm-3">Имя</dt>
+            <dd class="col-sm-9">@Model.User.FirstName</dd>
+
+            <dt class="col-sm-3">Отчество</dt>
+            <dd class="col-sm-9">@Model.User.MiddleName</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.User.Email</dd>
+
+            <dt class="col-sm-3">Предметы</dt>
+            <dd class="col-sm-9">@Model.SubjectsToString</dd>
+
+            <dt class="col-sm-3">Дата регистрации</dt>
+            <dd class="col-sm-9">@Model.User.RegisteredAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd>
+
+        </dl>
+
+        <a asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-primary">Редактировать</a>
+        <a asp-action="All" class="btn btn-secondary">Назад</a>
+
+    </div>
 </div>
