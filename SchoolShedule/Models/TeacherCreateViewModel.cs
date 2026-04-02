@@ -5,14 +5,14 @@ namespace SchoolShedule.Models
 {
     public class TeacherCreateViewModel
     {
-        [Required]
+        [Required(ErrorMessage ="Выберите хотя бы один основной предмет для учителя")]
         [Display(Name = "Основные предметы")]
         public List<int> SelectedSubjectIds { get; set; } = new();
 
         /// <summary>
         /// Имя
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Введите Имя для учителя")]
         [MaxLength(50)]
         [Display(Name = "Имя")]
         public string FirstName { get; set; } = default!;
@@ -20,7 +20,7 @@ namespace SchoolShedule.Models
         /// <summary>
         /// Фамилия
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Введите Фамилию для учителя")]
         [MaxLength(50)]
         [Display(Name = "Фамилия")]
         public string LastName { get; set; } = default!;

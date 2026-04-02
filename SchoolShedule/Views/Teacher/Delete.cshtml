@@ -1,27 +1,49 @@
-﻿@model SchoolShedule.Entities.Teacher
+﻿@model Teacher
 
-@{
-    ViewData["Title"] = "Delete";
-}
+<h2 class="mb-4 text-danger">Удаление преподавателя</h2>
 
-<h1>Delete</h1>
+<div class="card shadow-sm border-danger">
+    <div class="card-body">
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Teacher</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.FirstName)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="UserId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+        <h4 class="card-title text-danger">
+            Вы уверены, что хотите удалить этого преподавателя?
+        </h4>
+
+        <p class="text-muted">
+            Это действие необратимо.
+        </p>
+
+        <hr />
+
+        <dl class="row">
+
+            <dt class="col-sm-3">Фамилия И.О.</dt>
+            <dd class="col-sm-9">@Model.GetFIO</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.User.Email</dd>
+
+            <dt class="col-sm-3">Предметы</dt>
+            <dd class="col-sm-9">@Model.SubjectsToString</dd>
+
+            <dt class="col-sm-3">Дата регистрации</dt>
+            <dd class="col-sm-9">
+                @Model.User.RegisteredAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+            </dd>
+
+        </dl>
+
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="UserId" />
+
+            <button type="submit" class="btn btn-danger">
+                Удалить
+            </button>
+
+            <a asp-action="All" class="btn btn-secondary">
+                Отмена
+            </a>
+        </form>
+
+    </div>
 </div>

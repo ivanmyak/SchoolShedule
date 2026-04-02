@@ -170,7 +170,7 @@ namespace SchoolShedule.Controllers
                 Subjects = await _context.Subjects.ToListAsync()
             };
 
-            ViewData["Title"] = $"{teacher.GetFIO}-изменение";
+            ViewData["Title"] = $"{teacher.GetFIO}-Изменение";
             return View(model);
         }
 
@@ -221,12 +221,13 @@ namespace SchoolShedule.Controllers
 
             var teacher = await _context.Teachers
                 .Include(t => t.User)
+                .Include(t => t.Subjects)
                 .FirstOrDefaultAsync(m => m.UserId == id);
             if (teacher == null)
             {
                 return NotFound();
             }
-            ViewData["Title"] = $"! {teacher.GetFIO}-удаление !";
+            ViewData["Title"] = $"! {teacher.GetFIO}-УДАЛЕНИЕ !";
 
             return View(teacher);
         }
