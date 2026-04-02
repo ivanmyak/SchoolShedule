@@ -1,159 +1,189 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using NuGet.DependencyResolver;
+using SchoolShedule.Data;
+using SchoolShedule.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using SchoolShedule.Data;
-using SchoolShedule.Entities;
 
 namespace SchoolShedule.Controllers
 {
     public class SubjectController : Controller
     {
+        private readonly ILogger<SubjectController> _logger;
         private readonly SheduleDbContext _context;
 
-        public SubjectController(SheduleDbContext context)
+        public SubjectController(SheduleDbContext context, ILogger<SubjectController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Subject
         public async Task<IActionResult> All()
         {
             ViewData["Title"] = "Предметы";
-
+            _logger.LogInformation("Получение списка предметов");
             return View(await _context.Subjects.ToListAsync());
         }
 
-        // GET: Subject/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var subject = await _context.Subjects
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (subject == null)
-            {
-                return NotFound();
-            }
-
-            return View(subject);
-        }
-
-        // GET: Subject/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Subject/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Code")] Subject subject)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(subject);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(All));
-            }
-            return View(subject);
-        }
-
-        // GET: Subject/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var subject = await _context.Subjects.FindAsync(id);
-            if (subject == null)
-            {
-                return NotFound();
-            }
-            return View(subject);
-        }
-
-        // POST: Subject/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Code")] Subject subject)
-        {
-            if (id != subject.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(subject);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!SubjectExists(subject.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(All));
-            }
-            return View(subject);
-        }
-
-        // GET: Subject/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var subject = await _context.Subjects
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (subject == null)
-            {
-                return NotFound();
-            }
-
-            return View(subject);
-        }
-
-        // POST: Subject/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        [HttpGet]
+        public async Task<IActionResult> DetailsAsync(int? id)
         {
             var subject = await _context.Subjects.FindAsync(id);
-            if (subject != null)
+
+            if (subject == null)
             {
-                _context.Subjects.Remove(subject);
+                _logger.LogWarning("Попытка открыть Details для несуществующего предмета: Id={Id}", id);
+                return NotFound();
             }
 
+            _logger.LogInformation("Просмотр предмета: {Name} ({Code})", subject.Name, subject.Code);
+            ViewData["Title"] = $"{subject.Name} - инфо";
+
+            return View(subject);
+        }
+
+        [HttpGet]
+        public IActionResult CreateAsync()
+        {
+            _logger.LogInformation("Открытие формы создания предмета");
+            ViewData["Title"] = $"Предмет - новый";
+
+            return View(new Subject());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAsync(Subject subject)
+        {
+            subject.Code = subject.Code?.Trim().ToUpper() ?? throw new Exception("При создании нового Предмета поле Code оказалось пустым!");
+
+            // Проверка уникальности Code
+            var duplicates = await _context.Subjects
+                .Where(s => s.Code == subject.Code)
+                .ToListAsync();
+
+            if (duplicates.Any())
+            {
+                _logger.LogWarning("Попытка создать предмет с дублирующим кодом: {Code}", subject.Code);
+                ModelState.AddModelError("Code", "Код предмета должен быть уникальным");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Создание предмета не удалось из-за ошибок валидации");
+                return View(subject);
+            }
+
+            _context.Subjects.Add(subject);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Создан новый предмет: {Name} ({Code})", subject.Name, subject.Code);
+
             return RedirectToAction(nameof(All));
         }
 
-        private bool SubjectExists(int id)
+        [HttpGet]
+        public async Task<IActionResult> EditAsync(int id)
         {
-            return _context.Subjects.Any(e => e.Id == id);
+            var subject = await _context.Subjects.FindAsync(id);
+
+            if (subject == null)
+            {
+                _logger.LogWarning("Попытка открыть Edit для несуществующего предмета: Id={Id}", id);
+                return NotFound();
+            }
+
+            _logger.LogInformation("Открытие формы редактирования предмета: {Name} ({Code})", subject.Name, subject.Code);
+            ViewData["Title"] = $"{subject.Name}-Изменение";
+
+            return View(subject);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAsync(int id, Subject model)
+        {
+            if (id != model.Id)
+            {
+                _logger.LogError("Несоответствие Id при редактировании: routeId={RouteId}, modelId={ModelId}", id, model.Id);
+                return NotFound();
+            }
+            var subject = await _context.Subjects.FindAsync(model.Id);
+
+            if (subject == null)
+            {
+                _logger.LogWarning("Редактирование: предмет ({Name} - {Code}) не найден, Id={Id}", model.Name, model.Code, model.Id);
+                return NotFound();
+            }
+
+
+            var duplicates = await _context.Subjects
+                .Where(s => s.Id != model.Id && s.Code == model.Code)
+                .ToListAsync();
+
+            if (duplicates.Any())
+            {
+                _logger.LogWarning("Попытка изменить предмет на дублирующий код: {Code}", subject.Code);
+                ModelState.AddModelError("Code", "Код предмета должен быть уникальным");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Редактирование предмета не удалось из-за ошибок валидации");
+                return View(subject);
+            }
+
+            string normalisedCode = model.Code?.Trim().ToUpper() ?? throw new Exception("При создании нового Предмета поле Code оказалось пустым!");
+            subject.Name = subject.Name == model.Name ? subject.Name : model.Name;
+            subject.Code = subject.Code == normalisedCode ? subject.Code : normalisedCode;
+            _context.Update(subject);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Предмет обновлён: {Name} ({Code})", subject.Name, subject.Code);
+
+            return RedirectToAction(nameof(All));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            var subject = await _context.Subjects.FindAsync(id);
+
+            if (subject == null)
+            {
+                _logger.LogWarning("Попытка открыть Delete для несуществующего предмета: Id={Id}", id);
+                return NotFound();
+            }
+
+            _logger.LogInformation("Открытие формы удаления предмета: {Name} ({Code})", subject.Name, subject.Code);
+            ViewData["Title"] = $"{subject.Name}-УДАЛЕНИЕ";
+
+            return View(subject);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmedAsync(int id)
+        {
+            var subject = await _context.Subjects.FindAsync(id);
+
+            if (subject != null)
+            {
+                _logger.LogInformation("Удаление предмета: {Name} ({Code})", subject.Name, subject.Code);
+                _context.Subjects.Remove(subject);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                _logger.LogWarning("Попытка удалить несуществующий предмет: Id={Id}", id);
+            }
+
+            return RedirectToAction(nameof(All));
         }
     }
 }

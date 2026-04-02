@@ -29,9 +29,10 @@ namespace SchoolShedule.Controllers
             _generator = generator;
         }
 
-        // GET: Teacher
         public async Task<IActionResult> All()
         {
+            _logger.LogInformation("Получение списка преподавателей");
+
             var sheduleDbContext = _context.Teachers
                 .Include(t => t.User)
                 .Include(t => t.Subjects);
@@ -42,10 +43,11 @@ namespace SchoolShedule.Controllers
         }
 
         // GET: Teacher/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        public async Task<IActionResult> DetailsAsync(Guid? id)
         {
             if (id == null)
             {
+                _logger.LogWarning("Details: передан пустой Id");
                 return NotFound();
             }
 
@@ -55,9 +57,11 @@ namespace SchoolShedule.Controllers
                 .FirstOrDefaultAsync(m => m.UserId == id);
             if (teacher == null)
             {
+                _logger.LogWarning("Details: преподаватель не найден, Id={Id}", id);
                 return NotFound();
             }
 
+            _logger.LogInformation("Просмотр преподавателя: {FIO}", teacher.GetFIO);
             ViewData["Title"] = $"{teacher.GetFIO} - инфо";
             return View(teacher);
         }
@@ -66,6 +70,7 @@ namespace SchoolShedule.Controllers
         public async Task<IActionResult> CreateAsync()
         {
             ViewData["Title"] = "Новый Преподаватель";
+            _logger.LogInformation("Открытие формы создания преподавателя");
 
             var model = new TeacherCreateViewModel
             {
@@ -81,6 +86,7 @@ namespace SchoolShedule.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Создание преподавателя: модель невалидна");
                 model.Subjects = await _context.Subjects.ToListAsync();
                 return View(model);
             }
@@ -92,6 +98,9 @@ namespace SchoolShedule.Controllers
 
             if (model.AutoGenerateCredentials)
             {
+                _logger.LogInformation("Генерация учётных данных для преподавателя {LastName} {FirstName}",
+                model.LastName, model.FirstName);
+
                 userName = await _generator.GenerateUserNameAsync(model.FirstName, model.LastName);
                 email = await _generator.GenerateEmailAsync(userName);
                 password = _generator.GeneratePassword(model.FirstName, model.LastName);
@@ -100,6 +109,7 @@ namespace SchoolShedule.Controllers
             {
                 if (string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
                 {
+                    _logger.LogWarning("Создание преподавателя: Email/Password не указаны при отключённой автогенерации");
                     ModelState.AddModelError("", "Email и пароль обязательны, если отключена автогенерация");
                     model.Subjects = await _context.Subjects.ToListAsync();
                     return View(model);
@@ -125,6 +135,9 @@ namespace SchoolShedule.Controllers
 
             if (!userResult.Succeeded)
             {
+                _logger.LogError("Ошибка создания пользователя: {Errors}",
+                string.Join(", ", userResult.Errors.Select(e => e.Description)));
+
                 foreach (var error in userResult.Errors)
                     ModelState.AddModelError("", error.Description);
 
@@ -144,12 +157,14 @@ namespace SchoolShedule.Controllers
             _context.Teachers.Add(teacher);
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Создан преподаватель: {FIO}, Email={Email}", teacher.GetFIO, email);
+
             return RedirectToAction(nameof(All));
         }
 
 
         [HttpGet]
-        public async Task<IActionResult> Edit(Guid id)
+        public async Task<IActionResult> EditAsync(Guid id)
         {
             var teacher = await _context.Teachers
                 .Include(t => t.User)
@@ -157,7 +172,11 @@ namespace SchoolShedule.Controllers
                 .FirstOrDefaultAsync(t => t.UserId == id);
 
             if (teacher == null)
+            {
+                _logger.LogWarning("Edit: преподаватель не найден, Id={Id}", id);
                 return NotFound();
+            }
+            _logger.LogInformation("Открытие формы редактирования преподавателя: {FIO}", teacher.GetFIO);
 
             var model = new TeacherUpdateViewModel
             {
@@ -176,10 +195,12 @@ namespace SchoolShedule.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(TeacherUpdateViewModel model)
+        public async Task<IActionResult> EditAsync(TeacherUpdateViewModel model)
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Редактирование преподавателя: модель невалидна");
+
                 model.Subjects = await _context.Subjects.ToListAsync();
                 return View(model);
             }
@@ -190,8 +211,12 @@ namespace SchoolShedule.Controllers
                 .FirstOrDefaultAsync(t => t.UserId == model.Id);
 
             if (teacher == null)
+            {
+                _logger.LogWarning("Редактирование: преподаватель не найден, Id={Id}", model.Id);
                 return NotFound();
+            }
 
+            _logger.LogInformation("Редактирование преподавателя: {FIO}", teacher.GetFIO);
             // 1. Обновляем User
             teacher.User.FirstName = model.FirstName;
             teacher.User.LastName = model.LastName;
@@ -208,14 +233,17 @@ namespace SchoolShedule.Controllers
 
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Преподаватель обновлён: {FIO}", teacher.GetFIO);
+
             return RedirectToAction(nameof(All));
         }
 
         // GET: Teacher/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        public async Task<IActionResult> DeleteAsync(Guid? id)
         {
             if (id == null)
             {
+                _logger.LogWarning("Delete: передан пустой Id");
                 return NotFound();
             }
 
@@ -225,9 +253,10 @@ namespace SchoolShedule.Controllers
                 .FirstOrDefaultAsync(m => m.UserId == id);
             if (teacher == null)
             {
+                _logger.LogWarning("Delete: преподаватель не найден, Id={Id}", id);
                 return NotFound();
             }
-            ViewData["Title"] = $"! {teacher.GetFIO}-УДАЛЕНИЕ !";
+            ViewData["Title"] = $"{teacher.GetFIO}-УДАЛЕНИЕ";
 
             return View(teacher);
         }
@@ -240,7 +269,12 @@ namespace SchoolShedule.Controllers
             var teacher = await _context.Teachers.FindAsync(id);
             if (teacher != null)
             {
+                _logger.LogInformation("Удаление преподавателя: UserId={Id}, FIO={Fio}, Subject={Subjects}", id, teacher.GetFIO, teacher.SubjectsToString);
                 _context.Teachers.Remove(teacher);
+            }
+            else
+            {
+                _logger.LogWarning("Попытка удалить несуществующего преподавателя: Id={Id}", id);
             }
 
             await _context.SaveChangesAsync();

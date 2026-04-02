@@ -69,32 +69,32 @@ namespace SchoolShedule.Providers
 
         }
 
-        private static bool TestPostgres(string conn, ILogger logger)
-        {
-            try
-            {
-                using var c = new NpgsqlConnection(conn);
-                c.Open();
+        //private static bool TestPostgres(string conn, ILogger logger)
+        //{
+        //    try
+        //    {
+        //        using var c = new NpgsqlConnection(conn);
+        //        c.Open();
 
-                // проверка доступности сервиса
-                var options = new DbContextOptionsBuilder<SheduleDbContext>()
-                    .UseNpgsql(conn)
-                    .Options;
+        //        // проверка доступности сервиса
+        //        var options = new DbContextOptionsBuilder<SheduleDbContext>()
+        //            .UseNpgsql(conn)
+        //            .Options;
 
-                using var db = new SheduleDbContext(options);
-                // проверка миграций и схемы
-                db.Database.Migrate();
-                logger.LogInformation("[DB-TEST] Postgres миграции применены успешно.");
-                if (!db.Users.Any() && !db.Subjects.Any())
-                    logger.LogInformation("[DB-TEST] Postgres пуст — можно запускать DbInitializer.");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning("[DB-TEST] Postgres failed: {Message}", ex.Message);
-                return false;
-            }
-        }
+        //        using var db = new SheduleDbContext(options);
+        //        // проверка миграций и схемы
+        //        db.Database.Migrate();
+        //        logger.LogInformation("[DB-TEST] Postgres миграции применены успешно.");
+        //        if (!db.Users.Any() && !db.Subjects.Any())
+        //            logger.LogInformation("[DB-TEST] Postgres пуст — можно запускать DbInitializer.");
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.LogWarning("[DB-TEST] Postgres failed: {Message}", ex.Message);
+        //        return false;
+        //    }
+        //}
 
         private static bool ConfigureMssql(IConfiguration cfg, IServiceCollection services, ILogger logger)
         {
@@ -126,30 +126,30 @@ namespace SchoolShedule.Providers
 
         }
 
-        private static bool TestMssql(string conn, ILogger logger)
-        {
-            try
-            {
-                using var c = new SqlConnection(conn); c.Open();
-                // проверка доступности сервиса
-                var options = new DbContextOptionsBuilder<SheduleDbContext>()
-                    .UseSqlServer(conn)
-                    .Options;
-                using var db = new SheduleDbContext(options);
-                db.Database.Migrate();
-                logger.LogInformation("[DB-TEST] MSSQL миграции применены успешно.");
+        //private static bool TestMssql(string conn, ILogger logger)
+        //{
+        //    try
+        //    {
+        //        using var c = new SqlConnection(conn); c.Open();
+        //        // проверка доступности сервиса
+        //        var options = new DbContextOptionsBuilder<SheduleDbContext>()
+        //            .UseSqlServer(conn)
+        //            .Options;
+        //        using var db = new SheduleDbContext(options);
+        //        db.Database.Migrate();
+        //        logger.LogInformation("[DB-TEST] MSSQL миграции применены успешно.");
 
-                // проверка схемы 
-                if (!db.Users.Any() && !db.Subjects.Any())
-                    logger.LogInformation("[DB-TEST] MSSQL пуст — можно запускать DbInitializer.");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "[DB-TEST] Ошибка при проверке подключения к MSSQL!");
-                throw;
-            }
-        }
+        //        // проверка схемы 
+        //        if (!db.Users.Any() && !db.Subjects.Any())
+        //            logger.LogInformation("[DB-TEST] MSSQL пуст — можно запускать DbInitializer.");
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.LogError(ex, "[DB-TEST] Ошибка при проверке подключения к MSSQL!");
+        //        throw;
+        //    }
+        //}
 
         /// <summary>
         /// Преобразование строки подключения с кодом переменных в правильную строку

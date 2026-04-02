@@ -8,6 +8,8 @@ namespace SchoolShedule.Data
 {
     public class SheduleDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
+        private readonly ILogger<SheduleDbContext> _logger;
+
         public DbSet<Student> Students { get; set; } = default!;
         public DbSet<Teacher> Teachers { get; set; } = default!;
         public DbSet<ClassGroup> ClassGroups { get; set; } = default!;
@@ -16,7 +18,7 @@ namespace SchoolShedule.Data
         public DbSet<Room> Rooms { get; set; } = default!;
         public DbSet<TimeSlot> TimeSlots { get; set; } = default!;
 
-        public SheduleDbContext(DbContextOptions<SheduleDbContext> options) : base(options) { }
+        public SheduleDbContext(DbContextOptions<SheduleDbContext> options, ILogger<SheduleDbContext> logger) : base(options) { _logger = logger; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -61,8 +63,38 @@ namespace SchoolShedule.Data
 
             // Пометил, что код предмета тоже будет уникальным
             builder.Entity<Subject>()
-                .HasIndex(s=> s.Code)
+                .HasIndex(s => s.Code)
                 .IsUnique();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken token = default)
+        {
+            LogChanges();
+            return await base.SaveChangesAsync(token);
+        }
+
+        private void LogChanges()
+        {
+            var modified = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Modified);
+
+            foreach (var entry in modified)
+            {
+                foreach (var prop in entry.Properties)
+                {
+                    if (prop.IsModified)
+                    {
+                        _logger.LogInformation(
+                            "[UPDATE] {Entity} {Id}: {Prop} {Old} -> {New}",
+                            entry.Entity.GetType().Name,
+                            entry.Property("Id").CurrentValue,
+                            prop.Metadata.Name,
+                            prop.OriginalValue,
+                            prop.CurrentValue
+                        );
+                    }
+                }
+            }
         }
 
     }
