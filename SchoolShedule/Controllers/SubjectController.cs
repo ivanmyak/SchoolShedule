@@ -139,8 +139,11 @@ namespace SchoolShedule.Controllers
             }
 
             string normalisedCode = model.Code?.Trim().ToUpper() ?? throw new Exception("При создании нового Предмета поле Code оказалось пустым!");
-            subject.Name = subject.Name == model.Name ? subject.Name : model.Name;
-            subject.Code = subject.Code == normalisedCode ? subject.Code : normalisedCode;
+            if (subject.Name != model.Name)
+                subject.Name = model.Name;
+
+            if (subject.Code != normalisedCode)
+                subject.Code = normalisedCode;
             _context.Update(subject);
             await _context.SaveChangesAsync();
 
