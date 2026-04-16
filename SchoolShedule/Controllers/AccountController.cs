@@ -102,7 +102,7 @@ namespace SchoolShedule.Controllers
             return Ok(new { message = "Инициализация выполнена" });
         }
 
-        [Route("GodHasDick")]
+        [Route("StartShedule")]
         public async Task<IActionResult> InitAdminDb([FromServices] RoleManager<IdentityRole<Guid>> roleManager)
         {
             await Data.Seed.DbInitializer.InitAdminAsync(_userManager, roleManager, _logger);
