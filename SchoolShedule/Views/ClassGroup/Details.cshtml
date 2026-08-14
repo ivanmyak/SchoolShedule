@@ -1,13 +1,11 @@
 ﻿@model SchoolShedule.Entities.ClassGroup
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Details ClassGroup";
 }
 
-<h1>Details</h1>
-
 <div>
-    <h4>ClassGroup</h4>
+    <h4>Группа</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -25,6 +23,7 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Изменить</a> |
+    <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
+
 </div>

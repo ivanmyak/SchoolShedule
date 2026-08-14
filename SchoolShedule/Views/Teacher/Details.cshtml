@@ -1,5 +1,8 @@
 ﻿@model Teacher
 
+@{
+    ViewData["Title"] = "Details Teacher";
+}
 <h2 class="mb-4">Информация о преподавателе</h2>
 
 <div class="card shadow-sm">
@@ -33,7 +36,8 @@
         </dl>
 
         <a asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-primary">Редактировать</a>
-        <a asp-action="All" class="btn btn-secondary">Назад</a>
+        <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
+
 
     </div>
 </div>

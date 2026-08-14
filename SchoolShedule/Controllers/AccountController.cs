@@ -65,7 +65,7 @@ namespace SchoolShedule.Controllers
                 RegisteredAt = DateTimeOffset.UtcNow
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: true);

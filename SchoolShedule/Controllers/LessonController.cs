@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SchoolShedule.Data;
 using SchoolShedule.Entities;
 using SchoolShedule.Enums;
+using SchoolShedule.Extensions;
 using SchoolShedule.Models;
 using System;
 using System.Collections.Generic;
@@ -132,11 +133,58 @@ namespace SchoolShedule.Controllers
             {
                 return NotFound();
             }
-            ViewData["ClassGroupId"] = new SelectList(_context.ClassGroups, "Id", "Id", lesson.ClassGroupId);
-            ViewData["RoomId"] = new SelectList(_context.Rooms, "Id", "Id", lesson.RoomId);
-            ViewData["SubjectId"] = new SelectList(_context.Subjects, "Id", "Code", lesson.SubjectId);
-            ViewData["TeacherId"] = new SelectList(_context.Teachers, "UserId", "UserId", lesson.TeacherId);
-            ViewData["TimeSlotId"] = new SelectList(_context.TimeSlots, "Id", "Id", lesson.TimeSlotId);
+            ViewData["SubjectId"] = new SelectList(_context.Subjects, "Id", "Name", lesson.SubjectId);
+            ViewData["TeacherId"] = new SelectList(_context.Teachers.Include("User").Include("Subjects"), "UserId", "TeacherString", lesson.TeacherId);
+            ViewData["ClassGroupId"] = new SelectList(_context.ClassGroups, "Id", "Name", lesson.ClassGroupId, "Grade");
+
+            var rooms = _context.Rooms
+    .OrderBy(r => r.Floor)
+    .ThenBy(r => r.Number)
+    .ToList();
+
+            var roomgroups = rooms
+                .Select(r => r.Floor)
+                .Distinct()
+                .OrderBy(f => f)
+                .ToDictionary(
+                    floor => floor,
+                    floor => new SelectListGroup { Name = $"Этаж {floor}" }
+                );
+
+            ViewData["RoomId"] = rooms
+                .Select(r => new SelectListItem
+                {
+                    Value = r.Id.ToString(),
+                    Text = r.RoomNumber,
+                    Group = roomgroups[r.Floor]
+                })
+                .ToList();
+
+            var slots = _context.TimeSlots
+    .OrderBy(ts => ts.DayOfWeek)
+    .ThenBy(ts => ts.Period)
+    .ToList();
+
+            // создаём группы с русскими названиями
+            var slotgroups = slots
+                .Select(ts => ts.DayOfWeek)
+                .Distinct()
+                .OrderBy(day => day)
+                .ToDictionary(
+                    day => day,
+                    day => new SelectListGroup { Name = day.GetDisplayName() }
+                );
+
+            // формируем SelectListItem
+            ViewData["TimeSlotId"] = slots
+                .Select(ts => new SelectListItem
+                {
+                    Value = ts.Id.ToString(),
+                    Text = ts.TimeSlotString,
+                    Group = slotgroups[ts.DayOfWeek]
+                })
+                .ToList();
+
             return View(lesson);
         }
 

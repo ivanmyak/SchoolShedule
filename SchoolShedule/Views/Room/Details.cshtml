@@ -1,13 +1,12 @@
 ﻿@model SchoolShedule.Entities.Room
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Details Room";
 }
 
-<h1>Details</h1>
+<h1>Подробности по кабинету</h1>
 
 <div>
-    <h4>Room</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -25,6 +24,7 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Редактировать кабинет</a> |
+    <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
+
 </div>

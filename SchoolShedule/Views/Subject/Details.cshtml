@@ -1,5 +1,8 @@
 ﻿@model Subject
 
+@{
+    ViewData["Title"] = "Details Subject";
+}
 <h2 class="mb-4">Информация о предмете</h2>
 
 <div class="card shadow-sm">
@@ -9,7 +12,7 @@
         <p class="text-muted">Код: @Model.Code</p>
 
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Редактировать</a>
-        <a asp-action="All" class="btn btn-secondary">Назад</a>
+        <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
 
     </div>
 </div>

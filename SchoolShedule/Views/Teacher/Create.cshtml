@@ -1,5 +1,8 @@
 ﻿@model TeacherCreateViewModel
 
+@{
+    ViewData["Title"] = "Create Teacher";
+}
 <h2 class="mb-4">Создание преподавателя</h2>
 
 <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
@@ -62,7 +65,10 @@
     </div>
 
     <button class="btn btn-primary">Создать</button>
+    <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
+
 </form>
+
 
 @section Scripts {
     <script src="~/lib/select2/js/select2.min.js"></script>

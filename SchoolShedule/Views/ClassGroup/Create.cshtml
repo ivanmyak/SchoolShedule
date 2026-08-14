@@ -1,5 +1,8 @@
 ﻿@model SchoolShedule.Entities.ClassGroup
 
+@{
+    ViewData["Title"] = "Create ClassGroup";
+}
 <h1>Новый класс</h1>
 
 <hr />
@@ -25,7 +28,8 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
+
 </div>
 
 @section Scripts {

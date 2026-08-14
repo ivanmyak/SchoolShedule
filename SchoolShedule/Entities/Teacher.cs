@@ -32,7 +32,6 @@ namespace SchoolShedule.Entities
     $"{User.LastName} {User.FirstName[0]}." +
     (string.IsNullOrWhiteSpace(User.MiddleName) ? "" : $"{User.MiddleName[0]}.");
 
-
         /// <summary>
         /// Сборное название основных предметов Учителя
         /// </summary>
@@ -40,6 +39,15 @@ namespace SchoolShedule.Entities
         [Display(Name = "Предметы")]
         public string SubjectsToString =>
     string.Join(" / ", Subjects.Select(s => s.Name));
+
+        /// <summary>
+        /// Учитель и его предметы
+        /// </summary>
+        /// <example> Понедельник, 3 урок -> 1-3</example>
+        [Required]
+        [Display(Name = "Учитель и его направление")]
+        public string TeacherString => $"{GetFIO} ({SubjectsToString})";
+
     }
 
 }

@@ -1,6 +1,6 @@
 ﻿@model LoginViewModel
 
-<h2>Login</h2>
+<h2 class="text-warning">Вход возможен только если вы сотрудник учреждения и вам предоставили доступ!</h2>
 
 <form asp-action="Login" method="post">
     <div asp-validation-summary="All"></div>
@@ -18,5 +18,4 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Войти</button>
-    <a asp-action="Register" class="btn btn-outline-warning">Регистрация</a>
 </form>

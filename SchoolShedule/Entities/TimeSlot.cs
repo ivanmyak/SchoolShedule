@@ -33,5 +33,7 @@ namespace SchoolShedule.Entities
         [Required]
         [Display(Name = "Номер кабинета")]
         public string TimeSlotString => $"{(int)DayOfWeek + 1}-{Period}";
+
+        public override string ToString() => TimeSlotString;
     }
 }

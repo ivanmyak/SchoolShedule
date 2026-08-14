@@ -1,5 +1,8 @@
 ﻿@model Teacher
 
+@{
+    ViewData["Title"] = "Delete Teacher";
+}
 <h2 class="mb-4 text-danger">Удаление преподавателя</h2>
 
 <div class="card shadow-sm border-danger">
@@ -40,9 +43,8 @@
                 Удалить
             </button>
 
-            <a asp-action="All" class="btn btn-secondary">
-                Отмена
-            </a>
+            <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
+
         </form>
 
     </div>

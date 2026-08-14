@@ -1,8 +1,11 @@
 ﻿@model SchoolShedule.Entities.Room
 
-<h1>Create</h1>
+@{
+    ViewData["Title"] = "Create Room";
+}
+<h1>Добавление нового кабинета для проведения уроков</h1>
 
-<h4>Room</h4>
+<h4>Кабинет</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -19,14 +22,15 @@
                 <span asp-validation-for="Number" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Создать" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
+
 </div>
 
 @section Scripts {

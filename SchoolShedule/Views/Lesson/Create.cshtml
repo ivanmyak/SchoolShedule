@@ -1,6 +1,9 @@
 ﻿@using SchoolShedule.Extensions
 @model LessonCreateViewModel
 
+@{
+    ViewData["Title"] = "Create Lesson";
+}
 <h2 class="mb-4">Создание урока</h2>
 
 <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
@@ -95,6 +98,8 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
+
 </form>
 
 @section Scripts {

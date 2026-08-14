@@ -30,6 +30,8 @@ namespace SchoolShedule.Controllers
         // GET: Room/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            ViewData["Title"] = "Details Room";
+
             if (id == null)
             {
                 return NotFound();
@@ -48,6 +50,8 @@ namespace SchoolShedule.Controllers
         // GET: Room/Create
         public IActionResult Create()
         {
+            ViewData["Title"] = "Create Room";
+
             return View();
         }
 
@@ -70,6 +74,8 @@ namespace SchoolShedule.Controllers
         // GET: Room/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            ViewData["Title"] = "Edit Room";
+
             if (id == null)
             {
                 return NotFound();
@@ -121,6 +127,8 @@ namespace SchoolShedule.Controllers
         // GET: Room/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            ViewData["Title"] = "Delete Room";
+
             if (id == null)
             {
                 return NotFound();

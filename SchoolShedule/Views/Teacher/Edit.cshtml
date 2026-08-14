@@ -1,5 +1,8 @@
 ﻿@model TeacherUpdateViewModel
 
+@{
+    ViewData["Title"] = "Edit Teacher";
+}
 <h2 class="mb-4">Редактирование преподавателя</h2>
 
 <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
@@ -51,7 +54,8 @@
     </div>
 
     <button class="btn btn-primary">Сохранить</button>
-    <a asp-action="All" class="btn btn-secondary">Назад</a>
+    <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
+
 </form>
 
 @section Scripts {
