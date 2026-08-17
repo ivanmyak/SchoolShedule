@@ -64,5 +64,10 @@ namespace SchoolShedule.Services
         {
             return $"{_translit.Transliterate(firstName)}_Tea2!$3cH_{_translit.Transliterate(lastName)}";
         }
+
+        public string GeneratePassword(User user)
+        {
+            return $"{_translit.Transliterate(user.FirstName)}_Tea2!$3cH_{_translit.Transliterate(user.LastName)}";
+        }
     }
 }

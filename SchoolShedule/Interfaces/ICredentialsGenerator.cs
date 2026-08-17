@@ -1,4 +1,6 @@
-﻿namespace SchoolShedule.Interfaces
+﻿using SchoolShedule.Entities;
+
+namespace SchoolShedule.Interfaces
 {
     /// <summary>
     /// Генератор реквизитов для входа 
@@ -27,5 +29,12 @@
         /// <param name="lastName">Фамилия пользователя</param>
         /// <returns></returns>
         string GeneratePassword(string firstName, string lastName);
+
+        /// <summary>
+        /// Генерация Пароля
+        /// </summary>
+        /// <param name="user">Пользователь</param>
+        /// <returns></returns>
+        string GeneratePassword(User user);
     }
 }

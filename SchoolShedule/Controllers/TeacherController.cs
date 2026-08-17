@@ -8,6 +8,7 @@ using SchoolShedule.Interfaces;
 using SchoolShedule.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -82,7 +83,7 @@ namespace SchoolShedule.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateAsync(TeacherCreateViewModel model)
+        public async Task<IActionResult> CreateAsync(TeacherCreateViewModel model, [FromServices] RoleManager<IdentityRole<Guid>> roleManager)
         {
             if (!ModelState.IsValid)
             {
@@ -120,7 +121,25 @@ namespace SchoolShedule.Controllers
                 password = model.Password;
             }
 
-            // 2. Создаём пользователя
+            //2. Проверяем наличие роли Учитель
+            var teacherRole = await roleManager.FindByNameAsync("Teacher");
+            if (teacherRole == null)
+            {
+                _logger.LogWarning("[TEACHER-CREATE] В БД отсутствует роль Учителя! Выполняем создание даной роли!");
+                teacherRole = new() { Name = "Teacher" };
+                var resultRole = await roleManager.CreateAsync(teacherRole);
+                if (resultRole.Succeeded) // И, после создания Юзверя и Роли - объединяем их (PanPineappleApplePan!)
+                {
+                    _logger.LogWarning("[TEACHER-CREATE] В БД успешно создана роль Учителя!");
+                }
+                else
+                {
+                    _logger.LogError("[TEACHER-CREATE] Не удалось создать роль Учителя в БД!");
+                    throw new DbUpdateException("Не удалось создать роль Учителя в БД!");
+                }
+            }
+
+            // 3. Создаём пользователя
             var user = new User
             {
                 UserName = userName,
@@ -133,9 +152,10 @@ namespace SchoolShedule.Controllers
 
             var userResult = await _userManager.CreateAsync(user, password);
 
+
             if (!userResult.Succeeded)
             {
-                _logger.LogError("Ошибка создания пользователя: {Errors}",
+                _logger.LogError("[TEACHER-CREATE] Ошибка создания пользователя: {Errors}",
                 string.Join(", ", userResult.Errors.Select(e => e.Description)));
 
                 foreach (var error in userResult.Errors)
@@ -145,7 +165,10 @@ namespace SchoolShedule.Controllers
                 return View(model);
             }
 
-            // 3. Создаём учителя
+            //3.1. Присваиваем роль - Учителю
+            await _userManager.AddToRoleAsync(user, teacherRole.Name ?? "Teacher");
+
+            // 4. Создаём учителя
             var teacher = new Teacher
             {
                 UserId = user.Id,
@@ -157,7 +180,7 @@ namespace SchoolShedule.Controllers
             _context.Teachers.Add(teacher);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Создан преподаватель: {FIO}, Email={Email}", teacher.GetFIO, email);
+            _logger.LogInformation("[TEACHER-CREATE] Создан преподаватель: {FIO}, Email={Email}", teacher.GetFIO, email);
 
             return RedirectToAction(nameof(All));
         }
@@ -173,10 +196,10 @@ namespace SchoolShedule.Controllers
 
             if (teacher == null)
             {
-                _logger.LogWarning("Edit: преподаватель не найден, Id={Id}", id);
+                _logger.LogWarning("[TEACHER-EDIT] Преподаватель не найден, Id={Id}", id);
                 return NotFound();
             }
-            _logger.LogInformation("Открытие формы редактирования преподавателя: {FIO}", teacher.GetFIO);
+            _logger.LogInformation("[TEACHER-EDIT] Открытие формы редактирования преподавателя: {FIO}", teacher.GetFIO);
 
             var model = new TeacherUpdateViewModel
             {
@@ -195,11 +218,11 @@ namespace SchoolShedule.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditAsync(TeacherUpdateViewModel model)
+        public async Task<IActionResult> EditAsync(TeacherUpdateViewModel model, [FromServices] RoleManager<IdentityRole<Guid>> roleManager)
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Редактирование преподавателя: модель невалидна");
+                _logger.LogWarning("[TEACHER-EDIT] Модель невалидна");
 
                 model.Subjects = await _context.Subjects.ToListAsync();
                 return View(model);
@@ -212,11 +235,36 @@ namespace SchoolShedule.Controllers
 
             if (teacher == null)
             {
-                _logger.LogWarning("Редактирование: преподаватель не найден, Id={Id}", model.Id);
+                _logger.LogWarning("[TEACHER-EDIT] Преподаватель не найден, Id={Id}", model.Id);
                 return NotFound();
             }
 
-            _logger.LogInformation("Редактирование преподавателя: {FIO}", teacher.GetFIO);
+            //2. Проверяем наличие роли Учитель
+            var teacherRole = await roleManager.FindByNameAsync("Teacher");
+            if (teacherRole == null)
+            {
+                _logger.LogWarning("[TEACHER-EDIT] В БД отсутствует роль Учителя! Выполняем создание даной роли!");
+                teacherRole = new() { Name = "Teacher" };
+                var resultRole = await roleManager.CreateAsync(teacherRole);
+                if (resultRole.Succeeded) // И, после создания Юзверя и Роли - объединяем их (PanPineappleApplePan!)
+                {
+                    _logger.LogWarning("[TEACHER-EDIT] В БД успешно создана роль Учителя!");
+                }
+                else
+                {
+                    _logger.LogError("[TEACHER-EDIT] Не удалось создать роль Учителя в БД!");
+                    throw new DbUpdateException("Не удалось создать роль Учителя в БД!");
+                }
+            }
+
+            //Проверка соответствующей роли у учителя и её присвоение
+            if (!await _userManager.IsInRoleAsync(teacher.User, "Teacher"))
+            {
+                _logger.LogWarning($"[TEACHER-EDIT] У Учителя {teacher.GetFIO} отсутствует привязка к роли - исправляем!");
+                await _userManager.AddToRoleAsync(teacher.User, "Teacher");
+            }
+
+            _logger.LogInformation("[TEACHER-EDIT] Редактирование преподавателя: {FIO}", teacher.GetFIO);
             // 1. Обновляем User
             teacher.User.FirstName = model.FirstName;
             teacher.User.LastName = model.LastName;

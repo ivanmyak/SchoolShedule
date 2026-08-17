@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using NuGet.DependencyResolver;
 using SchoolShedule.Entities;
+using SchoolShedule.Interfaces;
 using System.Data;
 using System.Linq;
 using System.Text.Json;
@@ -8,16 +11,17 @@ namespace SchoolShedule.Data.Seed
 {
     public static class DbInitializer
     {
-        public static async Task SeedAsync(SheduleDbContext context, ILogger logger)
+        public static async Task SeedAsync(SheduleDbContext context, ILogger logger, UserManager<User> userManager, RoleManager<IdentityRole<Guid>> roleManager, ICredentialsGenerator generator)
         {
             string seedPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "Seed", "seed.json");
+
             if (!File.Exists(seedPath))
             {
                 logger.LogError($"[DB] Отсутствует файл-зерно по пути: {seedPath}");
-                //throw new DataException("В БД уже присутствуют значения - инициализация 'зерном' отменена!");
                 return;
             }
 
+            // Одна запись обязана быть - это наш Админ. Если есть иные - значит база чем-то инициализирована. Или очищать-удалять базу, или вручную админом добавлять
             if (context.Users.Count() > 1 || context.Subjects.Any() || context.ClassGroups.Any())
             {
                 // если база уже заполнена - сообщаем об неудаче
@@ -26,124 +30,151 @@ namespace SchoolShedule.Data.Seed
                 return;
 
             }
+
             var json = await File.ReadAllTextAsync(seedPath);
             var seedData = JsonSerializer.Deserialize<SeedData>(json);
 
             if (seedData == null)
             {
-                logger.LogError("Файл с 'зерном' отсутствует, пуст или не удалось обработать!");
-                //throw new FileLoadException("Файл с 'зерном' отсутствует, пуст или не удалось обработать!");
+                logger.LogError("[DB] Файл 'seed.json' пуст или повреждён.");
                 return;
-
             }
-            List<User> users = new();
-            List<Teacher> teachers = new();
-            List<Student> students = new();
 
-            List<Subject> subjects = new();
-            List<ClassGroup> classGroups = new();
-            List<Room> rooms = new();
-            List<TimeSlot> timeslots = new();
-            List<Lesson> lessons = new();
-            //string[] tryseeds = ["users", "teachers", "students", "subjects", "classGroups", "rooms", "timeslots", "lessons"];
-            string seedentitiesstatus = "users";
-            // Обрабатываем json-сущности и добавляем в БД
             try
             {
+                // -----------------------------
+                // 1. Создаём роли
+                // -----------------------------
+                string[] roles = { "Administrator", "Teacher", "Student" };
 
-                // Users 
-                users.AddRange(seedData.Users);
-                context.AddRange(users);
+                foreach (var role in roles)
+                {
+                    if (!await roleManager.RoleExistsAsync(role))
+                    {
+                        await roleManager.CreateAsync(new() { Name = role });
+                    }
+                }
 
-                // Subjects
-                seedentitiesstatus = nameof(Subject);
-                subjects.AddRange(seedData.Subjects);
-                context.AddRange(subjects);
+                // -----------------------------
+                // 2. Создаём пользователей через UserManager
+                // -----------------------------
+                Dictionary<Guid, User> createdUsers = new();
 
-                // Teachers
-                seedentitiesstatus = nameof(Teacher);
-                foreach (var teacherSeed in seedData.Teachers)
+                foreach (var u in seedData.Users)
+                {
+                    var user = new User
+                    {
+                        Id = u.Id,
+                        UserName = u.Email,
+                        Email = u.Email,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        MiddleName = u.MiddleName
+                    };
+
+                    var result = await userManager.CreateAsync(user, generator.GeneratePassword(user));
+
+                    if (!result.Succeeded)
+                    {
+                        logger.LogError($"Ошибка создания пользователя {u.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                        continue;
+                    }
+
+
+                    createdUsers.Add(user.Id, user);
+                }
+
+                // -----------------------------
+                // 3. Создаём предметы
+                // -----------------------------
+                context.Subjects.AddRange(seedData.Subjects);
+                await context.SaveChangesAsync();
+
+                // -----------------------------
+                // 4. Создаём преподавателей
+                // -----------------------------
+                List<Teacher> teachers = new();
+
+                foreach (var t in seedData.Teachers)
                 {
                     var teacher = new Teacher
                     {
-                        UserId = teacherSeed.UserId,
-                        User = users
-                        .First(u =>
-                            u.Id == teacherSeed.UserId),
-                        Subjects = subjects
-                        .Where(s =>
-                            teacherSeed.Subjects.Contains(s.Code))
-                        .ToList()
-
+                        UserId = t.UserId,
+                        User = createdUsers[t.UserId],
+                        Subjects = context.Subjects.Where(s => t.Subjects.Contains(s.Code)).ToList()
                     };
+
+                    // Назначаем роль
+                    await userManager.AddToRoleAsync(teacher.User, "Teacher");
                     teachers.Add(teacher);
                 }
-                context.AddRange(teachers);
 
-                // ClassGroups
-                seedentitiesstatus = nameof(classGroups);
-                classGroups.AddRange(seedData.ClassGroups);
-                context.AddRange(classGroups);
+                context.Teachers.AddRange(teachers);
+                await context.SaveChangesAsync();
 
-                // Students
-                seedentitiesstatus = nameof(Student);
-                foreach (var studentSeed in seedData.Students)
+                // -----------------------------
+                // 5. Создаём классы
+                // -----------------------------
+                context.ClassGroups.AddRange(seedData.ClassGroups);
+                await context.SaveChangesAsync();
+
+                // -----------------------------
+                // 6. Создаём студентов
+                // -----------------------------
+                List<Student> students = new();
+
+                foreach (var s in seedData.Students)
                 {
                     var student = new Student
                     {
-                        UserId = studentSeed.UserId,
-                        User = users.First(u =>
-                            u.Id == studentSeed.UserId),
-                        ClassGroup = classGroups
-                            .First(c =>
-                                c.Grade == studentSeed.Grade && c.Letter == studentSeed.Letter[0])
-
+                        UserId = s.UserId,
+                        User = createdUsers[s.UserId],
+                        ClassGroup = context.ClassGroups.First(c => c.Grade == s.Grade && c.Letter == s.Letter[0])
                     };
+
+                    await userManager.AddToRoleAsync(student.User, "Student");
                     students.Add(student);
                 }
-                context.AddRange(students);
 
-                // Rooms
-                seedentitiesstatus = nameof(Room);
-                rooms.AddRange(seedData.Rooms);
-                context.AddRange(rooms);
+                context.Students.AddRange(students);
+                await context.SaveChangesAsync();
 
-                // TimeSlots
-                seedentitiesstatus = nameof(TimeSlot);
-                timeslots.AddRange(seedData.TimeSlots);
-                context.AddRange(timeslots);
+                // -----------------------------
+                // 7. Кабинеты, слоты, уроки
+                // -----------------------------
+                context.Rooms.AddRange(seedData.Rooms);
+                context.TimeSlots.AddRange(seedData.TimeSlots);
+                await context.SaveChangesAsync();
 
-                // Lessons
-                seedentitiesstatus = nameof(Lesson);
+                List<Lesson> lessons = new();
+
                 foreach (var l in seedData.Lessons)
                 {
-                    var lesson = new Lesson
+                    lessons.Add(new Lesson
                     {
-                        Subject = subjects.First(s => s.Code == l.SubjectCode),
+                        Subject = context.Subjects.First(s => s.Code == l.SubjectCode),
                         Teacher = teachers.First(t => t.UserId == l.TeacherId),
-                        ClassGroup = classGroups.First(c => c.Grade == l.Grade && c.Letter == l.Letter[0]),
-                        Room = rooms.First(r => $"{r.Floor}-{r.Number}" == l.RoomNumber),
-                        TimeSlot = timeslots.First(ts => (int)ts.DayOfWeek == l.DayOfWeek && ts.Period == l.Period)
-                    };
-                    lessons.Add(lesson);
+                        ClassGroup = context.ClassGroups.First(c => c.Grade == l.Grade && c.Letter == l.Letter[0]),
+                        Room = context.Rooms.First(r => $"{r.Floor}-{r.Number}" == l.RoomNumber),
+                        TimeSlot = context.TimeSlots.First(ts => (int)ts.DayOfWeek == l.DayOfWeek && ts.Period == l.Period)
+                    });
                 }
-                context.AddRange(lessons);
 
-
+                context.Lessons.AddRange(lessons);
                 await context.SaveChangesAsync();
+
+                logger.LogInformation("[DB] Инициализация успешно завершена.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                logger.LogError($"[SEED] Возникла ошибка в иницализации при работе с {seedentitiesstatus}");
+                logger.LogError($"[SEED] Ошибка при инициализации: {ex.Message}");
                 throw;
             }
-
-
         }
 
         public static async Task InitAdminAsync(UserManager<User> userManager, RoleManager<IdentityRole<Guid>> roleManager, ILogger logger)
         {
-            var user = await userManager.FindByEmailAsync("user1@guestmail.com");
+            var user = await userManager.FindByEmailAsync("superadmin@admin.com");
             if (user != null)
             {
                 logger.LogWarning("[DB] В БД уже присутствует Администратор - инициализация отменена!");
