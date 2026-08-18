@@ -52,7 +52,7 @@
                                 {
                                     bool isOwnSubject = lesson.Teacher.Subjects.Any(s => s.Code == lesson.Subject.Code);
 
-                                    var teacherShort = lesson.Teacher.GetFIO;
+                                    var teacherShort = lesson.Teacher.User.GetFIO;
 
                                     var specialization = lesson.Teacher.SubjectsToString;
                                     var modalId = $"modal_{modalCounter++}";

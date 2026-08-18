@@ -56,7 +56,7 @@
             <select asp-for="SelectedTeacherId" class="form-select teacher-select">
                 @foreach (var t in Model.GetTeachersSorted())
                 {
-                    var text = $"{t.GetFIO} ({t.SubjectsToString})";
+                    var text = $"{t.User.GetFIO} ({t.SubjectsToString})";
 
                     <option value="@t.UserId"
                             data-subjects="@string.Join(",", t.Subjects.Select(s => s.Id))"

@@ -62,8 +62,8 @@ namespace SchoolShedule.Controllers
                 return NotFound();
             }
 
-            _logger.LogInformation("Просмотр преподавателя: {FIO}", teacher.GetFIO);
-            ViewData["Title"] = $"{teacher.GetFIO} - инфо";
+            _logger.LogInformation("Просмотр преподавателя: {FIO}", teacher.User.GetFIO);
+            ViewData["Title"] = $"{teacher.User.GetFIO} - инфо";
             return View(teacher);
         }
 
@@ -180,7 +180,7 @@ namespace SchoolShedule.Controllers
             _context.Teachers.Add(teacher);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("[TEACHER-CREATE] Создан преподаватель: {FIO}, Email={Email}", teacher.GetFIO, email);
+            _logger.LogInformation("[TEACHER-CREATE] Создан преподаватель: {FIO}, Email={Email}", teacher.User.GetFIO, email);
 
             return RedirectToAction(nameof(All));
         }
@@ -199,7 +199,7 @@ namespace SchoolShedule.Controllers
                 _logger.LogWarning("[TEACHER-EDIT] Преподаватель не найден, Id={Id}", id);
                 return NotFound();
             }
-            _logger.LogInformation("[TEACHER-EDIT] Открытие формы редактирования преподавателя: {FIO}", teacher.GetFIO);
+            _logger.LogInformation("[TEACHER-EDIT] Открытие формы редактирования преподавателя: {FIO}", teacher.User.GetFIO);
 
             var model = new TeacherUpdateViewModel
             {
@@ -212,7 +212,7 @@ namespace SchoolShedule.Controllers
                 Subjects = await _context.Subjects.ToListAsync()
             };
 
-            ViewData["Title"] = $"{teacher.GetFIO}-Изменение";
+            ViewData["Title"] = $"{teacher.User.GetFIO}-Изменение";
             return View(model);
         }
 
@@ -260,11 +260,11 @@ namespace SchoolShedule.Controllers
             //Проверка соответствующей роли у учителя и её присвоение
             if (!await _userManager.IsInRoleAsync(teacher.User, "Teacher"))
             {
-                _logger.LogWarning($"[TEACHER-EDIT] У Учителя {teacher.GetFIO} отсутствует привязка к роли - исправляем!");
+                _logger.LogWarning($"[TEACHER-EDIT] У Учителя {teacher.User.GetFIO} отсутствует привязка к роли - исправляем!");
                 await _userManager.AddToRoleAsync(teacher.User, "Teacher");
             }
 
-            _logger.LogInformation("[TEACHER-EDIT] Редактирование преподавателя: {FIO}", teacher.GetFIO);
+            _logger.LogInformation("[TEACHER-EDIT] Редактирование преподавателя: {FIO}", teacher.User.GetFIO);
             // 1. Обновляем User
             teacher.User.FirstName = model.FirstName;
             teacher.User.LastName = model.LastName;
@@ -281,7 +281,7 @@ namespace SchoolShedule.Controllers
 
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Преподаватель обновлён: {FIO}", teacher.GetFIO);
+            _logger.LogInformation("Преподаватель обновлён: {FIO}", teacher.User.GetFIO);
 
             return RedirectToAction(nameof(All));
         }
@@ -304,7 +304,7 @@ namespace SchoolShedule.Controllers
                 _logger.LogWarning("Delete: преподаватель не найден, Id={Id}", id);
                 return NotFound();
             }
-            ViewData["Title"] = $"{teacher.GetFIO}-УДАЛЕНИЕ";
+            ViewData["Title"] = $"{teacher.User.GetFIO}-УДАЛЕНИЕ";
 
             return View(teacher);
         }
@@ -317,7 +317,7 @@ namespace SchoolShedule.Controllers
             var teacher = await _context.Teachers.FindAsync(id);
             if (teacher != null)
             {
-                _logger.LogInformation("Удаление преподавателя: UserId={Id}, FIO={Fio}, Subject={Subjects}", id, teacher.GetFIO, teacher.SubjectsToString);
+                _logger.LogInformation("Удаление преподавателя: UserId={Id}, FIO={Fio}, Subject={Subjects}", id, teacher.User.GetFIO, teacher.SubjectsToString);
                 _context.Teachers.Remove(teacher);
             }
             else

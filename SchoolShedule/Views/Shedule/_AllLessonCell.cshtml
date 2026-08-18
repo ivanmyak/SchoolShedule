@@ -8,7 +8,7 @@ else
 {
     bool isOwnSubject = Model.Teacher.Subjects.Any(s => s.Code == Model.Subject.Code);
 
-    var fio = Model.Teacher.GetFIO;
+    var fio = Model.Teacher.User.GetFIO;
     var modalId = $"modal_{Model.Id}";
     var specialization = Model.Teacher.SubjectsToString;
 

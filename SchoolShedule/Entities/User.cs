@@ -36,6 +36,14 @@ namespace SchoolShedule.Entities
         [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy HH:mm}", ApplyFormatInEditMode = true)]
         public DateTimeOffset RegisteredAt { get; set; } = DateTimeOffset.UtcNow;
 
-
+        /// <summary>
+        /// Сборная строка Фамилия И.О.
+        /// </summary>
+        /// <example>Иванов Иван Иванович -> Иванов И.И.
+        /// Станиславская Инга -> Станиславская И.</example>
+        [Display(Name = "Фамилия И.О.")]
+        public string GetFIO =>
+    $"{LastName} {FirstName[0]}." +
+    (string.IsNullOrWhiteSpace(MiddleName) ? "" : $"{MiddleName[0]}.");
     }
 }

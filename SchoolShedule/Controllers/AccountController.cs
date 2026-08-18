@@ -102,12 +102,12 @@ namespace SchoolShedule.Controllers
             //Проверка соответствующей роли у учителя и её присвоение
             if (!await _userManager.IsInRoleAsync(teacher.User, "Teacher"))
             {
-                _logger.LogWarning($"[ACCOUNT-RESETPASSWORD] У Учителя {teacher.GetFIO} отсутствует привязка к роли - исправляем!");
+                _logger.LogWarning($"[ACCOUNT-RESETPASSWORD] У Учителя {teacher.User.GetFIO} отсутствует привязка к роли - исправляем!");
                 await _userManager.AddToRoleAsync(teacher.User, "Teacher");
             }
             if (result.Succeeded)
             {
-                _logger.LogInformation($"Пароль учителя {teacher.GetFIO} успешно сброшен Администратором.");
+                _logger.LogInformation($"Пароль учителя {teacher.User.GetFIO} успешно сброшен Администратором.");
                 return RedirectToAction("All", "Teacher");
             }
 
