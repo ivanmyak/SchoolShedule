@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -19,7 +22,7 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        @if (!User.Identity.IsAuthenticated)
+                        @if (!User.Identity?.IsAuthenticated ?? false)
                         {
                             @await Html.PartialAsync("_MenuGuest")
                         }
@@ -41,18 +44,26 @@
                             </li>
                         }
 
-                        <li class="nav-item">
-                            @if (User.Identity?.IsAuthenticated ?? false)
-                            {
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            var currentUser = await UserManager.GetUserAsync(User);
+                            <li class="nav-item">
+                                <label class="nav-link">@currentUser?.GetFIO</label>
+                            </li>
+
+                            <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <!-- ФИО пользователя -->
                                     <button type="submit" class="nav-link btn btn-warning text-dark">Выход</button>
                                 </form>
-                            }
-                            else
-                            {
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
                                 <a asp-controller="Account" asp-action="Login" class="btn btn-outline-success">Вход</a>
-                            }
-                        </li>
+                            </li>
+                        }
                     </ul>
                 </div>
 
