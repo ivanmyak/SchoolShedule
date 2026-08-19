@@ -152,6 +152,21 @@ namespace SchoolShedule.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("RoomSubject", b =>
+                {
+                    b.Property<int>("AssignedSubjectsId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("AssignedSubjectsId", "RoomId");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("RoomSubject");
+                });
+
             modelBuilder.Entity("SchoolShedule.Entities.ClassGroup", b =>
                 {
                     b.Property<int>("Id")
@@ -166,9 +181,73 @@ namespace SchoolShedule.Migrations
                     b.Property<char?>("Letter")
                         .HasColumnType("character(1)");
 
+                    b.Property<int?>("ScheduleTemplateId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("ScheduleTemplateId");
+
                     b.ToTable("ClassGroups");
+                });
+
+            modelBuilder.Entity("SchoolShedule.Entities.Generation.LessonRuleContainer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClassGroupId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RulesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TemplateId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassGroupId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.HasIndex("TemplateId");
+
+                    b.ToTable("LessonRuleContainers");
+                });
+
+            modelBuilder.Entity("SchoolShedule.Entities.Generation.ScheduleTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("PeriodType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScheduleTemplates");
                 });
 
             modelBuilder.Entity("SchoolShedule.Entities.Lesson", b =>
@@ -226,7 +305,12 @@ namespace SchoolShedule.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("TeacherUserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TeacherUserId");
 
                     b.ToTable("Rooms");
                 });
@@ -454,6 +538,55 @@ namespace SchoolShedule.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("RoomSubject", b =>
+                {
+                    b.HasOne("SchoolShedule.Entities.Subject", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedSubjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SchoolShedule.Entities.Room", null)
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SchoolShedule.Entities.ClassGroup", b =>
+                {
+                    b.HasOne("SchoolShedule.Entities.Generation.ScheduleTemplate", null)
+                        .WithMany("ClassGroups")
+                        .HasForeignKey("ScheduleTemplateId");
+                });
+
+            modelBuilder.Entity("SchoolShedule.Entities.Generation.LessonRuleContainer", b =>
+                {
+                    b.HasOne("SchoolShedule.Entities.ClassGroup", "ClassGroup")
+                        .WithMany()
+                        .HasForeignKey("ClassGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SchoolShedule.Entities.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SchoolShedule.Entities.Generation.ScheduleTemplate", "Template")
+                        .WithMany()
+                        .HasForeignKey("TemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassGroup");
+
+                    b.Navigation("Subject");
+
+                    b.Navigation("Template");
+                });
+
             modelBuilder.Entity("SchoolShedule.Entities.Lesson", b =>
                 {
                     b.HasOne("SchoolShedule.Entities.ClassGroup", "ClassGroup")
@@ -495,6 +628,13 @@ namespace SchoolShedule.Migrations
                     b.Navigation("Teacher");
 
                     b.Navigation("TimeSlot");
+                });
+
+            modelBuilder.Entity("SchoolShedule.Entities.Room", b =>
+                {
+                    b.HasOne("SchoolShedule.Entities.Teacher", null)
+                        .WithMany("AssignedRooms")
+                        .HasForeignKey("TeacherUserId");
                 });
 
             modelBuilder.Entity("SchoolShedule.Entities.Student", b =>
@@ -545,6 +685,16 @@ namespace SchoolShedule.Migrations
             modelBuilder.Entity("SchoolShedule.Entities.ClassGroup", b =>
                 {
                     b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("SchoolShedule.Entities.Generation.ScheduleTemplate", b =>
+                {
+                    b.Navigation("ClassGroups");
+                });
+
+            modelBuilder.Entity("SchoolShedule.Entities.Teacher", b =>
+                {
+                    b.Navigation("AssignedRooms");
                 });
 #pragma warning restore 612, 618
         }

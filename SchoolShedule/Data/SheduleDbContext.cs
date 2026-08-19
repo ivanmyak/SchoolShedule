@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SchoolShedule.Entities;
+using SchoolShedule.Entities.Generation;
 using System;
 
 namespace SchoolShedule.Data
@@ -17,6 +18,9 @@ namespace SchoolShedule.Data
         public DbSet<Lesson> Lessons { get; set; } = default!;
         public DbSet<Room> Rooms { get; set; } = default!;
         public DbSet<TimeSlot> TimeSlots { get; set; } = default!;
+
+        public DbSet<ScheduleTemplate> ScheduleTemplates { get; set; }
+        public DbSet<LessonRuleContainer> LessonRuleContainers { get; set; }
 
         public SheduleDbContext(DbContextOptions<SheduleDbContext> options, ILogger<SheduleDbContext> logger) : base(options) { _logger = logger; }
 
@@ -47,6 +51,11 @@ namespace SchoolShedule.Data
             builder.Entity<Student>()
                 .HasIndex(s => s.UserId)
                 .IsUnique();
+
+            // Связь многие-ко-многим: Room - Subjects
+            builder.Entity<Room>()
+                .HasMany(t => t.AssignedSubjects)
+                .WithMany();
 
             // Уникальные индексы для предотвращения конфликтов в расписании 
             builder.Entity<Lesson>()

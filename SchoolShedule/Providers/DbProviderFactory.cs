@@ -54,7 +54,7 @@ namespace SchoolShedule.Providers
 
                 if (TestConnection(connBuilder.ConnectionString, logger, "Postgres"))
                 {
-                    services.AddDbContext<SheduleDbContext>(opt => opt.UseNpgsql(goodConn));
+                    services.AddDbContext<SheduleDbContext>(opt => opt.UseNpgsql(goodConn).EnableSensitiveDataLogging());
                     return true;
                 }
                 else

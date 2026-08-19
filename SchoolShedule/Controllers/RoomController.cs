@@ -24,7 +24,9 @@ namespace SchoolShedule.Controllers
         {
             ViewData["Title"] = "Кабинеты";
 
-            return View(await _context.Rooms.ToListAsync());
+            return View(await _context.Rooms
+                .Include(r=> r.AssignedSubjects)
+                .ToListAsync());
         }
 
         // GET: Room/Details/5

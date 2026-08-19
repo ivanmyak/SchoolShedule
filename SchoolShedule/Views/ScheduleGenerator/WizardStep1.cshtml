@@ -1,0 +1,135 @@
+﻿@model GeneratorWizardViewModel
+
+@{
+    ViewData["Title"] = "Мастер генерации";
+}
+
+<h2 class="mb-4">Мастер генерации расписания</h2>
+
+<div id="wizard">
+
+    <!-- Шаг 1 -->
+    <div id="step1">
+        <h4>Шаг 1: Выбор периода и классов</h4>
+
+        <div class="mb-3">
+            <label asp-for="PeriodType"></label>
+            <select asp-for="PeriodType" class="form-select">
+                <option value="">-- Выберите период --</option>
+                <option value="Week">Неделя</option>
+                <option value="Term">Четверть</option>
+                <option value="HalfYear">Полугодие</option>
+                <option value="Year">Год</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Классы</label>
+            <select asp-for="SelectedClassIds" multiple class="form-select">
+                @foreach (var c in ViewBag.ClassGroups)
+                {
+                    <option value="@c.Id">@c.Grade-@c.Letter</option>
+                }
+            </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="goStep1()">Далее</button>
+    </div>
+
+    <!-- Шаг 2 -->
+    <div id="step2" class="d-none">
+        <h4>Шаг 2: Выбор предметов</h4>
+
+        <select id="subjects" multiple class="form-select">
+            @foreach (var s in ViewBag.Subjects)
+            {
+                <option value="@s.Id">@s.Name</option>
+            }
+        </select>
+
+        <button class="btn btn-primary mt-3" onclick="goStep2()">Далее</button>
+    </div>
+
+    <!-- Шаг 3 -->
+    <div id="step3" class="d-none">
+        <h4>Шаг 3: Выбор преподавателей</h4>
+
+        <div id="teachersArea"></div>
+
+        <button class="btn btn-primary mt-3" onclick="goStep3()">Далее</button>
+    </div>
+
+    <!-- Шаг 4 -->
+    <div id="step4" class="d-none">
+        <h4>Шаг 4: Правила</h4>
+
+        <p>Здесь позже появится настройка правил.</p>
+
+        <button class="btn btn-success">Сохранить шаблон</button>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        let templateId = null;
+
+        // Шаг 1
+        function goStep1() {
+            const data = {
+                periodType: $("#PeriodType").val(),
+                selectedClassIds: $("#SelectedClassIds").val()
+            };
+
+            $.ajax({
+                url: '/ScheduleGenerator/WizardStep1',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (resp) {
+                    templateId = resp.templateId;
+                    $("#step1").addClass("d-none");
+                    $("#step2").removeClass("d-none");
+                }
+            });
+        }
+
+        // Шаг 2
+        function goStep2() {
+            const data = {
+                templateId: templateId,
+                selectedSubjectIds: $("#subjects").val()
+            };
+
+            $.ajax({
+                url: '/ScheduleGenerator/WizardStep2',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function () {
+                    $("#step2").addClass("d-none");
+                    $("#step3").removeClass("d-none");
+                }
+            });
+        }
+
+        // Шаг 3
+        function goStep3() {
+            const data = {
+                templateId: templateId
+                // TODO: собрать преподавателей
+            };
+
+            $.ajax({
+                url: '/ScheduleGenerator/WizardStep3',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function () {
+                    $("#step3").addClass("d-none");
+                    $("#step4").removeClass("d-none");
+                }
+            });
+        }
+    </script>
+}

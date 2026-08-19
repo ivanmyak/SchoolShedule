@@ -1,228 +1,499 @@
 {
   "Users": [
     {
-      "Id": "11111111-1111-1111-1111-111111111111",
       "FirstName": "Иван",
       "LastName": "Петров",
-      "MiddleName": "Алексеевич",
-      "UserName": "ivan.petrov",
-      "NormalizedUserName": "IVAN.PETROV",
-      "Email": "ivan.petrov@teachermail.com",
-      "NormalizedEmail": "IVAN.PETROV@TEACHERMAIL.COM"
+      "MiddleName": "Алексеевич"
     },
     {
-      "Id": "22222222-2222-2222-2222-222222222222",
       "FirstName": "Мария",
       "LastName": "Сидорова",
-      "MiddleName": "Игоревна",
-      "UserName": "maria.sidorova",
-      "NormalizedUserName": "MARIA.SIDOROVA",
-      "Email": "maria.sidorova@teachermail.com",
-      "NormalizedEmail": "MARIA.SIDOROVA@TEACHERMAIL.COM"
+      "MiddleName": "Игоревна"
     },
     {
-      "Id": "33333333-3333-3333-3333-333333333333",
       "FirstName": "Алексей",
       "LastName": "Кузнецов",
-      "MiddleName": "Сергеевич",
-      "UserName": "alexey.kuznetsov",
-      "NormalizedUserName": "ALEXEY.KUZNETSOV",
-      "Email": "alexey.kuznetsov@teachermail.com",
-      "NormalizedEmail": "ALEXEY.KUZNETSOV@TEACHERMAIL.COM"
+      "MiddleName": "Сергеевич"
     },
     {
-      "Id": "44444444-4444-4444-4444-444444444444",
       "FirstName": "Ольга",
       "LastName": "Иванова",
-      "MiddleName": "Павловна",
-      "UserName": "olga.ivanova",
-      "NormalizedUserName": "OLGA.IVANOVA",
-      "Email": "olga.ivanova@teachermail.com",
-      "NormalizedEmail": "OLGA.IVANOVA@TEACHERMAIL.COM"
+      "MiddleName": "Павловна"
     },
     {
-      "Id": "55555555-5555-5555-5555-555555555555",
       "FirstName": "Сергей",
       "LastName": "Михайлов",
-      "MiddleName": "Владимирович",
-      "UserName": "sergey.mikhailov",
-      "NormalizedUserName": "SERGEY.MIKHAILOV",
-      "Email": "sergey.mikhailov@teachermail.com",
-      "NormalizedEmail": "SERGEY.MIKHAILOV@TEACHERMAIL.COM"
+      "MiddleName": "Владимирович"
     },
-
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000001",
-      "FirstName": "Анна",
-      "LastName": "Ковалева",
-      "UserName": "anna.kovaleva",
-      "NormalizedUserName": "ANNA.KOVALEVA",
-      "Email": "anna.kovaleva@studentmail.com",
-      "NormalizedEmail": "ANNA.KOVALEVA@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000002",
-      "FirstName": "Дмитрий",
-      "LastName": "Смирнов",
-      "UserName": "dmitry.smirnov",
-      "NormalizedUserName": "DMITRY.SMIRNOV",
-      "Email": "dmitry.smirnov@studentmail.com",
-      "NormalizedEmail": "DMITRY.SMIRNOV@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000003",
-      "FirstName": "Елена",
-      "LastName": "Фролова",
-      "UserName": "elena.frolova",
-      "NormalizedUserName": "ELENA.FROLOVA",
-      "Email": "elena.frolova@studentmail.com",
-      "NormalizedEmail": "ELENA.FROLOVA@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000004",
-      "FirstName": "Николай",
-      "LastName": "Соловьев",
-      "UserName": "nikolay.solovyev",
-      "NormalizedUserName": "NIKOLAY.SOLOVYEV",
-      "Email": "nikolay.solovyev@studentmail.com",
-      "NormalizedEmail": "NIKOLAY.SOLOVYEV@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000005",
-      "FirstName": "Ирина",
-      "LastName": "Козлова",
-      "UserName": "irina.kozlova",
-      "NormalizedUserName": "IRINA.KOZLOVA",
-      "Email": "irina.kozlova@studentmail.com",
-      "NormalizedEmail": "IRINA.KOZLOVA@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000006",
-      "FirstName": "Павел",
-      "LastName": "Орлов",
-      "UserName": "pavel.orlov",
-      "NormalizedUserName": "PAVEL.ORLOV",
-      "Email": "pavel.orlov@studentmail.com",
-      "NormalizedEmail": "PAVEL.ORLOV@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000007",
-      "FirstName": "Светлана",
-      "LastName": "Громова",
-      "UserName": "svetlana.gromova",
-      "NormalizedUserName": "SVETLANA.GROMOVA",
-      "Email": "svetlana.gromova@studentmail.com",
-      "NormalizedEmail": "SVETLANA.GROMOVA@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000008",
-      "FirstName": "Виктор",
-      "LastName": "Егоров",
-      "UserName": "victor.egorov",
-      "NormalizedUserName": "VICTOR.EGOROV",
-      "Email": "victor.egorov@studentmail.com",
-      "NormalizedEmail": "VICTOR.EGOROV@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000009",
-      "FirstName": "Татьяна",
-      "LastName": "Лебедева",
-      "UserName": "tatiana.lebedeva",
-      "NormalizedUserName": "TATIANA.LEBEDEVA",
-      "Email": "tatiana.lebedeva@studentmail.com",
-      "NormalizedEmail": "TATIANA.LEBEDEVA@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000010",
-      "FirstName": "Андрей",
-      "LastName": "Новиков",
-      "UserName": "andrey.novikov",
-      "NormalizedUserName": "ANDREY.NOVIKOV",
-      "Email": "andrey.novikov@studentmail.com",
-      "NormalizedEmail": "ANDREY.NOVIKOV@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000011",
-      "FirstName": "Юлия",
-      "LastName": "Морозова",
-      "UserName": "yulia.morozova",
-      "NormalizedUserName": "YULIA.MOROZOVA",
-      "Email": "yulia.morozova@studentmail.com",
-      "NormalizedEmail": "YULIA.MOROZOVA@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000012",
-      "FirstName": "Олег",
-      "LastName": "Васильев",
-      "UserName": "oleg.vasiliev",
-      "NormalizedUserName": "OLEG.VASILIEV",
-      "Email": "oleg.vasiliev@studentmail.com",
-      "NormalizedEmail": "OLEG.VASILIEV@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000013",
-      "FirstName": "Наталья",
-      "LastName": "Попова",
-      "UserName": "natalia.popova",
-      "NormalizedUserName": "NATALIA.POPOVA",
-      "Email": "natalia.popova@studentmail.com",
-      "NormalizedEmail": "NATALIA.POPOVA@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000014",
-      "FirstName": "Максим",
-      "LastName": "Зайцев",
-      "UserName": "maxim.zaytsev",
-      "NormalizedUserName": "MAXIM.ZAYTSEV",
-      "Email": "maxim.zaytsev@studentmail.com",
-      "NormalizedEmail": "MAXIM.ZAYTSEV@STUDENTMAIL.COM"
-    },
-    {
-      "Id": "aaaaaaaa-0000-0000-0000-000000000015",
-      "FirstName": "Валерия",
-      "LastName": "Соколова",
-      "UserName": "valeria.sokolova",
-      "NormalizedUserName": "VALERIA.SOKOLOVA",
-      "Email": "valeria.sokolova@studentmail.com",
-      "NormalizedEmail": "VALERIA.SOKOLOVA@STUDENTMAIL.COM"
-    }
+	{
+    "LastName": "Непейвода",
+    "FirstName": "Хотен",
+    "MiddleName": "Игоревич"
+  },
+  {
+    "LastName": "Сидоров",
+    "FirstName": "Всемила",
+    "MiddleName": "Сергеевич"
+  },
+  {
+    "LastName": "Павлюченков",
+    "FirstName": "Радомила",
+    "MiddleName": "Мстиславовна"
+  },
+  {
+    "LastName": "Зайцев",
+    "FirstName": "Всемила",
+    "MiddleName": "Святославович"
+  },
+  {
+    "LastName": "Кузьмин",
+    "FirstName": "Воротислав"
+  },
+  {
+    "LastName": "Бондаренко",
+    "FirstName": "Велислава"
+  },
+  {
+    "LastName": "Непейвода",
+    "FirstName": "Борислав",
+    "MiddleName": "Мстиславович"
+  },
+  {
+    "LastName": "Здислав",
+    "FirstName": "Любомила"
+  },
+  {
+    "LastName": "Бочаров",
+    "FirstName": "Волибор"
+  },
+  {
+    "LastName": "Гончаров",
+    "FirstName": "Всемила",
+    "MiddleName": "Борисовна"
+  },
+  {
+    "LastName": "Голицын",
+    "FirstName": "Ярослав"
+  },
+  {
+    "LastName": "Ковальчук",
+    "FirstName": "Велимудр",
+    "MiddleName": "Татьянова"
+  },
+  {
+    "LastName": "Ястржембский",
+    "FirstName": "Мстислав",
+    "MiddleName": "Святославович"
+  },
+  {
+    "LastName": "Бойко",
+    "FirstName": "Воротислав",
+    "MiddleName": "Сергеевич"
+  },
+  {
+    "LastName": "Волков",
+    "FirstName": "Венцеслава"
+  },
+  {
+    "LastName": "Ясинский",
+    "FirstName": "Бажена",
+    "MiddleName": "Ростиславович"
+  },
+  {
+    "LastName": "Ковальчук",
+    "FirstName": "Пётр",
+    "MiddleName": "Натальивна"
+  },
+  {
+    "LastName": "Ейбогин",
+    "FirstName": "Стоян",
+    "MiddleName": "Мстиславович"
+  },
+  {
+    "LastName": "Зайцев",
+    "FirstName": "Первуша",
+    "MiddleName": "Мстиславовна"
+  },
+  {
+    "LastName": "Шевченко",
+    "FirstName": "Любомила",
+    "MiddleName": "Петрович"
+  },
+  {
+    "LastName": "Ковальчук",
+    "FirstName": "Видана",
+    "MiddleName": "Татьянин"
+  },
+  {
+    "LastName": "Непейвода",
+    "FirstName": "Милонег"
+  },
+  {
+    "LastName": "Волков",
+    "FirstName": "Радость",
+    "MiddleName": "Ростиславовна"
+  },
+  {
+    "LastName": "Токарев",
+    "FirstName": "Дмитрий",
+    "MiddleName": "Всеволодович"
+  },
+  {
+    "LastName": "Громыко",
+    "FirstName": "Хотен"
+  },
+  {
+    "LastName": "Шевченко",
+    "FirstName": "Пётр"
+  },
+  {
+    "LastName": "Яцкевич",
+    "FirstName": "Богдан"
+  },
+  {
+    "LastName": "Ямщиков",
+    "FirstName": "Велимудр",
+    "MiddleName": "Ростиславович"
+  },
+  {
+    "LastName": "Мелешко",
+    "FirstName": "Радомила",
+    "MiddleName": "Ростиславовна"
+  },
+  {
+    "LastName": "Ястржембский",
+    "FirstName": "Пересвет",
+    "MiddleName": "Любавовна"
+  },
+  {
+    "LastName": "Шевченко",
+    "FirstName": "Веселина",
+    "MiddleName": "Ярославовна"
+  },
+  {
+    "LastName": "Кузнецов",
+    "FirstName": "Иван"
+  },
+  {
+    "LastName": "Гончаров",
+    "FirstName": "Рада",
+    "MiddleName": "Алексеевич"
+  },
+  {
+    "LastName": "Убейконь",
+    "FirstName": "Гостомысл",
+    "MiddleName": "Сергеевич"
+  },
+  {
+    "LastName": "Шевченко",
+    "FirstName": "Стоян",
+    "MiddleName": "Всеволодовна"
+  },
+  {
+    "LastName": "Кузьмин",
+    "FirstName": "Алексей",
+    "MiddleName": "Владимировна"
+  },
+  {
+    "LastName": "Мелешко",
+    "FirstName": "Борислав",
+    "MiddleName": "Всеволодович"
+  },
+  {
+    "LastName": "Хватаймуха",
+    "FirstName": "Вторак",
+    "MiddleName": "Святославович"
+  },
+  {
+    "LastName": "Иванов",
+    "FirstName": "Всемила",
+    "MiddleName": "Борисович"
+  },
+  {
+    "LastName": "Громыко",
+    "FirstName": "Рада",
+    "MiddleName": "Владимирович"
+  },
+  {
+    "LastName": "Шимко",
+    "FirstName": "Ждан",
+    "MiddleName": "Натальивна"
+  },
+  {
+    "LastName": "Мельников",
+    "FirstName": "Ратибор"
+  },
+  {
+    "LastName": "Мельников",
+    "FirstName": "Вячеслав"
+  },
+  {
+    "LastName": "Ейбогин",
+    "FirstName": "Добронега"
+  },
+  {
+    "LastName": "Бондаренко",
+    "FirstName": "Радость",
+    "MiddleName": "Ярославовна"
+  },
+  {
+    "LastName": "Громыко",
+    "FirstName": "Тихомир",
+    "MiddleName": "Натальивна"
+  },
+  {
+    "LastName": "Ильин",
+    "FirstName": "Светозара"
+  },
+  {
+    "LastName": "Ейбогин",
+    "FirstName": "Бажена",
+    "MiddleName": "Владимировна"
+  },
+  {
+    "LastName": "Иванов",
+    "FirstName": "Доброжир",
+    "MiddleName": "Петрович"
+  },
+  {
+    "LastName": "Златомир",
+    "FirstName": "Вторак"
+  },
+  {
+    "LastName": "Убейконь",
+    "FirstName": "Тихомир",
+    "MiddleName": "Татьянин"
+  },
+  {
+    "LastName": "Петров",
+    "FirstName": "Рада",
+    "MiddleName": "Владимирович"
+  }
   ],
 
   "Teachers": [
     {
-      "UserId": "11111111-1111-1111-1111-111111111111",
+      "UserName": "bazhena.eybogin",
+      "Subjects": [ "PE" ]
+    },
+	{
+      "UserName": "aleksey.kuzmin",
+      "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "UserName": "bazhena.yasinskiy",
+      "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "UserName": "lyubomila.shevchenko",
+      "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "UserName": "petr.shevchenko",
+      "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "UserName": "rada.goncharov",
+      "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "UserName": "vsemila.goncharov",
+      "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "UserName": "vtorak.zlatomir",
+      "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "UserName": "borislav.meleshko",
+      "Subjects": [ "BELLANG", "BELLIT" ]
+    },
+	{
+      "UserName": "lyubomila.zdislav",
+      "Subjects": [ "BELLANG", "BELLIT" ]
+    },
+	{
+      "UserName": "vorotislav.boyko",
+      "Subjects": [ "BELLANG", "BELLIT" ]
+    },
+	{
+      "UserName": "yaroslav.golicyn",
+      "Subjects": [ "BELLANG", "BELLIT" ]
+    },
+	{
+      "UserName": "dobrozhir.ivanov",
+      "Subjects": [ "BELHIST" ]
+    },
+	{
+      "UserName": "ratibor.melnikov",
+      "Subjects": [ "BELHIST" ]
+    },
+	{
+      "UserName": "rada.petrov",
+      "Subjects": [ "BIO" ]
+    },
+	{
+      "UserName": "vsemila.zaycev",
+      "Subjects": [ "BIO" ]
+    },
+	{
+      "UserName": "velimudr.kovalchuk",
+      "Subjects": [ "GEO" ]
+    },
+	{
+      "UserName": "ivan.kuznecov",
+      "Subjects": [ "IT" ]
+    },
+	{
+      "UserName": "rada.gromyko",
+      "Subjects": [ "IT" ]
+    },
+	{
+      "UserName": "stoyan.eybogin",
+      "Subjects": [ "IT" ]
+    },
+	{
+      "UserName": "vtorak.hvataymuha",
+      "Subjects": [ "IT" ]
+    },
+	{
+      "UserName": "vorotislav.kuzmin",
+      "Subjects": [ "ART" ]
+    },
+	{
+      "UserName": "petr.kovalchuk",
+      "Subjects": [ "HIST" ]
+    },
+	{
+      "UserName": "volibor.bocharov",
+      "Subjects": [ "HIST" ]
+    },
+	{
+      "UserName": "hoten.gromyko",
       "Subjects": [ "MATH" ]
     },
-    {
-      "UserId": "22222222-2222-2222-2222-222222222222",
-      "Subjects": [ "PHYS" ]
+	{
+      "UserName": "radomila.meleshko",
+      "Subjects": [ "MATH" ]
     },
-    {
-      "UserId": "33333333-3333-3333-3333-333333333333",
-      "Subjects": [ "CHEM", "BIO" ]
+	{
+      "UserName": "radost.volkov",
+      "Subjects": [ "MATH" ]
     },
-    {
-      "UserId": "44444444-4444-4444-4444-444444444444",
+	{
+      "UserName": "stoyan.shevchenko",
+      "Subjects": [ "MATH" ]
+    },
+	{
+      "UserName": "tihomir.ubeykon",
+      "Subjects": [ "MATH" ]
+    },
+	{
+      "UserName": "velimudr.yamschikov",
+      "Subjects": [ "MATH" ]
+    },
+	{
+      "UserName": "vsemila.sidorov",
+      "Subjects": [ "MATH" ]
+    },
+	{
+      "UserName": "gostomysl.ubeykon",
+      "Subjects": [ "SAFETY" ]
+    },
+	{
+      "UserName": "hoten.nepeyvoda",
+      "Subjects": [ "SAFETY" ]
+    },
+	{
+      "UserName": "peresvet.yastrzhembskiy",
+      "Subjects": [ "SAFETY" ]
+    },
+	{
+      "UserName": "zhdan.shimko",
+      "Subjects": [ "SAFETY" ]
+    },
+	{
+      "UserName": "radomila.pavlyuchenkov",
+      "Subjects": [ "CIVICS" ]
+    },
+	{
+      "UserName": "vsemila.ivanov",
+      "Subjects": [ "CIVICS" ]
+    },
+	{
+      "UserName": "bogdan.yackevich",
       "Subjects": [ "RUSLANG", "RUSLIT" ]
     },
+	{
+      "UserName": "dobronega.eybogin",
+      "Subjects": [ "RUSLANG", "RUSLIT" ]
+    },
+	{
+      "UserName": "pervusha.zaycev",
+      "Subjects": [ "RUSLANG", "RUSLIT" ]
+    },
+	{
+      "UserName": "tihomir.gromyko",
+      "Subjects": [ "RUSLANG", "RUSLIT" ]
+    },
+	{
+      "UserName": "vidana.kovalchuk",
+      "Subjects": [ "RUSLANG", "RUSLIT" ]
+    },
+	{
+      "UserName": "dmitriy.tokarev",
+      "Subjects": [ "WORKART" ]
+    },
+	{
+      "UserName": "svetozara.ilin",
+      "Subjects": [ "WORKART" ]
+    },
+	{
+      "UserName": "miloneg.nepeyvoda",
+      "Subjects": [ "PHYS" ]
+    },
+	{
+      "UserName": "mstislav.yastrzhembskiy",
+      "Subjects": [ "PE" ]
+    },
+	{
+      "UserName": "radost.bondarenko",
+      "Subjects": [ "PE" ]
+    },
+	{
+      "UserName": "venceslava.volkov",
+      "Subjects": [ "PE" ]
+    },
+	{
+      "UserName": "borislav.nepeyvoda",
+      "Subjects": [ "CHEM" ]
+    },
+	{
+      "UserName": "vyacheslav.melnikov",
+      "Subjects": [ "CHEM" ]
+    },
+	{
+      "UserName": "veselina.shevchenko",
+      "Subjects": [ "MAW" ]
+    },
     {
-      "UserId": "55555555-5555-5555-5555-555555555555",
-      "Subjects": [ "ENGLANG" ]
+      "UserName": "velislava.bondarenko",
+      "Subjects": [ "TECHDRAW" ]
     }
   ],
 
   "ClassGroups": [
     {
-      "Grade": 3,
-      "Letter": "В"
-    },
-    {
-      "Grade": 4,
-      "Letter": "Б"
-    },
-    {
       "Grade": 5,
       "Letter": "А"
+    },
+	{
+      "Grade": 5,
+      "Letter": "Б"
+    },
+	{
+      "Grade": 5,
+      "Letter": "В"
     },
     {
       "Grade": 5,
@@ -230,94 +501,70 @@
     },
     {
       "Grade": 6,
-      "Letter": "Б"
-    },
-    {
-      "Grade": 7,
       "Letter": "А"
     },
-    {
-      "Grade": 9,
-      "Letter": "Б"
-    }
-  ],
-
-  "Students": [
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000001",
-      "Grade": 5,
-      "Letter": "А"
-    },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000002",
+	{
       "Grade": 6,
       "Letter": "Б"
     },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000003",
-      "Grade": 7,
-      "Letter": "А"
-    },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000004",
-      "Grade": 7,
-      "Letter": "А"
-    },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000005",
-      "Grade": 7,
-      "Letter": "А"
-    },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000006",
-      "Grade": 4,
-      "Letter": "Б"
-    },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000007",
-      "Grade": 5,
-      "Letter": "А"
-    },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000008",
-      "Grade": 4,
-      "Letter": "Б"
-    },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000009",
-      "Grade": 3,
+	{
+      "Grade": 6,
       "Letter": "В"
     },
     {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000010",
-      "Grade": 3,
+      "Grade": 7,
+      "Letter": "А"
+    },
+	{
+      "Grade": 7,
+      "Letter": "Б"
+    },
+	{
+      "Grade": 7,
+      "Letter": "В"
+    },
+	{
+      "Grade": 8,
+      "Letter": "А"
+    },
+	{
+      "Grade": 8,
+      "Letter": "Б"
+    },
+	{
+      "Grade": 8,
+      "Letter": "В"
+    },
+	{
+      "Grade": 9,
+      "Letter": "А"
+    },
+	{
+      "Grade": 9,
+      "Letter": "Б"
+    },
+	{
+      "Grade": 9,
       "Letter": "В"
     },
     {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000011",
-      "Grade": 5,
+      "Grade": 9,
       "Letter": "Г"
     },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000012",
-      "Grade": 4,
+	{
+      "Grade": 10,
+      "Letter": "А"
+    },
+	{
+      "Grade": 10,
       "Letter": "Б"
     },
-
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000013",
-      "Grade": 9,
-      "Letter": "Б"
-
+	{
+      "Grade": 11,
+      "Letter": "А"
     },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000014",
-      "Grade": 9,
-      "Letter": "Б"
-    },
-    {
-      "UserId": "aaaaaaaa-0000-0000-0000-000000000015",
-      "Grade": 9,
+	{
+      "Grade": 11,
       "Letter": "Б"
     }
   ],
@@ -355,6 +602,50 @@
       "Name": "Английский язык",
       "Code": "ENGLANG"
     },
+	{
+      "Name": "Белорусский язык",
+      "Code": "BELLANG"
+    },
+	{
+      "Name": "Белорусская литература",
+      "Code": "BELLIT"
+    },
+	{
+      "Name": "Труды",
+      "Code": "WORKART"
+    },
+	{
+      "Name": "География",
+      "Code": "GEO"
+    },
+	{
+      "Name": "Информатика",
+      "Code": "IT"
+    },
+	{
+      "Name": "Черчение",
+      "Code": "TECHDRAW"
+    },
+	{
+      "Name": "Человек и Мир",
+      "Code": "MAW"
+    },
+	{
+      "Name": "История Беларуси",
+      "Code": "BELHIST"
+    },
+	{
+      "Name": "Обществоведение",
+      "Code": "CIVICS"
+    },
+	{
+      "Name": "Искусство",
+      "Code": "ART"
+    },
+	{
+      "Name": "Основы безопасности жизнедеятельности",
+      "Code": "SAFETY"
+    },
     {
       "Name": "Биология",
       "Code": "BIO"
@@ -363,24 +654,145 @@
 
   "Rooms": [
     {
+      "Floor": 1,
+      "Number": 1,
+	  "Subjects": [ "ENGLANG" ]
+    },
+    {
+      "Floor": 1,
+      "Number": 15,
+	  "Subjects": [ "WORKART" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 18,
+	  "Subjects": [ "WORKART" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 23,
+	  "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 25,
+	  "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 26,
+	  "Subjects": [ "MATH" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 27,
+	  "Subjects": [ "RUSLANG","RUSLIT" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 28,
+	  "Subjects": [ "RUSLANG","RUSLIT" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 32,
+	  "Subjects": [ "RUSLANG","RUSLIT" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 33,
+	  "Subjects": [ "MATH" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 34,
+	  "Subjects": [ "GEO" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 35,
+	  "Subjects": [ "ENGLANG" ]
+    },
+	{
+      "Floor": 1,
+      "Number": 37,
+	  "Subjects": [ "ENGLANG" ]
+    },	
+	{
       "Floor": 2,
-      "Number": 25
+      "Number": 10,
+	  "Subjects": [ "PE" ]
+    },
+    {
+      "Floor": 2,
+      "Number": 27,
+	  "Subjects": [ "PHYS" ]
+    },
+	{
+      "Floor": 2,
+      "Number": 28,
+	  "Subjects": [ "MATH" ]
+    },
+	{
+      "Floor": 2,
+      "Number": 29,
+	  "Subjects": [ "MATH" ]
+    },
+	{
+      "Floor": 2,
+      "Number": 30,
+	  "Subjects": [ "BIO" ]
+    },
+	{
+      "Floor": 2,
+      "Number": 34,
+	  "Subjects": [ "IT" ]
+    },
+	{
+      "Floor": 2,
+      "Number": 35,
+	  "Subjects": [ "IT" ]
+    },
+	{
+      "Floor": 2,
+      "Number": 37,
+	  "Subjects": [ "MATH" ]
     },
     {
       "Floor": 3,
-      "Number": 24
+      "Number": 24,
+	  "Subjects": [ "CHEM" ]
     },
     {
-      "Floor": 2,
-      "Number": 18
+      "Floor": 3,
+      "Number": 26,
+	  "Subjects": [ "BELLANG", "BELLIT" ]
+    },{
+      "Floor": 3,
+      "Number": 27,
+	  "Subjects": [ "BELLANG", "BELLIT" ]
+    },{
+      "Floor": 3,
+      "Number": 28,
+	  "Subjects": [ "HIST", "CIVICS" ]
+    },{
+      "Floor": 3,
+      "Number": 32,
+	  "Subjects": [ "BELLANG", "BELLIT" ]
+    },{
+      "Floor": 3,
+      "Number": 33,
+	  "Subjects": [ "HIST", "CIVICS" ]
     },
-    {
-      "Floor": 1,
-      "Number": 5
+	{
+      "Floor": 3,
+      "Number": 34,
+	  "Subjects": [ "GEO" ]
     },
-    {
-      "Floor": 1,
-      "Number": 1
+	{
+      "Floor": 3,
+      "Number": 36,
+	  "Subjects": [ "BIO" ]
     }
   ],
 
@@ -549,146 +961,5 @@
       "DayOfWeek": 4,
       "Period": 8
     }
-  ],
-
-  "Lessons": [
-    {
-      "SubjectCode": "MATH",
-      "TeacherId": "11111111-1111-1111-1111-111111111111",
-      "Grade": 5,
-      "Letter": "А",
-      "RoomNumber": "2-25",
-      "DayOfWeek": 0,
-      "Period": 1
-    },
-    {
-      "SubjectCode": "RUSLANG",
-      "TeacherId": "44444444-4444-4444-4444-444444444444",
-      "Grade": 5,
-      "Letter": "А",
-      "RoomNumber": "3-24",
-      "DayOfWeek": 0,
-      "Period": 2
-    },
-    {
-      "SubjectCode": "ENGLANG",
-      "TeacherId": "55555555-5555-5555-5555-555555555555",
-      "Grade": 5,
-      "Letter": "А",
-      "RoomNumber": "2-18",
-      "DayOfWeek": 0,
-      "Period": 3
-    },
-    {
-      "SubjectCode": "PHYS",
-      "TeacherId": "22222222-2222-2222-2222-222222222222",
-      "Grade": 5,
-      "Letter": "А",
-      "RoomNumber": "2-25",
-      "DayOfWeek": 1,
-      "Period": 1
-    },
-    {
-      "SubjectCode": "BIO",
-      "TeacherId": "33333333-3333-3333-3333-333333333333",
-      "Grade": 5,
-      "Letter": "А",
-      "RoomNumber": "3-24",
-      "DayOfWeek": 1,
-      "Period": 2
-    },
-
-    {
-      "SubjectCode": "MATH",
-      "TeacherId": "11111111-1111-1111-1111-111111111111",
-      "Grade": 6,
-      "Letter": "Б",
-      "RoomNumber": "2-18",
-      "DayOfWeek": 1,
-      "Period": 3
-    },
-    {
-      "SubjectCode": "RUSLIT",
-      "TeacherId": "44444444-4444-4444-4444-444444444444",
-      "Grade": 6,
-      "Letter": "Б",
-      "RoomNumber": "3-24",
-      "DayOfWeek": 2,
-      "Period": 1
-    },
-    {
-      "SubjectCode": "CHEM",
-      "TeacherId": "33333333-3333-3333-3333-333333333333",
-      "Grade": 6,
-      "Letter": "Б",
-      "RoomNumber": "2-25",
-      "DayOfWeek": 2,
-      "Period": 2
-    },
-    {
-      "SubjectCode": "PE",
-      "TeacherId": "55555555-5555-5555-5555-555555555555",
-      "Grade": 6,
-      "Letter": "Б",
-      "RoomNumber": "1-5",
-      "DayOfWeek": 2,
-      "Period": 3
-    },
-    {
-      "SubjectCode": "PHYS",
-      "TeacherId": "22222222-2222-2222-2222-222222222222",
-      "Grade": 6,
-      "Letter": "Б",
-      "RoomNumber": "1-1",
-      "DayOfWeek": 3,
-      "Period": 1
-    },
-
-    {
-      "SubjectCode": "MATH",
-      "TeacherId": "11111111-1111-1111-1111-111111111111",
-      "Grade": 7,
-      "Letter": "А",
-      "RoomNumber": "3-24",
-      "DayOfWeek": 3,
-      "Period": 2
-    },
-    {
-      "SubjectCode": "RUSLANG",
-      "TeacherId": "44444444-4444-4444-4444-444444444444",
-      "Grade": 7,
-      "Letter": "А",
-      "RoomNumber": "2-18",
-      "DayOfWeek": 3,
-      "Period": 3
-    },
-    {
-      "SubjectCode": "ENGLANG",
-      "TeacherId": "55555555-5555-5555-5555-555555555555",
-      "Grade": 7,
-      "Letter": "А",
-      "RoomNumber": "2-25",
-      "DayOfWeek": 4,
-      "Period": 1
-    },
-    {
-      "SubjectCode": "CHEM",
-      "TeacherId": "33333333-3333-3333-3333-333333333333",
-      "Grade": 7,
-      "Letter": "А",
-      "RoomNumber": "1-5",
-      "DayOfWeek": 4,
-      "Period": 2
-    },
-    {
-      "SubjectCode": "BIO",
-      "TeacherId": "33333333-3333-3333-3333-333333333333",
-      "Grade": 7,
-      "Letter": "А",
-      "RoomNumber": "1-1",
-      "DayOfWeek": 4,
-      "Period": 3
-    }
   ]
-
 }

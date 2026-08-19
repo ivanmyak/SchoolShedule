@@ -36,7 +36,8 @@ namespace SchoolShedule.Controllers
 
             var sheduleDbContext = _context.Teachers
                 .Include(t => t.User)
-                .Include(t => t.Subjects);
+                .Include(t => t.Subjects)
+                .Include(t => t.AssignedRooms);
 
             ViewData["Title"] = "Преподаватели";
 

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
@@ -10,6 +11,7 @@ namespace SchoolShedule.Entities
     public class Teacher
     {
         [Key]
+        [ForeignKey(name: nameof(User))]
         public Guid UserId { get; set; }
 
         [Display(Name = "Учитель")]
@@ -38,6 +40,19 @@ namespace SchoolShedule.Entities
         [Display(Name = "Учитель и его направление")]
         public string TeacherString => $"{User.GetFIO} ({SubjectsToString})";
 
+        /// <summary>
+        /// Приоритетные кабинеты для Учителя
+        /// </summary>
+        [Display(Name = "Кабинеты учителя")]
+        public List<Room> AssignedRooms { get; set; } = new();
+
+        /// <summary>
+        /// Сборное название основных кабинетов Учителя
+        /// </summary>
+        /// <example>1-15 / 2-13</example>
+        [Display(Name = "Предметы")]
+        public string RoomsToString =>
+    string.Join(" / ", AssignedRooms.Select(r => r.RoomNumber));
     }
 
 }

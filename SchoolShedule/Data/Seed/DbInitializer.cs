@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NuGet.DependencyResolver;
 using SchoolShedule.Entities;
 using SchoolShedule.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Text.Json;
@@ -58,36 +60,39 @@ namespace SchoolShedule.Data.Seed
                 // -----------------------------
                 // 2. Создаём пользователей через UserManager
                 // -----------------------------
-                Dictionary<Guid, User> createdUsers = new();
+                Dictionary<string, User> createdUsers = new();
+                List<Subject> createdSubjects = new();
+                List<Room> createdRooms = new();
+
 
                 foreach (var u in seedData.Users)
                 {
+                    string userName = u.Email ?? await generator.GenerateUserNameAsync(u.FirstName, u.LastName);
                     var user = new User
                     {
                         Id = u.Id,
-                        UserName = u.Email,
-                        Email = u.Email,
                         FirstName = u.FirstName,
                         LastName = u.LastName,
-                        MiddleName = u.MiddleName
+                        MiddleName = u.MiddleName,
+                        UserName = userName,
+                        Email = u.Email ?? await generator.GenerateEmailAsync(userName),
                     };
 
                     var result = await userManager.CreateAsync(user, generator.GeneratePassword(user));
 
                     if (!result.Succeeded)
                     {
-                        logger.LogError($"Ошибка создания пользователя {u.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                        logger.LogError($"Ошибка создания пользователя {u.GetFIO}({u.Email}): {string.Join(", ", result.Errors.Select(e => e.Description))}");
                         continue;
                     }
-
-
-                    createdUsers.Add(user.Id, user);
+                    createdUsers.Add(user.UserName, user);
                 }
 
                 // -----------------------------
                 // 3. Создаём предметы
                 // -----------------------------
-                context.Subjects.AddRange(seedData.Subjects);
+                createdSubjects = seedData.Subjects;
+                context.Subjects.AddRange(createdSubjects);
                 await context.SaveChangesAsync();
 
                 // -----------------------------
@@ -99,9 +104,8 @@ namespace SchoolShedule.Data.Seed
                 {
                     var teacher = new Teacher
                     {
-                        UserId = t.UserId,
-                        User = createdUsers[t.UserId],
-                        Subjects = context.Subjects.Where(s => t.Subjects.Contains(s.Code)).ToList()
+                        User = createdUsers[t.UserName],
+                        Subjects = createdSubjects.Where(s => t.Subjects.Contains(s.Code)).ToList()
                     };
 
                     // Назначаем роль
@@ -119,49 +123,27 @@ namespace SchoolShedule.Data.Seed
                 await context.SaveChangesAsync();
 
                 // -----------------------------
-                // 6. Создаём студентов
+                // 6. Кабинеты
                 // -----------------------------
-                List<Student> students = new();
-
-                foreach (var s in seedData.Students)
+                foreach (var r in seedData.Rooms)
                 {
-                    var student = new Student
+                    var room = new Room
                     {
-                        UserId = s.UserId,
-                        User = createdUsers[s.UserId],
-                        ClassGroup = context.ClassGroups.First(c => c.Grade == s.Grade && c.Letter == s.Letter[0])
+                        Floor = r.Floor,
+                        Number = r.Number,
+                        AssignedSubjects = createdSubjects.Where(s => r.Subjects.Contains(s.Code)).ToList()
                     };
-
-                    await userManager.AddToRoleAsync(student.User, "Student");
-                    students.Add(student);
+                    createdRooms.Add(room);
                 }
-
-                context.Students.AddRange(students);
+                context.Rooms.AddRange(createdRooms);
                 await context.SaveChangesAsync();
 
                 // -----------------------------
-                // 7. Кабинеты, слоты, уроки
+                // 7. Слоты уроков
                 // -----------------------------
-                context.Rooms.AddRange(seedData.Rooms);
                 context.TimeSlots.AddRange(seedData.TimeSlots);
                 await context.SaveChangesAsync();
 
-                List<Lesson> lessons = new();
-
-                foreach (var l in seedData.Lessons)
-                {
-                    lessons.Add(new Lesson
-                    {
-                        Subject = context.Subjects.First(s => s.Code == l.SubjectCode),
-                        Teacher = teachers.First(t => t.UserId == l.TeacherId),
-                        ClassGroup = context.ClassGroups.First(c => c.Grade == l.Grade && c.Letter == l.Letter[0]),
-                        Room = context.Rooms.First(r => $"{r.Floor}-{r.Number}" == l.RoomNumber),
-                        TimeSlot = context.TimeSlots.First(ts => (int)ts.DayOfWeek == l.DayOfWeek && ts.Period == l.Period)
-                    });
-                }
-
-                context.Lessons.AddRange(lessons);
-                await context.SaveChangesAsync();
 
                 logger.LogInformation("[DB] Инициализация успешно завершена.");
             }
@@ -230,7 +212,7 @@ namespace SchoolShedule.Data.Seed
         public List<StudentSeed> Students { get; set; } = new();
         public List<ClassGroup> ClassGroups { get; set; } = new();
         public List<Subject> Subjects { get; set; } = new();
-        public List<Room> Rooms { get; set; } = new();
+        public List<RoomSeed> Rooms { get; set; } = new();
         public List<TimeSlot> TimeSlots { get; set; } = new();
         public List<LessonSeed> Lessons { get; set; } = new();
     }
@@ -252,9 +234,32 @@ namespace SchoolShedule.Data.Seed
         public int Grade { get; set; }
         public string Letter { get; set; } = default!;
     }
+
     public class TeacherSeed
     {
-        public Guid UserId { get; set; }
+        public string UserName { get; set; } = null!;
+
+        /// <summary>
+        /// коды предметов
+        /// </summary>
+        /// <example>(MATH, PHYS, ...)</example>
+        public List<string> Subjects { get; set; } = new();
+    }
+
+    public class RoomSeed
+    {
+        /// <summary>
+        /// Этаж
+        /// </summary>
+        [Display(Name = "Этаж")]
+        public int Floor { get; set; }
+
+        /// <summary>
+        /// Номер кабинета
+        /// </summary>
+        [Display(Name = "Номер кабинета")]
+
+        public int Number { get; set; }
 
         /// <summary>
         /// коды предметов

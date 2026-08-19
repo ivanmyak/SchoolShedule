@@ -5,6 +5,7 @@ using SchoolShedule.Entities;
 using SchoolShedule.Interfaces;
 using SchoolShedule.Providers;
 using SchoolShedule.Services;
+using SchoolShedule.Services.Generation;
 
 namespace SchoolShedule
 {
@@ -43,11 +44,18 @@ namespace SchoolShedule
                 .AddDefaultTokenProviders();
             builder.Services.AddAuthorization();
 
-            // DI-связкb интерфейса и сервиса 
+            // DI-связки интерфейса и сервиса 
             builder.Services.AddScoped<ITranslit, TranslitService>();
             builder.Services.AddScoped<ICredentialsGenerator, CredentialsGeneratorService>();
 
-            // Скервисы по-умолчанию
+            //Подключаем наш специфический Сериализатор "Правил к урокам"
+            builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(opts =>
+            {
+                opts.SerializerOptions.Converters.Add(new RuleBaseConverter());
+            });
+
+
+            // Сервисы по-умолчанию
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 
