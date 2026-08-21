@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolShedule.Data;
+using SchoolShedule.Entities;
 using SchoolShedule.Entities.Generation;
+using SchoolShedule.Entities.Generation.Rules;
 using SchoolShedule.Models;
+using System.Text.Json;
 
 namespace SchoolShedule.Controllers
 {
@@ -35,11 +38,8 @@ namespace SchoolShedule.Controllers
         /// </summary>
         public async Task<IActionResult> Wizard()
         {
-            var vm = new GeneratorWizardViewModel();
-            vm.Teachers = await _context.Teachers.Include("User").Include("Subjects").ToListAsync();
-            vm.Subjects = await _context.Subjects.ToListAsync();
-            vm.ClassGroups = await _context.ClassGroups.OrderBy(cg => cg.Grade).ThenBy(cg => cg.Letter).ToListAsync();
-            return View("WizardStep1", vm);
+            // Тут мы, когда-нибудь, приделаем передачу выбранных шаблонов или расписаний для корректировок/перегенерации
+            return View();
         }
 
         /// <summary>
@@ -131,6 +131,87 @@ namespace SchoolShedule.Controllers
         {
             // TODO: позже подгрузить RuleBase-наборы и отобразить их.
             return View(vm);
+        }
+
+        /// <summary>
+        /// Минимальный мастер генерации расписания на основе правила HoursRule.
+        /// </summary>
+        public async Task<IActionResult> WizardTemplateMinimumAsync()
+        {
+            var vm = new GeneratorWizardViewModel
+            {
+                ClassGroups = await _context.ClassGroups.OrderBy(cg => cg.Grade).ThenBy(cg => cg.Letter).ToListAsync(),
+                Subjects = await _context.Subjects.ToListAsync()
+            };
+
+            return View(vm);
+        }
+
+        /// <summary>
+        /// Сохранение настроек часов (HoursRule) для предметов и классов.
+        /// </summary>
+        [HttpPost]
+        public IActionResult WizardTemplateMinimumSave([FromBody] WizardHoursDto dto)
+        {
+            // создаём шаблон
+            var template = new ScheduleTemplate
+            {
+                PeriodType = dto.PeriodType
+            };
+
+            _context.ScheduleTemplates.Add(template);
+            _context.SaveChanges();
+
+            // для каждой ячейки таблицы создаём HoursRule
+            foreach (var cell in dto.Cells)
+            {
+                if (cell.Hours <= 0)
+                    continue;
+
+                var rule = new HoursRule
+                {
+                    SubjectId = cell.SubjectId,
+                    ClassGroupId = cell.ClassGroupId,
+                    Hours = cell.Hours,
+                    PeriodType = dto.PeriodType
+                };
+
+                var container = new LessonRuleContainer
+                {
+                    TemplateId = template.Id,
+                    SubjectId = cell.SubjectId,
+                    ClassGroupId = cell.ClassGroupId,
+                    RulesJson = JsonSerializer.Serialize(new List<RuleBase> { rule })
+                };
+
+                _context.LessonRuleContainers.Add(container);
+            }
+
+            _context.SaveChanges();
+
+            return Ok(new { templateId = template.Id });
+        }
+
+        /// <summary>
+        /// Запуск минимальной генерации расписания на основе сохранённых HoursRule.
+        /// </summary>
+        [HttpPost]
+        public IActionResult WizardTemplateMinimumGenerate([FromBody] int templateId)
+        {
+            var template = _context.ScheduleTemplates
+                .Include(t => t.ClassGroups)
+                .FirstOrDefault(t => t.Id == templateId);
+
+            var containers = _context.LessonRuleContainers
+                .Where(c => c.TemplateId == templateId)
+                .ToList();
+
+            // TODO: здесь будет минимальный генератор:
+            // - по каждому контейнеру
+            // - по каждому HoursRule
+            // - создаём Lesson в нужном количестве
+
+            return Ok();
         }
     }
 }

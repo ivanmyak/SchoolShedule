@@ -14,7 +14,7 @@ namespace SchoolShedule.Models
         /// </summary>
         [Required]
         [Display(Name ="Период расписания")]
-        public SchedulePeriodType? PeriodType { get; set; }
+        public SchedulePeriodType? PeriodType { get; set; } = SchedulePeriodType.Term;
 
         public IEnumerable<SchedulePeriodType> Periods =>
             Enum.GetValues(typeof(SchedulePeriodType)).Cast<SchedulePeriodType>();

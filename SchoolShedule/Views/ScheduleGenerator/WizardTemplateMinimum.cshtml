@@ -1,0 +1,106 @@
+﻿@model GeneratorWizardViewModel
+
+@{
+    ViewData["Title"] = "Быстрая генерация расписания";
+}
+
+<h2 class="mb-4">Генерация расписания</h2>
+
+<div class="mb-3">
+    <label class="form-label">Период</label>
+    <select asp-for="PeriodType" id="period" asp-items="Html.GetEnumSelectList<SchoolShedule.Enums.SchedulePeriodType>()" class="form-select"></select>
+</div>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Предмет</th>
+            @foreach (var c in Model.ClassGroups)
+            {
+                <th>@c.Name</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model.Subjects)
+        {
+            <tr>
+                <td>@s.Name</td>
+                @foreach (var c in Model.ClassGroups)
+                {
+                    <td>
+                        <input type="number"
+                               class="form-control hours-input"
+                               style="min-width:5em"
+                               data-subject="@s.Id"
+                               data-class="@c.Id"
+                               value="0"
+                               min="0" />
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" id="btnSave">Сохранить шаблон</button>
+<button class="btn btn-success ms-2 d-none" id="btnGenerate">Сгенерировать расписание</button>
+
+@section Scripts {
+    <script>
+        let templateId = null;
+
+        $("#btnSave").on("click", function() {
+            const period = parseInt($("#period").val());
+            if (!period) {
+                alert("Выберите период.");
+                return;
+            }
+
+            const cells = [];
+            $(".hours-input").each(function() {
+                const hours = parseInt($(this).val());
+                if (isNaN(hours) || hours <= 0)
+                    return;
+
+                cells.push({
+                    subjectId: $(this).data("subject"),
+                    classGroupId: $(this).data("class"),
+                    hours: hours
+                });
+            });
+
+            const data = {
+                PeriodType: period,
+                Cells: cells
+            };
+
+            console.log(data);
+
+
+            $.ajax({
+                url: '/ScheduleGenerator/WizardTemplateMinimumSave',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(resp) {
+                    templateId = resp.templateId;
+                    $("#btnGenerate").removeClass("d-none");
+                    alert("Шаблон сохранён.");
+                }
+            });
+        });
+
+        $("#btnGenerate").on("click", function() {
+            $.ajax({
+                url: '/ScheduleGenerator/WizardTemplateMinimumGenerate',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(templateId),
+                success: function() {
+                    alert("Расписание сгенерировано (минимальная версия).");
+                }
+            });
+        });
+    </script>
+}
