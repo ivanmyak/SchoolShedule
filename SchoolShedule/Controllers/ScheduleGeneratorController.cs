@@ -5,6 +5,7 @@ using SchoolShedule.Entities;
 using SchoolShedule.Entities.Generation;
 using SchoolShedule.Entities.Generation.Rules;
 using SchoolShedule.Models;
+using System.Runtime.Serialization;
 using System.Text.Json;
 
 namespace SchoolShedule.Controllers
@@ -39,89 +40,34 @@ namespace SchoolShedule.Controllers
         public async Task<IActionResult> Wizard()
         {
             // Тут мы, когда-нибудь, приделаем передачу выбранных шаблонов или расписаний для корректировок/перегенерации
-            return View();
+            var templates = await _context.ScheduleTemplates
+        .OrderByDescending(t => t.CreatedAt)
+        .ToListAsync();
+
+            return View(templates);
+
         }
 
-        /// <summary>
-        /// Обработка выбора периода и классов, создание черновика шаблона.
-        /// </summary>
         [HttpPost]
-        public IActionResult WizardStep1(GeneratorWizardViewModel vm)
+        public async Task<IActionResult> DeleteTemplate(int id)
         {
-            if (!ModelState.IsValid)
-                return View("Wizard", vm);
+            var template = await _context.ScheduleTemplates
+                .Include(t => t.ClassGroups)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
-            var template = new ScheduleTemplate
-            {
-                PeriodType = vm.PeriodType!.Value
-            };
+            if (template == null)
+                return NotFound();
 
-            // Загружаем классы из БД
-            var classGroups = _context.ClassGroups
-                .Where(c => vm.SelectedClassIds.Contains(c.Id))
-                .ToList();
+            _context.ScheduleTemplates.Remove(template);
 
-            template.ClassGroups.AddRange(classGroups);
+            var containers = _context.LessonRuleContainers
+                .Where(c => c.TemplateId == id);
 
-            _context.ScheduleTemplates.Add(template);
-            _context.SaveChanges();
+            _context.LessonRuleContainers.RemoveRange(containers);
 
-            vm.TemplateId = template.Id;
+            await _context.SaveChangesAsync();
 
-            return RedirectToAction("WizardStep2", vm);
-        }
-
-        /// <summary>
-        /// Шаг выбора предметов для генерации расписания.
-        /// </summary>
-        public IActionResult WizardStep2(GeneratorWizardViewModel vm)
-        {
-            // TODO: подгрузить список предметов для выбранных классов.
-            return View(vm);
-        }
-
-        /// <summary>
-        /// Обработка выбора предметов и сохранение их в шаблон.
-        /// </summary>
-        [HttpPost]
-        public IActionResult WizardStep2Post(GeneratorWizardViewModel vm)
-        {
-            if (vm.TemplateId is null)
-                return RedirectToAction("Wizard");
-
-            var template = _context.ScheduleTemplates.Find(vm.TemplateId.Value);
-            if (template is null)
-                return RedirectToAction("Wizard");
-
-            // пока просто сохраняем выбранные предметы в шаблон (можно добавить отдельное поле при необходимости)
-            // либо позже вынести в отдельную сущность.
-
-            _context.SaveChanges();
-
-            return RedirectToAction("WizardStep3", vm);
-        }
-
-        /// <summary>
-        /// Шаг выбора преподавателей для выбранных предметов.
-        /// </summary>
-        public IActionResult WizardStep3(GeneratorWizardViewModel vm)
-        {
-            // TODO: подгрузить преподавателей по предметам.
-            return View(vm);
-        }
-
-        /// <summary>
-        /// Обработка выбора преподавателей и переход к настройке правил.
-        /// </summary>
-        [HttpPost]
-        public IActionResult WizardStep3Post(GeneratorWizardViewModel vm)
-        {
-            if (vm.TemplateId is null)
-                return RedirectToAction("Wizard");
-
-            // TODO: сохранить выбранных преподавателей в связанной сущности/шаблоне.
-
-            return RedirectToAction("WizardRules", vm);
+            return Ok();
         }
 
         /// <summary>
@@ -133,36 +79,127 @@ namespace SchoolShedule.Controllers
             return View(vm);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CheckTemplateName([FromBody] TemplateNameCheckDto dto)
+        {
+            var template = await _context.ScheduleTemplates.FindAsync(dto.TemplateId);
+
+            if (template is null)
+            {
+                return Ok(new { status = "OK" });
+            }
+            else
+            {
+                if (string.Equals(template.Name, dto.Name, StringComparison.OrdinalIgnoreCase))
+                    return Ok(new { status = "NAME_EXISTS" });
+                else
+                    return Ok(new { status = "OK" });
+            }
+
+
+        }
+
+
         /// <summary>
         /// Минимальный мастер генерации расписания на основе правила HoursRule.
         /// </summary>
-        public async Task<IActionResult> WizardTemplateMinimumAsync()
+        public async Task<IActionResult> WizardTemplateMinimumAsync(int templateId = 0)
         {
+            if (templateId == 0)
+            {
+                var vmnew = new GeneratorWizardViewModel
+                {
+                    ClassGroups = await _context.ClassGroups.OrderBy(cg => cg.Grade).ThenBy(cg => cg.Letter).ToListAsync(),
+                    Subjects = await _context.Subjects.ToListAsync()
+                };
+
+                return View(vmnew);
+            }
+            var template = await _context.ScheduleTemplates
+                .Include(t => t.ClassGroups)
+                .FirstOrDefaultAsync(t => t.Id == templateId);
+
+            if (template is null)
+            {
+                return NotFound("Не найден шаблон.");
+            }
+
             var vm = new GeneratorWizardViewModel
             {
-                ClassGroups = await _context.ClassGroups.OrderBy(cg => cg.Grade).ThenBy(cg => cg.Letter).ToListAsync(),
+                TemplateId = template.Id,
+                TemplateName = template.Name,
+                PeriodType = template.PeriodType,
+                ClassGroups = await _context.ClassGroups
+                    .OrderBy(cg => cg.Grade).ThenBy(cg => cg.Letter)
+                    .ToListAsync(),
                 Subjects = await _context.Subjects.ToListAsync()
             };
 
+            // подставляем часы из правил
+            var containers = await _context.LessonRuleContainers
+                .Where(c => c.TemplateId == templateId)
+                .ToListAsync();
+
+            vm.PreloadedHours = containers
+    .Select(c =>
+    {
+        var rules = JsonSerializer.Deserialize<List<HoursRule>>(c.RulesJson) ?? throw new SerializationException("Не удалось десериализовать правила из шаблона!");
+        var hr = rules.First();
+
+        return new WizardHoursCellDto
+        {
+            SubjectId = c.SubjectId,
+            ClassGroupId = c.ClassGroupId,
+            Hours = hr.Hours
+        };
+    })
+    .ToList();
+
             return View(vm);
         }
+
 
         /// <summary>
         /// Сохранение настроек часов (HoursRule) для предметов и классов.
         /// </summary>
         [HttpPost]
-        public IActionResult WizardTemplateMinimumSave([FromBody] WizardHoursDto dto)
+        public async Task<IActionResult> WizardTemplateMinimumSave([FromBody] WizardTempHoursDto dto)
         {
             // создаём шаблон
-            var template = new ScheduleTemplate
+            ScheduleTemplate template;
+            using var tx = await _context.Database.BeginTransactionAsync();
+
+            if (dto.TemplateId == 0)   // Если новый (Id==0) - создаём
             {
-                PeriodType = dto.PeriodType
-            };
+                template = new ScheduleTemplate
+                {
+                    Name = dto.Name,
+                    PeriodType = dto.PeriodType,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.ScheduleTemplates.Add(template);
+                _context.SaveChanges();
+            }
+            else  // Если существует шаблон (Id!=0) - достаём сущность, присваиваем новые данные и обновляем
+            {
+                template = await _context.ScheduleTemplates.Include(st=>st.ClassGroups).FirstOrDefaultAsync(st => st.Id == dto.TemplateId) ?? throw new KeyNotFoundException("[WIZARD-SAVE] Не удалось найти Шаблон по ID");
+                
+                // Меняем прошлые поля на новые
+                template.PeriodType = dto.PeriodType;
+                template.Name = dto.Name;
+                template.UpdatedAt = DateTime.UtcNow;
 
-            _context.ScheduleTemplates.Add(template);
-            _context.SaveChanges();
+                // Удаляем старые контейнеры правил
+                var oldContainers = _context.LessonRuleContainers
+                    .Where(c => c.TemplateId == template.Id);
 
-            // для каждой ячейки таблицы создаём HoursRule
+                _context.LessonRuleContainers.RemoveRange(oldContainers);
+            }
+
+            // Сохраняем изменения шаблона
+            await _context.SaveChangesAsync();
+
+            // Создаём новые контейнеры правил
             foreach (var cell in dto.Cells)
             {
                 if (cell.Hours <= 0)
@@ -181,13 +218,14 @@ namespace SchoolShedule.Controllers
                     TemplateId = template.Id,
                     SubjectId = cell.SubjectId,
                     ClassGroupId = cell.ClassGroupId,
-                    RulesJson = JsonSerializer.Serialize(new List<RuleBase> { rule })
+                    RulesJson = JsonSerializer.Serialize(new List<HoursRule> { rule })
                 };
 
                 _context.LessonRuleContainers.Add(container);
             }
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            await tx.CommitAsync();
 
             return Ok(new { templateId = template.Id });
         }

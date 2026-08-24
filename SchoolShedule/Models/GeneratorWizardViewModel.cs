@@ -52,6 +52,16 @@ namespace SchoolShedule.Models
         /// <summary>
         /// Идентификатор шаблона генерации расписания, если он уже создан.
         /// </summary>
-        public int? TemplateId { get; set; }
+        public int TemplateId { get; set; } = 0;
+
+        /// <summary>
+        /// Часы, загруженные из шаблона (для автозаполнения таблицы).
+        /// </summary>
+        public List<WizardHoursCellDto> PreloadedHours { get; set; } = new();
+
+        /// <summary>
+        /// Наименование шаблона
+        /// </summary>
+        public string TemplateName { get; set; } = string.Empty;
     }
 }

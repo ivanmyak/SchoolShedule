@@ -1,4 +1,8 @@
-﻿@{
+﻿@model List<SchoolShedule.Entities.Generation.ScheduleTemplate>
+@using SchoolShedule.Enums
+@using SchoolShedule.Extensions
+
+@{
     ViewData["Title"] = "Мастер генерации";
 }
 
@@ -6,4 +10,93 @@
 
 <p>Этот мастер поможет вам создать шаблон расписания для выбранного периода и классов.</p>
 
-<a asp-action="WizardTemplateMinimum" class="btn btn-primary">Начать</a>
+<h3 class="mb-3">Имеющиеся шаблоны:</h3>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">
+        Шаблонов пока нет. Создайте первый шаблон.
+    </div>
+}
+else
+{
+    <table class="table table-striped table-bordered align-middle">
+        <thead class="table-light">
+            <tr>
+                <th style="width: 40%">Название шаблона</th>
+                <th style="width: 20%">Период</th>
+                <th style="width: 20%">Создан</th>
+                <th style="width: 20%" class="text-center">Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td>@t.Name</td>
+                    <td>@t.PeriodType.GetDisplayName()</td>
+                    <td>@t.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td class="text-center">
+
+                        <!-- Использовать шаблон -->
+                        <a asp-action="WizardTemplateMinimum"
+                           asp-route-templateId="@t.Id"
+                           class="btn btn-outline-primary btn-sm me-2"
+                           data-bs-toggle="tooltip"
+                           title="Использовать шаблон для генерации">
+                            <i class="bi bi-play-circle"></i>
+                        </a>
+
+                        <!-- Удалить шаблон -->
+                        <button class="btn btn-outline-danger btn-sm"
+                                data-bs-toggle="tooltip"
+                                title="Удалить шаблон"
+                                onclick="deleteTemplate('@t.Id', '@t.Name', '@t.PeriodType.GetDisplayName()')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="WizardTemplateMinimum" class="btn btn-primary mt-3">
+    Создать новый шаблон
+</a>
+
+@section Scripts {
+    <script>
+        // Bootstrap tooltips
+        document.addEventListener("DOMContentLoaded", function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Удаление шаблона с двойным подтверждением
+        function deleteTemplate(id, name, period) {
+
+            if (!confirm(`Вы действительно хотите удалить шаблон "${name}"?`))
+                return;
+
+            if (!confirm(`Вы удаляете шаблон "${name}" для периода *${period}*.\nЭто действие необратимо!\nУдаляем?`))
+                return;
+
+            $.ajax({
+                url: '/ScheduleGenerator/DeleteTemplate',
+                method: 'POST',
+                data: { id: id },
+                success: function() {
+                    alert("Шаблон удалён.");
+                    location.reload();
+                },
+                error: function() {
+                    alert("Ошибка при удалении шаблона.");
+                }
+            });
+        }
+    </script>
+}

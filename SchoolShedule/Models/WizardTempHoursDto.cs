@@ -2,7 +2,7 @@
 
 namespace SchoolShedule.Models
 {
-    public class WizardHoursDto
+    public class WizardTempHoursDto
     {
         /// <summary>
         /// Выбранный тип периода.
@@ -13,6 +13,17 @@ namespace SchoolShedule.Models
         /// Ячейки таблицы "предмет × класс".
         /// </summary>
         public List<WizardHoursCellDto> Cells { get; set; } = new();
+
+        /// <summary>
+        /// ID Шаблона. 
+        /// Если новый, значение = 0.
+        /// </summary>
+        public int TemplateId { get; set; } = 0;
+
+        /// <summary>
+        /// Введённое имя для шаблона.
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -34,5 +45,10 @@ namespace SchoolShedule.Models
         /// Количество часов предмета для класса.
         /// </summary>
         public int Hours { get; set; }
+    }
+    public class TemplateNameCheckDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public int TemplateId { get; set; } = 0;
     }
 }

@@ -34,7 +34,7 @@
                                style="min-width:5em"
                                data-subject="@s.Id"
                                data-class="@c.Id"
-                               value="0"
+                               value="@(Model.PreloadedHours.FirstOrDefault(x => x.ClassGroupId == c.Id && x.SubjectId == s.Id)?.Hours ?? 0)"
                                min="0" />
                     </td>
                 }
@@ -46,10 +46,63 @@
 <button class="btn btn-primary" id="btnSave">Сохранить шаблон</button>
 <button class="btn btn-success ms-2 d-none" id="btnGenerate">Сгенерировать расписание</button>
 
+<!-- Модальное окно ввода имени шаблона -->
+<div class="modal fade" id="templateNameModal" tabindex="-1" aria-labelledby="templateNameModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="templateNameModalLabel">Имя шаблона</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="text" id="templateNameInput" class="form-control" placeholder="Введите имя шаблона" />
+                <div id="templateNameError" class="text-danger mt-2" style="display:none;"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="templateNameConfirmBtn">OK</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
 @section Scripts {
     <script>
-        let templateId = null;
+        let templateId = @Model.TemplateId;
+        let originalName = @Json.Serialize(Model.TemplateId != 0 ? Model.TemplateName : "");
 
+        // Скрываем кнопку генерации при любых изменениях
+        $(".hours-input, #period").on("input change", function() {
+            $("#btnGenerate").addClass("d-none");
+        });
+
+        // Открыть модальное окно
+        function openNameModal(initialName) {
+            $("#templateNameInput").val(initialName);
+            $("#templateNameError").hide();
+            const modal = new bootstrap.Modal(document.getElementById("templateNameModal"));
+            modal.show();
+        }
+
+        // Проверка имени на сервере
+        function checkTemplateName(name) {
+            return $.ajax({
+                url: '/ScheduleGenerator/CheckTemplateName',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    name: name,
+                    templateId: templateId
+                })
+            });
+        }
+
+        // Сохранение шаблона
         $("#btnSave").on("click", function() {
             const period = parseInt($("#period").val());
             if (!period) {
@@ -60,23 +113,65 @@
             const cells = [];
             $(".hours-input").each(function() {
                 const hours = parseInt($(this).val());
-                if (isNaN(hours) || hours <= 0)
-                    return;
-
-                cells.push({
-                    subjectId: $(this).data("subject"),
-                    classGroupId: $(this).data("class"),
-                    hours: hours
-                });
+                if (!isNaN(hours) && hours > 0) {
+                    cells.push({
+                        subjectId: $(this).data("subject"),
+                        classGroupId: $(this).data("class"),
+                        hours: hours
+                    });
+                }
             });
 
+            // Открываем модальное окно
+            openNameModal(originalName);
+
+            // Обработка кнопки OK
+            $("#templateNameConfirmBtn").off("click").on("click", async function() {
+                const name = $("#templateNameInput").val().trim();
+                if (!name) {
+                    $("#templateNameError").text("Введите имя шаблона.").show();
+                    return;
+                }
+
+                const check = await checkTemplateName(name);
+
+                if (check.status === "OK") {
+                    submitTemplate(name, period, cells, false);
+                }
+                else if (check.status === "NAME_EXISTS") {
+                    $("#templateNameError").html(`
+                            Шаблон с именем <b>${name}</b> уже существует.<br>
+                            Хотите <b>заменить</b> его или <b>сохранить как новый</b>?
+                            <div class="mt-2">
+                                <button class="btn btn-warning btn-sm me-2" id="replaceBtn">Заменить</button>
+                                <button class="btn btn-secondary btn-sm" id="newNameBtn">Новое имя</button>
+                            </div>
+                        `).show();
+
+                    $("#replaceBtn").on("click", function() {
+                        submitTemplate(name, period, cells, true);
+                    });
+
+                    $("#newNameBtn").on("click", function() {
+                        $("#templateNameInput").val("");
+                        $("#templateNameError").hide();
+                    });
+                }
+                else {
+                    alert("Неизвестный ответ сервера.");
+                }
+            });
+        });
+
+        // Отправка шаблона
+        function submitTemplate(name, period, cells, replace) {
             const data = {
-                PeriodType: period,
-                Cells: cells
+                name: name,
+                periodType: period,
+                cells: cells,
+                replaceExisting: replace,
+                templateId: templateId
             };
-
-            console.log(data);
-
 
             $.ajax({
                 url: '/ScheduleGenerator/WizardTemplateMinimumSave',
@@ -85,12 +180,19 @@
                 data: JSON.stringify(data),
                 success: function(resp) {
                     templateId = resp.templateId;
+                    originalName = name;
+
                     $("#btnGenerate").removeClass("d-none");
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById("templateNameModal"));
+                    modal.hide();
+
                     alert("Шаблон сохранён.");
                 }
             });
-        });
+        }
 
+        // Генерация расписания
         $("#btnGenerate").on("click", function() {
             $.ajax({
                 url: '/ScheduleGenerator/WizardTemplateMinimumGenerate',
@@ -98,9 +200,10 @@
                 contentType: 'application/json',
                 data: JSON.stringify(templateId),
                 success: function() {
-                    alert("Расписание сгенерировано (минимальная версия).");
+                    alert("Расписание сгенерировано.");
                 }
             });
         });
     </script>
 }
+
