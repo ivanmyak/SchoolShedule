@@ -50,7 +50,13 @@ namespace SchoolShedule.Entities.Generation
         public ClassGroup ClassGroup { get; set; } = default!;
 
         /// <summary>
-        /// JSON-представление списка правил (каждое правило — наследник RuleBase).
+        /// Наименование класса, что сохранён <seealso cref="RulesJson"/> (пока, по умолчанию, сделал — HoursRule).
+        /// </summary>
+        [Required]
+        public string RuleType { get; set; } = "HoursRule";
+
+        /// <summary>
+        /// JSON-представление списка правил (каждое правило — наследник от абстрактного RuleBase).
         /// </summary>
         [Required]
         public string RulesJson { get; set; } = string.Empty;

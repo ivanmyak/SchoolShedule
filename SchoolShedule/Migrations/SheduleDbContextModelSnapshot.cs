@@ -202,6 +202,10 @@ namespace SchoolShedule.Migrations
                     b.Property<int>("ClassGroupId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("RuleType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("RulesJson")
                         .IsRequired()
                         .HasColumnType("text");

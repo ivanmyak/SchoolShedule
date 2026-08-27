@@ -73,6 +73,16 @@
 
 @section Scripts {
     <script>
+        $(document).ready(function() {
+            if (templateId !== 0) {
+                $("#btnGenerate").removeClass("d-none");
+            }
+        });
+        
+        $(".hours-input, #period").on("input change", function() {
+            $("#btnGenerate").addClass("d-none");
+        });
+
         let templateId = @Model.TemplateId;
         let originalName = @Json.Serialize(Model.TemplateId != 0 ? Model.TemplateName : "");
 
@@ -105,11 +115,7 @@
         // Сохранение шаблона
         $("#btnSave").on("click", function() {
             const period = parseInt($("#period").val());
-            if (!period) {
-                alert("Выберите период.");
-                return;
-            }
-
+            
             const cells = [];
             $(".hours-input").each(function() {
                 const hours = parseInt($(this).val());
@@ -194,16 +200,29 @@
 
         // Генерация расписания
         $("#btnGenerate").on("click", function() {
-            $.ajax({
-                url: '/ScheduleGenerator/WizardTemplateMinimumGenerate',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(templateId),
-                success: function() {
-                    alert("Расписание сгенерировано.");
+    $.ajax({
+        url: '/ScheduleGenerator/WizardTemplateMinimumGenerate',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(templateId),
+        success: function(resp) {
+            alert("Расписание сгенерировано.");
+        },
+        error: function(xhr) {
+            let msg = "Ошибка генерации расписания.";
+
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+                msg = xhr.responseJSON.error;
+
+                if (xhr.responseJSON.required && xhr.responseJSON.maximum) {
+                    msg += `\nТребуется: ${xhr.responseJSON.required}, максимум: ${xhr.responseJSON.maximum}`;
                 }
-            });
-        });
+            }
+
+            alert(msg);
+        }
+    });
+});
     </script>
 }
 
