@@ -24,7 +24,7 @@ namespace SchoolShedule.Controllers
         /// <summary>
         /// Все "ячейки" для уроков, возможные на неделе
         /// </summary>
-        private readonly int _maxCountLessonsPerWeek = _maxCountLessonsPerDay*5;
+        private readonly int _maxCountLessonsPerWeek = _maxCountLessonsPerDay * 5;
 
 
         private readonly ILogger<ScheduleGeneratorController> _logger;
@@ -246,34 +246,7 @@ namespace SchoolShedule.Controllers
             return Ok(new { templateId = template.Id });
         }
 
-            /// Вычисляем количество максимума всех возможных уроков на неделе по формуле:
-            
-            /// Полученное количество часов/уроков сравниваем с необходимым (СУММА_ПО_ПРЕДМЕТО-ЧАСЫ)
-            /// Если СУММА_ПО_ПРЕДМЕТО-ЧАСЫ > МАКСИМУМА_ВОЗМОЖНЫХ_УРОКОВ - я хз что делать тут.
-            /// Возможно этот момент мы можем проверять и показывать ещё на этапе выставления часов по предметам...
-            /// ... чтобы админ не навалил часов по предметам больше, чем они физически есть в расписании
-            /// Если СУММА_ПО_ПРЕДМЕТО-ЧАСЫ <= МАКСИМУМА_ВОЗМОЖНЫХ_УРОКОВ :
-            /// Каким-то образом прикидываем сколько мы можем сделать уроков для этого класса на неделе
-            /// (каждый день по 6 уроков, или 4 дня по 6 уроков и один по 5, или 3 по 6 и два по 5 - так и понижать, пока не сравняется)
-            /// Из этого - формируем Группированный список ячеек для уроков. Группировка - День недели(?).
-            /// Генерация будет чем-то таким:
-            /// Формируем случайно-порядковый СТЭК (вариант списка) из необходимых уроков (ПРЕДМЕТ*ЧАСЫ.
-            /// Т.е. собираем весь тот список уроков, которые для выбранного класса нужно раскидать по расписанию на неделю)
-            /// Формируем некую коллекцию <ЯЧЕЙКА_УРОКА, КАБИНЕТ, ПРЕДМЕТ, УЧИТЕЛЬ, КЛАСС> - тут я не совсем понимаю
-            /// Запускаем цикл по Доставанию Предметов из СТЭКА.
-            /// Рандомно начинаем "тянуть" ЯЧЕЙКА_УРОКА, ПРЕДМЕТ и, сравнивая с уже имеющимся сгруппированным списком по <ЯЧЕЙКА_УРОКА, КАБИНЕТ, ПРЕДМЕТ, УЧИТЕЛЬ, КЛАСС>
-            /// Оценивать, есть ли в данном дне уже этот предмет или же нет.
-            /// Есть - берём следующую случайную ячейку и проверка повторяется.
-            /// Отсутствует - засовываем эту комбинацию в <ЯЧЕЙКА_УРОКА, КАБИНЕТ, ПРЕДМЕТ, УЧИТЕЛЬ, КЛАСС> и продолжаем цикл.
-            //
-            /// Это - что касаемо самого первого класса, с которым генерируем. Последующие - почти аналогично,
-            /// только проверки при объединении ячейка-предмет будут ещё и смотреть на незанятость в этот период Кабинета+Предмета+Учителя
-            //
-            /// TODO: здесь будет минимальный генератор:
-            /// - по каждому контейнеру
-            /// - по каждому HoursRule
-            /// - создаём Lesson в нужном количестве
-
+       
         /// <summary>
         /// Запуск минимальной генерации расписания на основе сохранённых HoursRule.
         /// </summary>
@@ -289,6 +262,11 @@ namespace SchoolShedule.Controllers
                     .ThenBy(c => c.ClassGroup.Letter)
                 .GroupBy(ar => ar.ClassGroupId)
                 .ToList();
+
+            var allRooms = _context.Rooms.Include(r=>r.AssignedSubjects).ToList();
+            var allTeachers = _context.Teachers.Include(t=>t.User).Include(t => t.Subjects).ToList();
+            var allSubjects = _context.Subjects.ToList();
+            var allClassGroups = _context.ClassGroups.ToList();
 
             if (!classGroupContainers.Any())
                 throw new KeyNotFoundException($"[WIZARD-GENERATE-MINIMUM] Не найдены правила для выбранного шаблона (ID = {templateId}) в БД");
@@ -306,6 +284,10 @@ namespace SchoolShedule.Controllers
             // Максимальное количество уроков в выбранном периоде
             int maxLessonCountPerPeriod = countWorkWeeks * _maxCountLessonsPerWeek;
 
+            // ID класса, с которым мы сейчас работаем
+            int currentClassId = 0;
+            ClassGroup currentClassGroup = new();
+
             // Группированные правила для класса. ClassGroupId является ключём.
             var rulesByClass = new Dictionary<int, List<HoursRule>>();
 
@@ -315,22 +297,23 @@ namespace SchoolShedule.Controllers
             // Перебираем контейнеры с правилами, группированные по КЛАССАМ учеников
             foreach (var classContainers in classGroupContainers)
             {
-                int classId = classContainers.Key;
-                rulesByClass[classId] = new List<HoursRule>();
+                currentClassId = classContainers.Key;
+                currentClassGroup = allClassGroups.FirstOrDefault(cg => cg.Id == currentClassId) ??  throw new KeyNotFoundException($"Не удалось найти класс по ID = {currentClassId}!"); 
+                rulesByClass[currentClassId] = new List<HoursRule>();
 
                 foreach (var container in classContainers)
                 {
                     var rules = JsonSerializer.Deserialize<List<HoursRule>>(container.RulesJson)
-                        ?? throw new SerializationException($"Не удалось десериализовать RulesJson для контейнера ID={container.Id}");
-                    rulesByClass[classId].AddRange(rules);
+                        ?? throw new SerializationException($"[WIZARD-GENERATE-MINIMUM] Не удалось десериализовать RulesJson для контейнера ID={container.Id}");
+                    rulesByClass[currentClassId].AddRange(rules);
                 }
 
                 // Количество всех часов предметов, отведённых на выбранный класс (указанных на странице генерации по шаблону)
-                int requiredLessonCount = rulesByClass[classId].Sum(r => r.Hours);
+                int requiredLessonCount = rulesByClass[currentClassId].Sum(r => r.Hours);
 
                 if (requiredLessonCount > maxLessonCountPerPeriod)
                 {
-                    string message = $"Количество часов предметов ({requiredLessonCount}) превышает максимум возможных уроков ({maxLessonCountPerPeriod}) для класса {classContainers.First().ClassGroup.Name}.";
+                    string message = $"[WIZARD-GENERATE-MINIMUM] Количество часов предметов ({requiredLessonCount}) превышает максимум возможных уроков ({maxLessonCountPerPeriod}) для класса {classContainers.First().ClassGroup.Name}.";
                     _logger.LogError(message);
                     return BadRequest(new
                     {
@@ -341,14 +324,103 @@ namespace SchoolShedule.Controllers
                 }
                 else
                 {
-                    freedomHours[classId] = maxLessonCountPerPeriod - requiredLessonCount;
-                    _logger.LogInformation($"Для класса {classContainers.First().ClassGroup.Name} Количество часов предметов составялет: {requiredLessonCount} при максимуме возможных уроков:{maxLessonCountPerPeriod}.\n\tКоличество часов для 'облегчения страданий': {freedomHours[classId]}");
+                    freedomHours[currentClassId] = maxLessonCountPerPeriod - requiredLessonCount;
+                    _logger.LogInformation($"[WIZARD-GENERATE-MINIMUM] Для класса {classContainers.First().ClassGroup.Name} Количество часов предметов составляет: {requiredLessonCount} при максимуме возможных уроков:{maxLessonCountPerPeriod}.\n\tКоличество часов для 'облегчения страданий': {freedomHours[currentClassId]}");
                 }
             }
 
+            // Лимит количества уроков на день для Класса
             var classWorkDays = CalculateDailyLessonLimits(freedomHours);
+            // Коллекция ячеек для формирования Уроков по классам
             var baseForLessons = BuildDailyLessonLimits(classWorkDays);
 
+            // Группированная по Классу коллекция Уроков для итогового расписания
+            var classLessons = new Dictionary<int, List<Lesson>>();
+
+            //Группированный список связей Класс, Предмет+Учитель+Кабинет - то, что нужно будет использовать и учитывать при генерации расписания
+            //и с каким списком мы будем сравнивать при поиске подходящих учителей.
+            // Правило сравнений: при выборе учителя мы смотрим (из нижеиспользуемого списка matchingTeachers)
+            // какой учитель уже задействован и сколько раз - выбираем минимально-задействованного из подходящих
+            var suitableTeachers = new List<SubjectTeacherRoom>();
+
+            try
+            {
+                // Цикл идёт по всем классам для формирования РАСПИСАНИЯ
+                foreach (int classId in rulesByClass.Keys)
+                {
+                    // Запоминаем ID класса
+                    currentClassId = classId;
+                    currentClassGroup = allClassGroups.FirstOrDefault(cg => cg.Id == currentClassId) ?? throw new KeyNotFoundException($"Не удалось найти класс по ID = {currentClassId}!");
+
+                    //Перетасованные ячейки TimeSlot для выбранного класса
+                    var currentTimeSlots = baseForLessons[currentClassId].OrderBy(_ => Guid.NewGuid()).ToList();
+                    //Перетасованные Предметы для распределения по выбранному классу
+                    var subjectsForLessons = BuildLessonTasksForClass(currentClassId, rulesByClass[currentClassId], allSubjects);
+
+
+                    // Цикл по перетасованным Предметам класса для формирования его расписания
+                    foreach (var currentSubject in subjectsForLessons)
+                    {
+                        // Подходящие учителя
+                        List<Teacher> matchingTeachers = allTeachers
+                            .Where(t => t.Subjects.Any(s => s.Id == currentSubject.Id))
+                            .ToList();
+
+                        // Подходящие кабинеты
+                        List<Room> matchingRooms = allRooms.Where(r => r.AssignedSubjects.Any(s => s.Id == currentSubject.Id)).ToList();
+
+
+                        SubjectTeacherRoom? assignment = null;
+
+                        // Подбираем слот в расписании для данного Предмета
+                        foreach (var slot in currentTimeSlots)
+                        {
+                            assignment = CheckTeachRoomBusies(
+                                currentClassId,
+                                currentClassGroup,
+                                currentSubject,
+                                slot,
+                                suitableTeachers,
+                                in matchingTeachers,
+                                in matchingRooms,
+                                in classLessons);
+
+                            if (assignment != null)
+                            {
+                                // создаём Lesson
+                                var lesson = new Lesson
+                                {
+                                    ClassGroupId = currentClassId,
+                                    SubjectId = currentSubject.Id,
+                                    TeacherId = assignment.Teacher.UserId,
+                                    RoomId = assignment.Room.Id,
+                                    TimeSlotId = slot.Id
+                                };
+
+                                if (!classLessons.ContainsKey(currentClassId))
+                                    classLessons[currentClassId] = new List<Lesson>();
+
+                                classLessons[currentClassId].Add(lesson);
+
+                                break;
+                            }
+                        }
+
+                        if (assignment == null)
+                        {
+                            _logger.LogError($"[WIZARD-GENERATE-MINIMUM] Не удалось разместить предмет {currentSubject.Name} в классе {currentClassId}");
+                            return BadRequest(new { error = $"Не удалось разместить предмет {currentSubject.Name} в классе {currentClassId}" });
+                        }
+                    }
+
+                }
+
+            }
+            catch (Exception)
+            {
+                _logger.LogError($"[WIZARD-GENERATE-MINIMUM] Возникла ошибка при генерации расписания для класса {currentClassGroup.Name}");
+                throw;
+            }
 
             return Ok();
         }
@@ -404,10 +476,10 @@ namespace SchoolShedule.Controllers
         }
 
         /// <summary>
-        /// Генерация <see cref="TimeSlot">"Ячеек"</see> для уроков для <see cref="ClassGroup">классов</see> в связи со "свободными часами"
+        /// Генерация <see cref="TimeSlot">"Ячеек"</see> для уроков <see cref="ClassGroup">классов</see> в связи со "свободными часами"
         /// </summary>
         /// <param name="dailyLimits"></param>
-        /// <returns>Словарь Класс-> Список <see cref="TimeSlot"/></returns>
+        /// <returns>Словарь <see cref="ClassGroup">Класс</see>-> Список <see cref="TimeSlot"/></returns>
         private Dictionary<int, List<TimeSlot>> BuildDailyLessonLimits(Dictionary<int, Dictionary<Day, int>> dailyLimits)
         {
             var allSlots = _context.TimeSlots
@@ -439,6 +511,162 @@ namespace SchoolShedule.Controllers
             }
 
             return classSlots;
+        }
+
+        /// <summary>
+        /// Проверяет возможность размещения урока (Предмет+Учитель+Кабинет) в указанной ячейке расписания.
+        /// </summary>
+        /// <param name="classId">Идентификатор класса.</param>
+        /// <param name="subject">Предмет, который требуется разместить.</param>
+        /// <param name="slot">Ячейка расписания (день+номер урока).</param>
+        /// <param name="matchingTeachers">Список подходящих учителей по специализации.</param>
+        /// <param name="matchingRooms">Список подходящих кабинетов по специализации.</param>
+        /// <param name="lessons">Уже сформированные уроки по классам.</param>
+        /// <returns>
+        /// Объект <see cref="SubjectTeacherRoom"/> при успешном подборе.
+        /// null — если ни один учитель/кабинет не подходит.
+        /// </returns>
+        private SubjectTeacherRoom? CheckTeachRoomBusies(
+            int classId,
+            ClassGroup classGroup,
+            Subject subject,
+            TimeSlot slot,
+            List<SubjectTeacherRoom> suitableTeachers,
+            in List<Teacher> matchingTeachers,
+            in List<Room> matchingRooms,
+            in Dictionary<int, List<Lesson>> lessons)
+        {
+            // 1. Проверяем занятость класса
+            if (lessons.TryGetValue(classId, out var classLessonList))
+            {
+                if (classLessonList.Any(l => l.TimeSlotId == slot.Id))
+                    return null;
+            }
+
+            // 2. Ищем существующую связь для класса и предмета
+            var existingLink = suitableTeachers
+                .FirstOrDefault(st => st.ClassId == classId && st.Subject.Id == subject.Id);
+
+            if (existingLink != null)
+            {
+                // Проверяем занятость учителя
+                if (lessons.Values.Any(list => list.Any(l => l.TeacherId == existingLink.Teacher.UserId && l.TimeSlotId == slot.Id)))
+                    return null;
+
+                // Проверяем занятость кабинета
+                if (lessons.Values.Any(list => list.Any(l => l.RoomId == existingLink.Room.Id && l.TimeSlotId == slot.Id)))
+                    return null;
+
+                return existingLink;
+            }
+
+            // 3. Ищем связи по предмету (для распределения нагрузки)
+            var linksForSubject = suitableTeachers
+                .Where(st => st.Subject.Id == subject.Id)
+                .ToList();
+
+            Teacher selectedTeacher;
+
+            if (linksForSubject.Any())
+            {
+                // Группируем по учителю и выбираем наименее загруженного
+                var teacherLoad = linksForSubject
+                    .GroupBy(st => st.Teacher.UserId)
+                    .Select(g => new
+                    {
+                        Teacher = g.First().Teacher,
+                        Count = g.Count()
+                    })
+                    .OrderBy(x => x.Count)
+                    .ToList();
+
+                selectedTeacher = teacherLoad.First().Teacher;
+            }
+            else
+            {
+                // Если связей по предмету нет — выбираем любого подходящего учителя
+                selectedTeacher = matchingTeachers.FirstOrDefault() ?? throw new KeyNotFoundException($"Не удалось найти подходящего учителя для класса {classGroup.Name} по предмету {subject.Name} для ячейки {slot.TimeSlotString}");
+                if (selectedTeacher == null)
+                    return null;
+            }
+
+            // Проверяем занятость выбранного учителя
+            if (lessons.Values.Any(list => list.Any(l => l.TeacherId == selectedTeacher.UserId && l.TimeSlotId == slot.Id)))
+                return null;
+
+            // 4. Выбор кабинета
+            Room selectedRoom;
+
+            // 4.1. Предпочитаемые кабинеты учителя
+            var teacherPreferredRoom = selectedTeacher.AssignedRooms
+                .FirstOrDefault(r => r.AssignedSubjects.Any(s => s.Id == subject.Id));
+
+            if (teacherPreferredRoom != null)
+                selectedRoom = teacherPreferredRoom;
+            else
+            {
+                // 4.2. Кабинеты со специализацией по предмету
+                var subjectPreferredRoom = matchingRooms.FirstOrDefault();
+                if (subjectPreferredRoom != null)
+                    selectedRoom = subjectPreferredRoom;
+                else
+                    selectedRoom = matchingRooms.FirstOrDefault() ?? throw new KeyNotFoundException($"Не удалось найти подходящего кабинета для класса {classGroup.Name} по предмету {subject.Name} для ячейки {slot.TimeSlotString}"); ;
+            }
+
+            // Проверяем занятость кабинета
+            if (lessons.Values.Any(list => list.Any(l => l.RoomId == selectedRoom.Id && l.TimeSlotId == slot.Id)))
+                return null;
+
+            // 5. Формируем новую связь
+            var newLink = new SubjectTeacherRoom
+            {
+                ClassId = classId,
+                Subject = subject,
+                Teacher = selectedTeacher,
+                Room = selectedRoom
+            };
+
+            _logger.LogInformation($"[WIZARD-CHECKTEACHROOMBUSIES] добавляем связь ({subject.Name})+({selectedTeacher.User.GetFIO})+({selectedRoom.RoomNumber}) для класса {classGroup.Name}");
+            suitableTeachers.Add(newLink);
+
+            return newLink;
+        }
+
+        /// <summary>
+        /// Формируем перемешанный список предметов для выбранного класса на основании часов (они указаны в правиле <see cref="HoursRule"/>).
+        /// Каждая задача соответствует одному уроку предмета.
+        /// </summary>
+        /// <param name="classId">Идентификатор класса.</param>
+        /// <param name="rules">Список правил количества часов по предметам.</param>
+        /// <returns>Случайно перемешанный список  предметов.</returns>
+        private List<Subject> BuildLessonTasksForClass(int classId, List<HoursRule> rules, in List<Subject> allSubjects)
+        {
+            var tasks = new List<Subject>();
+
+            foreach (var rule in rules)
+            {
+                for (int i = 0; i < rule.Hours; i++)
+                {
+                    Subject subject = allSubjects.Find(s => s.Id == rule.SubjectId)
+                        ??
+                        throw new KeyNotFoundException($"[WIZARD-BUILDLESSONTASKSFORCLASS] Не удалось найти предмет по ID {rule.SubjectId}");
+                    tasks.Add(subject);
+                }
+            }
+
+            // Перемешиваем задачи для случайного распределения предметов
+            return tasks.OrderBy(_ => Guid.NewGuid()).ToList();
+        }
+
+        /// <summary>
+        /// Необходимая DTO для связи Предмет+Учитель+Кабинет по Классу при генерации рассписания
+        /// </summary>
+        private class SubjectTeacherRoom
+        {
+            public int ClassId { get; set; }
+            public Subject Subject { get; set; } = null!;
+            public Teacher Teacher { get; set; } = null!;
+            public Room Room { get; set; } = null!;
         }
     }
 }
