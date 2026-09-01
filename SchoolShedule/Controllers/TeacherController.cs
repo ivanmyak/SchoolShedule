@@ -56,6 +56,7 @@ namespace SchoolShedule.Controllers
             var teacher = await _context.Teachers
                 .Include(t => t.User)
                 .Include(t => t.Subjects)
+                .Include(t => t.AssignedRooms)
                 .FirstOrDefaultAsync(m => m.UserId == id);
             if (teacher == null)
             {
@@ -193,6 +194,7 @@ namespace SchoolShedule.Controllers
             var teacher = await _context.Teachers
                 .Include(t => t.User)
                 .Include(t => t.Subjects)
+                .Include(t => t.AssignedRooms)
                 .FirstOrDefaultAsync(t => t.UserId == id);
 
             if (teacher == null)
@@ -210,7 +212,9 @@ namespace SchoolShedule.Controllers
                 MiddleName = teacher.User.MiddleName,
                 Email = teacher.User.Email!,
                 SelectedSubjectIds = teacher.Subjects.Select(s => s.Id).ToList(),
-                Subjects = await _context.Subjects.ToListAsync()
+                SelectedRoomIds = teacher.AssignedRooms.Select(r => r.Id).ToList(),
+                Subjects = await _context.Subjects.ToListAsync(),
+                Rooms = await _context.Rooms.ToListAsync()
             };
 
             ViewData["Title"] = $"{teacher.User.GetFIO}-Изменение";
@@ -240,24 +244,6 @@ namespace SchoolShedule.Controllers
                 return NotFound();
             }
 
-            //2. Проверяем наличие роли Учитель
-            var teacherRole = await roleManager.FindByNameAsync("Teacher");
-            if (teacherRole == null)
-            {
-                _logger.LogWarning("[TEACHER-EDIT] В БД отсутствует роль Учителя! Выполняем создание даной роли!");
-                teacherRole = new() { Name = "Teacher" };
-                var resultRole = await roleManager.CreateAsync(teacherRole);
-                if (resultRole.Succeeded) // И, после создания Юзверя и Роли - объединяем их (PanPineappleApplePan!)
-                {
-                    _logger.LogWarning("[TEACHER-EDIT] В БД успешно создана роль Учителя!");
-                }
-                else
-                {
-                    _logger.LogError("[TEACHER-EDIT] Не удалось создать роль Учителя в БД!");
-                    throw new DbUpdateException("Не удалось создать роль Учителя в БД!");
-                }
-            }
-
             //Проверка соответствующей роли у учителя и её присвоение
             if (!await _userManager.IsInRoleAsync(teacher.User, "Teacher"))
             {
@@ -271,7 +257,6 @@ namespace SchoolShedule.Controllers
             teacher.User.LastName = model.LastName;
             teacher.User.MiddleName = model.MiddleName;
             teacher.User.Email = model.Email;
-            teacher.User.UserName = model.Email;
 
             await _userManager.UpdateAsync(teacher.User);
 
@@ -280,6 +265,12 @@ namespace SchoolShedule.Controllers
                 .Where(s => model.SelectedSubjectIds.Contains(s.Id))
                 .ToListAsync();
 
+            // 2. Обновляем кабинеты
+            teacher.AssignedRooms = await _context.Rooms
+                .Where(r => model.SelectedRoomIds.Contains(r.Id))
+                .ToListAsync();
+
+            _context.Update(teacher);
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Преподаватель обновлён: {FIO}", teacher.User.GetFIO);

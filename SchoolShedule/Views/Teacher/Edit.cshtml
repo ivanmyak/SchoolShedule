@@ -52,6 +52,20 @@
         </select>
         <span asp-validation-for="SelectedSubjectIds" class="text-danger"></span>
     </div>
+        
+    <!-- Кабинеты -->
+    <div class="mb-3">
+        <label asp-for="SelectedRoomIds" class="form-label"></label>
+        <select asp-for="SelectedRoomIds" class="form-select subject-select" multiple>
+            @foreach (var r in Model.Rooms)
+            {
+                <option value="@r.Id" selected="@(Model.SelectedRoomIds.Contains(r.Id))">
+                    @r.RoomNumber
+                </option>
+            }
+        </select>
+        <span asp-validation-for="SelectedRoomIds" class="text-danger"></span>
+    </div>
 
     <button class="btn btn-primary">Сохранить</button>
     <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>

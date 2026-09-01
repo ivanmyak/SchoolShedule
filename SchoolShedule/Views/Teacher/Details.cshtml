@@ -30,6 +30,9 @@
             <dt class="col-sm-3">Предметы</dt>
             <dd class="col-sm-9">@Model.SubjectsToString</dd>
 
+            <dt class="col-sm-3">Кабинеты</dt>
+            <dd class="col-sm-9">@Model.RoomsToString</dd>
+
             <dt class="col-sm-3">Дата регистрации</dt>
             <dd class="col-sm-9">@Model.User.RegisteredAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd>
 

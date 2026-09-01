@@ -610,7 +610,7 @@ namespace SchoolShedule.Controllers
                 if (subjectPreferredRoom != null)
                     selectedRoom = subjectPreferredRoom;
                 else
-                    selectedRoom = matchingRooms.FirstOrDefault() ?? throw new KeyNotFoundException($"Не удалось найти подходящего кабинета для класса {classGroup.Name} по предмету {subject.Name} для ячейки {slot.TimeSlotString}"); ;
+                    selectedRoom = matchingRooms.FirstOrDefault() ?? throw new KeyNotFoundException($"[WIZARD-CHECKTEACHROOMBUSIES] Не удалось найти подходящего кабинета для класса {classGroup.Name} по предмету {subject.Name} для ячейки {slot.TimeSlotString}"); ;
             }
 
             // Проверяем занятость кабинета

@@ -29,7 +29,12 @@ namespace SchoolShedule.Models
         [Required]
         [Display(Name = "Основные предметы")]
         public List<int> SelectedSubjectIds { get; set; } = new();
-
         public List<Subject> Subjects { get; set; } = new();
+
+        [Required]
+        [Display(Name = "Основные кабинеты")]
+        public List<int> SelectedRoomIds { get; set; } = new();
+        public List<Room> Rooms { get; set; } = new();
+
     }
 }
