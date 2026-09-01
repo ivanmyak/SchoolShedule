@@ -1,38 +1,52 @@
-﻿@model SchoolShedule.Entities.Room
+﻿@model RoomCreateViewModel
 
 @{
     ViewData["Title"] = "Create Room";
 }
-<h1>Добавление нового кабинета для проведения уроков</h1>
+<h2>Добавление нового кабинета для проведения уроков</h2>
 
-<h4>Кабинет</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Floor" class="control-label"></label>
-                <input asp-for="Floor" class="form-control" />
-                <span asp-validation-for="Floor" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Number" class="control-label"></label>
-                <input asp-for="Number" class="form-control" />
-                <span asp-validation-for="Number" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Создать" class="btn btn-primary" />
-            </div>
-        </form>
+<link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
+
+<form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <!-- Этаж -->
+    <div class="col-md-3">
+        <label asp-for="Floor" class="form-label"></label>
+        <input asp-for="Floor" class="form-control" />
+        <span asp-validation-for="Floor" class="text-danger"></span>
     </div>
-</div>
 
-<div>
+    <!-- Номер кабинета -->
+    <div class="col-md-3">
+        <label asp-for="Number" class="form-label"></label>
+        <input asp-for="Number" class="form-control" />
+        <span asp-validation-for="Number" class="text-danger"></span>
+    </div>
+
+    <!-- Предметы -->
+    <div class="mb-3">
+        <label class="form-label">Основные предметы</label>
+        <select asp-for="SelectedSubjectIds" class="form-select subject-select" multiple>
+            @foreach (var s in Model.Subjects)
+            {
+                <option value="@s.Id">@s.Name</option>
+            }
+        </select>
+        <span asp-validation-for="SelectedSubjectIds" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary">Создать</button>
     <a asp-action="All" class="btn btn-secondary">Обратно к списку</a>
-
-</div>
+</form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(".subject-select").select2({ width: '100%' });
+    </script>
+
 }

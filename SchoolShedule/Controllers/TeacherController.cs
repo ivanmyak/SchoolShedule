@@ -77,7 +77,8 @@ namespace SchoolShedule.Controllers
 
             var model = new TeacherCreateViewModel
             {
-                Subjects = await _context.Subjects.ToListAsync()
+                Subjects = await _context.Subjects.ToListAsync(),
+                Rooms = await _context.Rooms.ToListAsync(),
             };
 
             return View(model);
@@ -230,12 +231,14 @@ namespace SchoolShedule.Controllers
                 _logger.LogWarning("[TEACHER-EDIT] Модель невалидна");
 
                 model.Subjects = await _context.Subjects.ToListAsync();
+                model.Rooms = await _context.Rooms.ToListAsync();
                 return View(model);
             }
 
             var teacher = await _context.Teachers
                 .Include(t => t.User)
                 .Include(t => t.Subjects)
+                .Include(t => t.AssignedRooms)
                 .FirstOrDefaultAsync(t => t.UserId == model.Id);
 
             if (teacher == null)

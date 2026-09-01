@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
 
 <form asp-action="Create" method="post" class="border p-4 rounded shadow-sm bg-light">
-
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <!-- ФИО -->
     <div class="row mb-3">
         <div class="col-md-4">
@@ -40,6 +40,18 @@
             }
         </select>
         <span asp-validation-for="SelectedSubjectIds" class="text-danger"></span>
+    </div>
+
+    <!-- Кабинеты -->
+    <div class="mb-3">
+        <label class="form-label">Основные кабинеты</label>
+        <select asp-for="SelectedRoomIds" class="form-select subject-select" multiple>
+            @foreach (var r in Model.Rooms)
+            {
+                <option value="@r.Id">@r.RoomNumber</option>
+            }
+        </select>
+        <span asp-validation-for="SelectedRoomIds" class="text-danger"></span>
     </div>
 
     <!-- Автогенерация -->

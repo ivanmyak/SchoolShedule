@@ -21,7 +21,6 @@ namespace SchoolShedule.Entities
         /// Номер кабинета
         /// </summary>
         [Display(Name = "Номер кабинета")]
-
         public int Number { get; set; }
 
         /// <summary>

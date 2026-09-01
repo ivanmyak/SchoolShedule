@@ -5,9 +5,13 @@ namespace SchoolShedule.Models
 {
     public class TeacherCreateViewModel
     {
-        [Required(ErrorMessage ="Выберите хотя бы один основной предмет для учителя")]
+        [Required(ErrorMessage = "Выберите хотя бы один основной предмет для учителя")]
         [Display(Name = "Основные предметы")]
         public List<int> SelectedSubjectIds { get; set; } = new();
+
+        [Required(ErrorMessage = "Выберите хотя бы один основной кабинет для учителя")]
+        [Display(Name = "Основные кабинеты")]
+        public List<int> SelectedRoomIds { get; set; } = new();
 
         /// <summary>
         /// Имя
@@ -33,6 +37,8 @@ namespace SchoolShedule.Models
         public string? MiddleName { get; set; }
 
         public List<Subject> Subjects { get; set; } = new();
+
+        public List<Room> Rooms { get; set; } = new();
 
         [Display(Name = "Email (логин)")]
         public string? Email { get; set; }
