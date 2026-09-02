@@ -1,0 +1,167 @@
+﻿@model ManualGenerateViewModel
+@using SchoolShedule.Extensions
+
+@{
+    ViewData["Title"] = "Ручное составление расписания";
+    var slotsPerDay = Model.CalculatedTimeSlots
+            .GroupBy(ts => ts.DayOfWeek);
+}
+
+<div class="container-fluid mt-3">
+
+    <!-- Заголовок -->
+    <h1 class="text-center mb-4">
+        Расписание для класса @Model.ClassGroup.Name
+        <small class="text-muted">(@Model.SelectedSchedulePeriod.GetDisplayName())</small>
+    </h1>
+
+    <div class="row">
+
+        <!-- Левая панель: предметы -->
+        <div class="col-3">
+            <h4>Предметы и часы</h4>
+            <ul id="subjects-list" class="list-group">
+
+                @foreach (var (subjectId, hours) in Model.SubjectHours)
+                {
+                    var subject = Model.Subjects.First(s => s.Id == subjectId);
+
+                    <li class="list-group-item d-flex justify-content-between align-items-center subject-item"
+                        draggable="true"
+                        data-subject-id="@subject.Id"
+                        data-subject-name="@subject.Name"
+                        data-hours="@hours">
+
+
+                        <span>@subject.Name</span>
+                        <span class="badge bg-primary rounded-pill">@hours</span>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <!-- Центральная часть: таблица расписания -->
+        <div class="col-9">
+
+            <h4 class="mb-3">Таблица расписания</h4>
+
+            <table class="table table-bordered text-center align-middle" id="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Урок</th>
+                        @foreach (var day in Enum.GetValues<SchoolShedule.Enums.Day>())
+                        {
+                            <th>@day.GetDisplayName()</th>
+                        }
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (int i = 0; i < slotsPerDay.Max(spd => spd.Count()); i++)
+                    {
+                        <tr>
+                            <td><strong>@(i + 1).</strong></td>
+
+                            @foreach (var day in Enum.GetValues<SchoolShedule.Enums.Day>())
+                            {
+                                var slot = Model.CalculatedTimeSlots.FirstOrDefault(cts => cts.Period == (i+1) && cts.DayOfWeek == day);
+                                @if (slot is not null)
+                                {
+                                    <td class="schedule-cell"
+                                        data-day="@day"
+                                        data-period="@slot.Period"
+                                        data-subject-id=""
+                                        data-teacher-id=""
+                                        data-room-id=""
+                                        id="@slot.Id">
+                                        Вставь мне
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        Пустой
+                                    </td>
+                                }
+                            }
+                        </tr>
+
+                    }
+
+                    
+                </tbody>
+            </table>
+
+            <!-- Кнопка сохранения -->
+            <button id="save-schedule-btn"
+                    class="btn btn-success mt-3"
+                    disabled>
+                Сохранить расписание
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно выбора преподавателя -->
+<div class="modal fade" id="teacherModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Выбор преподавателя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <select id="teacher-select" class="form-select">
+                    @foreach (var teacher in Model.Teachers)
+                    {
+                        <option value="@teacher.UserId">@teacher.User.GetFIO</option>
+                    }
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="teacher-select-confirm">Выбрать</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно выбора кабинета -->
+<div class="modal fade" id="roomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Выбор кабинета</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <select id="room-select" class="form-select">
+                    @foreach (var room in Model.Rooms)
+                    {
+                        <option value="@room.Id">@room.RoomNumber</option>
+                    }
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="room-select-confirm">Выбрать</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        window.manualClassId = "@Model.ClassGroup.Id";
+        window.manualPeriod = "@Model.SelectedSchedulePeriod";
+    </script>
+
+    <script src="~/js/manual-schedule.js"></script>
+}

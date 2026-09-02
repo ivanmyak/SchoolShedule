@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using Serilog.Events;
 using Serilog.Formatting.Json;
 
 namespace SchoolShedule.Providers
@@ -19,7 +20,10 @@ namespace SchoolShedule.Providers
 
             int retention = int.TryParse(files["RetentionDays"], out var r) ? r : 180;
 
-            var loggerConfig = new LoggerConfiguration().MinimumLevel.Information();
+            var minLevel = cfg.GetSection("Logging:LogLevel")["SchoolShedule"] ?? "Information";
+
+            var loggerConfig = new LoggerConfiguration()
+                .MinimumLevel.Is(ParseLevel(minLevel));
 
             var providerActions = new Dictionary<string, Action>
             {
@@ -62,6 +66,12 @@ namespace SchoolShedule.Providers
                rollingInterval: RollingInterval.Infinite,
                retainedFileCountLimit: retention
             );
+        }
+        private static LogEventLevel ParseLevel(string level)
+        {
+            return Enum.TryParse<LogEventLevel>(level, true, out var parsed)
+                ? parsed
+                : LogEventLevel.Information;
         }
     }
 }
