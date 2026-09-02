@@ -1,965 +1,1109 @@
 {
-  "Users": [
-    {
-      "FirstName": "Иван",
-      "LastName": "Петров",
-      "MiddleName": "Алексеевич"
-    },
-    {
-      "FirstName": "Мария",
-      "LastName": "Сидорова",
-      "MiddleName": "Игоревна"
-    },
-    {
-      "FirstName": "Алексей",
-      "LastName": "Кузнецов",
-      "MiddleName": "Сергеевич"
-    },
-    {
-      "FirstName": "Ольга",
-      "LastName": "Иванова",
-      "MiddleName": "Павловна"
-    },
-    {
-      "FirstName": "Сергей",
-      "LastName": "Михайлов",
-      "MiddleName": "Владимирович"
-    },
-	{
-    "LastName": "Непейвода",
-    "FirstName": "Хотен",
-    "MiddleName": "Игоревич"
-  },
-  {
-    "LastName": "Сидоров",
-    "FirstName": "Всемила",
-    "MiddleName": "Сергеевич"
-  },
-  {
-    "LastName": "Павлюченков",
-    "FirstName": "Радомила",
-    "MiddleName": "Мстиславовна"
-  },
-  {
-    "LastName": "Зайцев",
-    "FirstName": "Всемила",
-    "MiddleName": "Святославович"
-  },
-  {
-    "LastName": "Кузьмин",
-    "FirstName": "Воротислав"
-  },
-  {
-    "LastName": "Бондаренко",
-    "FirstName": "Велислава"
-  },
-  {
-    "LastName": "Непейвода",
-    "FirstName": "Борислав",
-    "MiddleName": "Мстиславович"
-  },
-  {
-    "LastName": "Здислав",
-    "FirstName": "Любомила"
-  },
-  {
-    "LastName": "Бочаров",
-    "FirstName": "Волибор"
-  },
-  {
-    "LastName": "Гончаров",
-    "FirstName": "Всемила",
-    "MiddleName": "Борисовна"
-  },
-  {
-    "LastName": "Голицын",
-    "FirstName": "Ярослав"
-  },
-  {
-    "LastName": "Ковальчук",
-    "FirstName": "Велимудр",
-    "MiddleName": "Татьянова"
-  },
-  {
-    "LastName": "Ястржембский",
-    "FirstName": "Мстислав",
-    "MiddleName": "Святославович"
-  },
-  {
-    "LastName": "Бойко",
-    "FirstName": "Воротислав",
-    "MiddleName": "Сергеевич"
-  },
-  {
-    "LastName": "Волков",
-    "FirstName": "Венцеслава"
-  },
-  {
-    "LastName": "Ясинский",
-    "FirstName": "Бажена",
-    "MiddleName": "Ростиславович"
-  },
-  {
-    "LastName": "Ковальчук",
-    "FirstName": "Пётр",
-    "MiddleName": "Натальивна"
-  },
-  {
-    "LastName": "Ейбогин",
-    "FirstName": "Стоян",
-    "MiddleName": "Мстиславович"
-  },
-  {
-    "LastName": "Зайцев",
-    "FirstName": "Первуша",
-    "MiddleName": "Мстиславовна"
-  },
-  {
-    "LastName": "Шевченко",
-    "FirstName": "Любомила",
-    "MiddleName": "Петрович"
-  },
-  {
-    "LastName": "Ковальчук",
-    "FirstName": "Видана",
-    "MiddleName": "Татьянин"
-  },
-  {
-    "LastName": "Непейвода",
-    "FirstName": "Милонег"
-  },
-  {
-    "LastName": "Волков",
-    "FirstName": "Радость",
-    "MiddleName": "Ростиславовна"
-  },
-  {
-    "LastName": "Токарев",
-    "FirstName": "Дмитрий",
-    "MiddleName": "Всеволодович"
-  },
-  {
-    "LastName": "Громыко",
-    "FirstName": "Хотен"
-  },
-  {
-    "LastName": "Шевченко",
-    "FirstName": "Пётр"
-  },
-  {
-    "LastName": "Яцкевич",
-    "FirstName": "Богдан"
-  },
-  {
-    "LastName": "Ямщиков",
-    "FirstName": "Велимудр",
-    "MiddleName": "Ростиславович"
-  },
-  {
-    "LastName": "Мелешко",
-    "FirstName": "Радомила",
-    "MiddleName": "Ростиславовна"
-  },
-  {
-    "LastName": "Ястржембский",
-    "FirstName": "Пересвет",
-    "MiddleName": "Любавовна"
-  },
-  {
-    "LastName": "Шевченко",
-    "FirstName": "Веселина",
-    "MiddleName": "Ярославовна"
-  },
-  {
-    "LastName": "Кузнецов",
-    "FirstName": "Иван"
-  },
-  {
-    "LastName": "Гончаров",
-    "FirstName": "Рада",
-    "MiddleName": "Алексеевич"
-  },
-  {
-    "LastName": "Убейконь",
-    "FirstName": "Гостомысл",
-    "MiddleName": "Сергеевич"
-  },
-  {
-    "LastName": "Шевченко",
-    "FirstName": "Стоян",
-    "MiddleName": "Всеволодовна"
-  },
-  {
-    "LastName": "Кузьмин",
-    "FirstName": "Алексей",
-    "MiddleName": "Владимировна"
-  },
-  {
-    "LastName": "Мелешко",
-    "FirstName": "Борислав",
-    "MiddleName": "Всеволодович"
-  },
-  {
-    "LastName": "Хватаймуха",
-    "FirstName": "Вторак",
-    "MiddleName": "Святославович"
-  },
-  {
-    "LastName": "Иванов",
-    "FirstName": "Всемила",
-    "MiddleName": "Борисович"
-  },
-  {
-    "LastName": "Громыко",
-    "FirstName": "Рада",
-    "MiddleName": "Владимирович"
-  },
-  {
-    "LastName": "Шимко",
-    "FirstName": "Ждан",
-    "MiddleName": "Натальивна"
-  },
-  {
-    "LastName": "Мельников",
-    "FirstName": "Ратибор"
-  },
-  {
-    "LastName": "Мельников",
-    "FirstName": "Вячеслав"
-  },
-  {
-    "LastName": "Ейбогин",
-    "FirstName": "Добронега"
-  },
-  {
-    "LastName": "Бондаренко",
-    "FirstName": "Радость",
-    "MiddleName": "Ярославовна"
-  },
-  {
-    "LastName": "Громыко",
-    "FirstName": "Тихомир",
-    "MiddleName": "Натальивна"
-  },
-  {
-    "LastName": "Ильин",
-    "FirstName": "Светозара"
-  },
-  {
-    "LastName": "Ейбогин",
-    "FirstName": "Бажена",
-    "MiddleName": "Владимировна"
-  },
-  {
-    "LastName": "Иванов",
-    "FirstName": "Доброжир",
-    "MiddleName": "Петрович"
-  },
-  {
-    "LastName": "Златомир",
-    "FirstName": "Вторак"
-  },
-  {
-    "LastName": "Убейконь",
-    "FirstName": "Тихомир",
-    "MiddleName": "Татьянин"
-  },
-  {
-    "LastName": "Петров",
-    "FirstName": "Рада",
-    "MiddleName": "Владимирович"
-  }
-  ],
-
-  "Teachers": [
-    {
-      "UserName": "bazhena.eybogin",
-      "Subjects": [ "PE" ]
-    },
-	{
-      "UserName": "aleksey.kuzmin",
-      "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "UserName": "bazhena.yasinskiy",
-      "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "UserName": "lyubomila.shevchenko",
-      "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "UserName": "petr.shevchenko",
-      "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "UserName": "rada.goncharov",
-      "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "UserName": "vsemila.goncharov",
-      "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "UserName": "vtorak.zlatomir",
-      "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "UserName": "borislav.meleshko",
-      "Subjects": [ "BELLANG", "BELLIT" ]
-    },
-	{
-      "UserName": "lyubomila.zdislav",
-      "Subjects": [ "BELLANG", "BELLIT" ]
-    },
-	{
-      "UserName": "vorotislav.boyko",
-      "Subjects": [ "BELLANG", "BELLIT" ]
-    },
-	{
-      "UserName": "yaroslav.golicyn",
-      "Subjects": [ "BELLANG", "BELLIT" ]
-    },
-	{
-      "UserName": "dobrozhir.ivanov",
-      "Subjects": [ "BELHIST" ]
-    },
-	{
-      "UserName": "ratibor.melnikov",
-      "Subjects": [ "BELHIST" ]
-    },
-	{
-      "UserName": "rada.petrov",
-      "Subjects": [ "BIO" ]
-    },
-	{
-      "UserName": "vsemila.zaycev",
-      "Subjects": [ "BIO" ]
-    },
-	{
-      "UserName": "velimudr.kovalchuk",
-      "Subjects": [ "GEO" ]
-    },
-	{
-      "UserName": "ivan.kuznecov",
-      "Subjects": [ "IT" ]
-    },
-	{
-      "UserName": "rada.gromyko",
-      "Subjects": [ "IT" ]
-    },
-	{
-      "UserName": "stoyan.eybogin",
-      "Subjects": [ "IT" ]
-    },
-	{
-      "UserName": "vtorak.hvataymuha",
-      "Subjects": [ "IT" ]
-    },
-	{
-      "UserName": "vorotislav.kuzmin",
-      "Subjects": [ "ART" ]
-    },
-	{
-      "UserName": "petr.kovalchuk",
-      "Subjects": [ "HIST" ]
-    },
-	{
-      "UserName": "volibor.bocharov",
-      "Subjects": [ "HIST" ]
-    },
-	{
-      "UserName": "hoten.gromyko",
-      "Subjects": [ "MATH" ]
-    },
-	{
-      "UserName": "radomila.meleshko",
-      "Subjects": [ "MATH" ]
-    },
-	{
-      "UserName": "radost.volkov",
-      "Subjects": [ "MATH" ]
-    },
-	{
-      "UserName": "stoyan.shevchenko",
-      "Subjects": [ "MATH" ]
-    },
-	{
-      "UserName": "tihomir.ubeykon",
-      "Subjects": [ "MATH" ]
-    },
-	{
-      "UserName": "velimudr.yamschikov",
-      "Subjects": [ "MATH" ]
-    },
-	{
-      "UserName": "vsemila.sidorov",
-      "Subjects": [ "MATH" ]
-    },
-	{
-      "UserName": "gostomysl.ubeykon",
-      "Subjects": [ "SAFETY" ]
-    },
-	{
-      "UserName": "hoten.nepeyvoda",
-      "Subjects": [ "SAFETY" ]
-    },
-	{
-      "UserName": "peresvet.yastrzhembskiy",
-      "Subjects": [ "SAFETY" ]
-    },
-	{
-      "UserName": "zhdan.shimko",
-      "Subjects": [ "SAFETY" ]
-    },
-	{
-      "UserName": "radomila.pavlyuchenkov",
-      "Subjects": [ "CIVICS" ]
-    },
-	{
-      "UserName": "vsemila.ivanov",
-      "Subjects": [ "CIVICS" ]
-    },
-	{
-      "UserName": "bogdan.yackevich",
-      "Subjects": [ "RUSLANG", "RUSLIT" ]
-    },
-	{
-      "UserName": "dobronega.eybogin",
-      "Subjects": [ "RUSLANG", "RUSLIT" ]
-    },
-	{
-      "UserName": "pervusha.zaycev",
-      "Subjects": [ "RUSLANG", "RUSLIT" ]
-    },
-	{
-      "UserName": "tihomir.gromyko",
-      "Subjects": [ "RUSLANG", "RUSLIT" ]
-    },
-	{
-      "UserName": "vidana.kovalchuk",
-      "Subjects": [ "RUSLANG", "RUSLIT" ]
-    },
-	{
-      "UserName": "dmitriy.tokarev",
-      "Subjects": [ "WORKART" ]
-    },
-	{
-      "UserName": "svetozara.ilin",
-      "Subjects": [ "WORKART" ]
-    },
-	{
-      "UserName": "miloneg.nepeyvoda",
-      "Subjects": [ "PHYS" ]
-    },
-	{
-      "UserName": "mstislav.yastrzhembskiy",
-      "Subjects": [ "PE" ]
-    },
-	{
-      "UserName": "radost.bondarenko",
-      "Subjects": [ "PE" ]
-    },
-	{
-      "UserName": "venceslava.volkov",
-      "Subjects": [ "PE" ]
-    },
-	{
-      "UserName": "borislav.nepeyvoda",
-      "Subjects": [ "CHEM" ]
-    },
-	{
-      "UserName": "vyacheslav.melnikov",
-      "Subjects": [ "CHEM" ]
-    },
-	{
-      "UserName": "veselina.shevchenko",
-      "Subjects": [ "MAW" ]
-    },
-    {
-      "UserName": "velislava.bondarenko",
-      "Subjects": [ "TECHDRAW" ]
-    }
-  ],
-
-  "ClassGroups": [
-    {
-      "Grade": 5,
-      "Letter": "А"
-    },
-	{
-      "Grade": 5,
-      "Letter": "Б"
-    },
-	{
-      "Grade": 5,
-      "Letter": "В"
-    },
-    {
-      "Grade": 5,
-      "Letter": "Г"
-    },
-    {
-      "Grade": 6,
-      "Letter": "А"
-    },
-	{
-      "Grade": 6,
-      "Letter": "Б"
-    },
-	{
-      "Grade": 6,
-      "Letter": "В"
-    },
-    {
-      "Grade": 7,
-      "Letter": "А"
-    },
-	{
-      "Grade": 7,
-      "Letter": "Б"
-    },
-	{
-      "Grade": 7,
-      "Letter": "В"
-    },
-	{
-      "Grade": 8,
-      "Letter": "А"
-    },
-	{
-      "Grade": 8,
-      "Letter": "Б"
-    },
-	{
-      "Grade": 8,
-      "Letter": "В"
-    },
-	{
-      "Grade": 9,
-      "Letter": "А"
-    },
-	{
-      "Grade": 9,
-      "Letter": "Б"
-    },
-	{
-      "Grade": 9,
-      "Letter": "В"
-    },
-    {
-      "Grade": 9,
-      "Letter": "Г"
-    },
-	{
-      "Grade": 10,
-      "Letter": "А"
-    },
-	{
-      "Grade": 10,
-      "Letter": "Б"
-    },
-	{
-      "Grade": 11,
-      "Letter": "А"
-    },
-	{
-      "Grade": 11,
-      "Letter": "Б"
-    }
-  ],
-
-  "Subjects": [
-    {
-      "Name": "Математика",
-      "Code": "MATH"
-    },
-    {
-      "Name": "Физика",
-      "Code": "PHYS"
-    },
-    {
-      "Name": "Химия",
-      "Code": "CHEM"
-    },
-    {
-      "Name": "История",
-      "Code": "HIST"
-    },
-    {
-      "Name": "Физическая культура",
-      "Code": "PE"
-    },
-    {
-      "Name": "Русский язык",
-      "Code": "RUSLANG"
-    },
-    {
-      "Name": "Русская литература",
-      "Code": "RUSLIT"
-    },
-    {
-      "Name": "Английский язык",
-      "Code": "ENGLANG"
-    },
-	{
-      "Name": "Белорусский язык",
-      "Code": "BELLANG"
-    },
-	{
-      "Name": "Белорусская литература",
-      "Code": "BELLIT"
-    },
-	{
-      "Name": "Труды",
-      "Code": "WORKART"
-    },
-	{
-      "Name": "География",
-      "Code": "GEO"
-    },
-	{
-      "Name": "Информатика",
-      "Code": "IT"
-    },
-	{
-      "Name": "Черчение",
-      "Code": "TECHDRAW"
-    },
-	{
-      "Name": "Человек и Мир",
-      "Code": "MAW"
-    },
-	{
-      "Name": "История Беларуси",
-      "Code": "BELHIST"
-    },
-	{
-      "Name": "Обществоведение",
-      "Code": "CIVICS"
-    },
-	{
-      "Name": "Искусство",
-      "Code": "ART"
-    },
-	{
-      "Name": "Основы безопасности жизнедеятельности",
-      "Code": "SAFETY"
-    },
-    {
-      "Name": "Биология",
-      "Code": "BIO"
-    }
-  ],
-
-  "Rooms": [
-    {
-      "Floor": 1,
-      "Number": 1,
-	  "Subjects": [ "ENGLANG" ]
-    },
-    {
-      "Floor": 1,
-      "Number": 15,
-	  "Subjects": [ "WORKART" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 18,
-	  "Subjects": [ "WORKART" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 23,
-	  "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 25,
-	  "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 26,
-	  "Subjects": [ "MATH" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 27,
-	  "Subjects": [ "RUSLANG","RUSLIT" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 28,
-	  "Subjects": [ "RUSLANG","RUSLIT" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 32,
-	  "Subjects": [ "RUSLANG","RUSLIT" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 33,
-	  "Subjects": [ "MATH" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 34,
-	  "Subjects": [ "GEO" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 35,
-	  "Subjects": [ "ENGLANG" ]
-    },
-	{
-      "Floor": 1,
-      "Number": 37,
-	  "Subjects": [ "ENGLANG" ]
-    },	
-	{
-      "Floor": 2,
-      "Number": 10,
-	  "Subjects": [ "PE" ]
-    },
-    {
-      "Floor": 2,
-      "Number": 27,
-	  "Subjects": [ "PHYS" ]
-    },
-	{
-      "Floor": 2,
-      "Number": 28,
-	  "Subjects": [ "MATH" ]
-    },
-	{
-      "Floor": 2,
-      "Number": 29,
-	  "Subjects": [ "MATH" ]
-    },
-	{
-      "Floor": 2,
-      "Number": 30,
-	  "Subjects": [ "BIO" ]
-    },
-	{
-      "Floor": 2,
-      "Number": 34,
-	  "Subjects": [ "IT" ]
-    },
-	{
-      "Floor": 2,
-      "Number": 35,
-	  "Subjects": [ "IT" ]
-    },
-	{
-      "Floor": 2,
-      "Number": 37,
-	  "Subjects": [ "MATH" ]
-    },
-    {
-      "Floor": 3,
-      "Number": 24,
-	  "Subjects": [ "CHEM" ]
-    },
-    {
-      "Floor": 3,
-      "Number": 26,
-	  "Subjects": [ "BELLANG", "BELLIT" ]
-    },{
-      "Floor": 3,
-      "Number": 27,
-	  "Subjects": [ "BELLANG", "BELLIT" ]
-    },{
-      "Floor": 3,
-      "Number": 28,
-	  "Subjects": [ "HIST", "CIVICS" ]
-    },{
-      "Floor": 3,
-      "Number": 32,
-	  "Subjects": [ "BELLANG", "BELLIT" ]
-    },{
-      "Floor": 3,
-      "Number": 33,
-	  "Subjects": [ "HIST", "CIVICS" ]
-    },
-	{
-      "Floor": 3,
-      "Number": 34,
-	  "Subjects": [ "GEO" ]
-    },
-	{
-      "Floor": 3,
-      "Number": 36,
-	  "Subjects": [ "BIO" ]
-    }
-  ],
-
-  "TimeSlots": [
-    {
-      "DayOfWeek": 0,
-      "Period": 1
-    },
-    {
-      "DayOfWeek": 0,
-      "Period": 2
-    },
-    {
-      "DayOfWeek": 0,
-      "Period": 3
-    },
-	{
-      "DayOfWeek": 0,
-      "Period": 4
-    },
-    {
-      "DayOfWeek": 0,
-      "Period": 5
-    },
-    {
-      "DayOfWeek": 0,
-      "Period": 6
-    },
-	{
-      "DayOfWeek": 0,
-      "Period": 7
-    },
-    {
-      "DayOfWeek": 0,
-      "Period": 8
-    },
-
-    {
-      "DayOfWeek": 1,
-      "Period": 1
-    },
-    {
-      "DayOfWeek": 1,
-      "Period": 2
-    },
-    {
-      "DayOfWeek": 1,
-      "Period": 3
-    },
-	{
-      "DayOfWeek": 1,
-      "Period": 4
-    },
-    {
-      "DayOfWeek": 1,
-      "Period": 5
-    },
-    {
-      "DayOfWeek": 1,
-      "Period": 6
-    },
-	{
-      "DayOfWeek": 1,
-      "Period": 7
-    },
-    {
-      "DayOfWeek": 1,
-      "Period": 8
-    },
-
-    {
-      "DayOfWeek": 2,
-      "Period": 1
-    },
-    {
-      "DayOfWeek": 2,
-      "Period": 2
-    },
-    {
-      "DayOfWeek": 2,
-      "Period": 3
-    },
-	{
-      "DayOfWeek": 2,
-      "Period": 4
-    },
-    {
-      "DayOfWeek": 2,
-      "Period": 5
-    },
-    {
-      "DayOfWeek": 2,
-      "Period": 6
-    },
-	{
-      "DayOfWeek": 2,
-      "Period": 7
-    },
-    {
-      "DayOfWeek": 2,
-      "Period": 8
-    },
-
-    {
-      "DayOfWeek": 3,
-      "Period": 1
-    },
-    {
-      "DayOfWeek": 3,
-      "Period": 2
-    },
-    {
-      "DayOfWeek": 3,
-      "Period": 3
-    },
-	{
-      "DayOfWeek": 3,
-      "Period": 4
-    },
-    {
-      "DayOfWeek": 3,
-      "Period": 5
-    },
-    {
-      "DayOfWeek": 3,
-      "Period": 6
-    },
-	{
-      "DayOfWeek": 3,
-      "Period": 7
-    },
-    {
-      "DayOfWeek": 3,
-      "Period": 8
-    },
-
-    {
-      "DayOfWeek": 4,
-      "Period": 1
-    },
-    {
-      "DayOfWeek": 4,
-      "Period": 2
-    },
-    {
-      "DayOfWeek": 4,
-      "Period": 3
-    },
-	{
-      "DayOfWeek": 4,
-      "Period": 4
-    },
-    {
-      "DayOfWeek": 4,
-      "Period": 5
-    },
-    {
-      "DayOfWeek": 4,
-      "Period": 6
-    },
-	{
-      "DayOfWeek": 4,
-      "Period": 7
-    },
-    {
-      "DayOfWeek": 4,
-      "Period": 8
-    }
-  ]
+	"Users": [
+		{
+			"FirstName": "Иван",
+			"LastName": "Петров",
+			"MiddleName": "Алексеевич"
+		},
+		{
+			"FirstName": "Мария",
+			"LastName": "Сидорова",
+			"MiddleName": "Игоревна"
+		},
+		{
+			"FirstName": "Алексей",
+			"LastName": "Кузнецов",
+			"MiddleName": "Сергеевич"
+		},
+		{
+			"FirstName": "Ольга",
+			"LastName": "Иванова",
+			"MiddleName": "Павловна"
+		},
+		{
+			"FirstName": "Сергей",
+			"LastName": "Михайлов",
+			"MiddleName": "Владимирович"
+		},
+		{
+			"LastName": "Непейвода",
+			"FirstName": "Хотен",
+			"MiddleName": "Игоревич"
+		},
+		{
+			"LastName": "Сидоров",
+			"FirstName": "Всемила",
+			"MiddleName": "Сергеевич"
+		},
+		{
+			"LastName": "Павлюченков",
+			"FirstName": "Радомила",
+			"MiddleName": "Мстиславовна"
+		},
+		{
+			"LastName": "Зайцев",
+			"FirstName": "Всемила",
+			"MiddleName": "Святославович"
+		},
+		{
+			"LastName": "Кузьмин",
+			"FirstName": "Воротислав"
+		},
+		{
+			"LastName": "Бондаренко",
+			"FirstName": "Велислава"
+		},
+		{
+			"LastName": "Непейвода",
+			"FirstName": "Борислав",
+			"MiddleName": "Мстиславович"
+		},
+		{
+			"LastName": "Здислав",
+			"FirstName": "Любомила"
+		},
+		{
+			"LastName": "Бочаров",
+			"FirstName": "Волибор"
+		},
+		{
+			"LastName": "Гончаров",
+			"FirstName": "Всемила",
+			"MiddleName": "Борисовна"
+		},
+		{
+			"LastName": "Голицын",
+			"FirstName": "Ярослав"
+		},
+		{
+			"LastName": "Ковальчук",
+			"FirstName": "Велимудр",
+			"MiddleName": "Татьянова"
+		},
+		{
+			"LastName": "Ястржембский",
+			"FirstName": "Мстислав",
+			"MiddleName": "Святославович"
+		},
+		{
+			"LastName": "Бойко",
+			"FirstName": "Воротислав",
+			"MiddleName": "Сергеевич"
+		},
+		{
+			"LastName": "Волков",
+			"FirstName": "Венцеслава"
+		},
+		{
+			"LastName": "Ясинский",
+			"FirstName": "Бажена",
+			"MiddleName": "Ростиславович"
+		},
+		{
+			"LastName": "Ковальчук",
+			"FirstName": "Пётр",
+			"MiddleName": "Натальивна"
+		},
+		{
+			"LastName": "Ейбогин",
+			"FirstName": "Стоян",
+			"MiddleName": "Мстиславович"
+		},
+		{
+			"LastName": "Зайцев",
+			"FirstName": "Первуша",
+			"MiddleName": "Мстиславовна"
+		},
+		{
+			"LastName": "Шевченко",
+			"FirstName": "Любомила",
+			"MiddleName": "Петрович"
+		},
+		{
+			"LastName": "Ковальчук",
+			"FirstName": "Видана",
+			"MiddleName": "Татьянин"
+		},
+		{
+			"LastName": "Непейвода",
+			"FirstName": "Милонег"
+		},
+		{
+			"LastName": "Волков",
+			"FirstName": "Радость",
+			"MiddleName": "Ростиславовна"
+		},
+		{
+			"LastName": "Токарев",
+			"FirstName": "Дмитрий",
+			"MiddleName": "Всеволодович"
+		},
+		{
+			"LastName": "Громыко",
+			"FirstName": "Хотен"
+		},
+		{
+			"LastName": "Шевченко",
+			"FirstName": "Пётр"
+		},
+		{
+			"LastName": "Яцкевич",
+			"FirstName": "Богдан"
+		},
+		{
+			"LastName": "Ямщиков",
+			"FirstName": "Велимудр",
+			"MiddleName": "Ростиславович"
+		},
+		{
+			"LastName": "Мелешко",
+			"FirstName": "Радомила",
+			"MiddleName": "Ростиславовна"
+		},
+		{
+			"LastName": "Ястржембский",
+			"FirstName": "Пересвет",
+			"MiddleName": "Любавовна"
+		},
+		{
+			"LastName": "Шевченко",
+			"FirstName": "Веселина",
+			"MiddleName": "Ярославовна"
+		},
+		{
+			"LastName": "Кузнецов",
+			"FirstName": "Иван"
+		},
+		{
+			"LastName": "Гончаров",
+			"FirstName": "Рада",
+			"MiddleName": "Алексеевич"
+		},
+		{
+			"LastName": "Убейконь",
+			"FirstName": "Гостомысл",
+			"MiddleName": "Сергеевич"
+		},
+		{
+			"LastName": "Шевченко",
+			"FirstName": "Стоян",
+			"MiddleName": "Всеволодовна"
+		},
+		{
+			"LastName": "Кузьмин",
+			"FirstName": "Алексей",
+			"MiddleName": "Владимировна"
+		},
+		{
+			"LastName": "Мелешко",
+			"FirstName": "Борислав",
+			"MiddleName": "Всеволодович"
+		},
+		{
+			"LastName": "Хватаймуха",
+			"FirstName": "Вторак",
+			"MiddleName": "Святославович"
+		},
+		{
+			"LastName": "Иванов",
+			"FirstName": "Всемила",
+			"MiddleName": "Борисович"
+		},
+		{
+			"LastName": "Громыко",
+			"FirstName": "Рада",
+			"MiddleName": "Владимирович"
+		},
+		{
+			"LastName": "Шимко",
+			"FirstName": "Ждан",
+			"MiddleName": "Натальивна"
+		},
+		{
+			"LastName": "Мельников",
+			"FirstName": "Ратибор"
+		},
+		{
+			"LastName": "Мельников",
+			"FirstName": "Вячеслав"
+		},
+		{
+			"LastName": "Ейбогин",
+			"FirstName": "Добронега"
+		},
+		{
+			"LastName": "Бондаренко",
+			"FirstName": "Радость",
+			"MiddleName": "Ярославовна"
+		},
+		{
+			"LastName": "Громыко",
+			"FirstName": "Тихомир",
+			"MiddleName": "Натальивна"
+		},
+		{
+			"LastName": "Ильин",
+			"FirstName": "Светозара"
+		},
+		{
+			"LastName": "Ейбогин",
+			"FirstName": "Бажена",
+			"MiddleName": "Владимировна"
+		},
+		{
+			"LastName": "Иванов",
+			"FirstName": "Доброжир",
+			"MiddleName": "Петрович"
+		},
+		{
+			"LastName": "Златомир",
+			"FirstName": "Вторак"
+		},
+		{
+			"LastName": "Убейконь",
+			"FirstName": "Тихомир",
+			"MiddleName": "Татьянин"
+		},
+		{
+			"LastName": "Петров",
+			"FirstName": "Рада",
+			"MiddleName": "Владимирович"
+		}
+	],
+	"Teachers": [
+		{
+			"UserName": "bazhena.eybogin",
+			"Subjects": [
+				"PE"
+			]
+		},
+		{
+			"UserName": "aleksey.kuzmin",
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"UserName": "bazhena.yasinskiy",
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"UserName": "lyubomila.shevchenko",
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"UserName": "petr.shevchenko",
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"UserName": "rada.goncharov",
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"UserName": "vsemila.goncharov",
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"UserName": "vtorak.zlatomir",
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"UserName": "borislav.meleshko",
+			"Subjects": [
+				"BELLANG",
+				"BELLIT"
+			]
+		},
+		{
+			"UserName": "lyubomila.zdislav",
+			"Subjects": [
+				"BELLANG",
+				"BELLIT"
+			]
+		},
+		{
+			"UserName": "vorotislav.boyko",
+			"Subjects": [
+				"BELLANG",
+				"BELLIT"
+			]
+		},
+		{
+			"UserName": "yaroslav.golicyn",
+			"Subjects": [
+				"BELLANG",
+				"BELLIT"
+			]
+		},
+		{
+			"UserName": "dobrozhir.ivanov",
+			"Subjects": [
+				"BELHIST"
+			]
+		},
+		{
+			"UserName": "ratibor.melnikov",
+			"Subjects": [
+				"BELHIST"
+			]
+		},
+		{
+			"UserName": "rada.petrov",
+			"Subjects": [
+				"BIO"
+			]
+		},
+		{
+			"UserName": "vsemila.zaycev",
+			"Subjects": [
+				"BIO"
+			]
+		},
+		{
+			"UserName": "velimudr.kovalchuk",
+			"Subjects": [
+				"GEO"
+			]
+		},
+		{
+			"UserName": "ivan.kuznecov",
+			"Subjects": [
+				"IT"
+			]
+		},
+		{
+			"UserName": "rada.gromyko",
+			"Subjects": [
+				"IT"
+			]
+		},
+		{
+			"UserName": "stoyan.eybogin",
+			"Subjects": [
+				"IT"
+			]
+		},
+		{
+			"UserName": "vtorak.hvataymuha",
+			"Subjects": [
+				"IT"
+			]
+		},
+		{
+			"UserName": "vorotislav.kuzmin",
+			"Subjects": [
+				"ART"
+			]
+		},
+		{
+			"UserName": "petr.kovalchuk",
+			"Subjects": [
+				"HIST"
+			]
+		},
+		{
+			"UserName": "volibor.bocharov",
+			"Subjects": [
+				"HIST"
+			]
+		},
+		{
+			"UserName": "hoten.gromyko",
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"UserName": "radomila.meleshko",
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"UserName": "radost.volkov",
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"UserName": "stoyan.shevchenko",
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"UserName": "tihomir.ubeykon",
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"UserName": "velimudr.yamschikov",
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"UserName": "vsemila.sidorov",
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"UserName": "gostomysl.ubeykon",
+			"Subjects": [
+				"SAFETY"
+			]
+		},
+		{
+			"UserName": "hoten.nepeyvoda",
+			"Subjects": [
+				"SAFETY"
+			]
+		},
+		{
+			"UserName": "peresvet.yastrzhembskiy",
+			"Subjects": [
+				"SAFETY"
+			]
+		},
+		{
+			"UserName": "zhdan.shimko",
+			"Subjects": [
+				"SAFETY"
+			]
+		},
+		{
+			"UserName": "radomila.pavlyuchenkov",
+			"Subjects": [
+				"CIVICS"
+			]
+		},
+		{
+			"UserName": "vsemila.ivanov",
+			"Subjects": [
+				"CIVICS"
+			]
+		},
+		{
+			"UserName": "bogdan.yackevich",
+			"Subjects": [
+				"RUSLANG",
+				"RUSLIT"
+			]
+		},
+		{
+			"UserName": "dobronega.eybogin",
+			"Subjects": [
+				"RUSLANG",
+				"RUSLIT"
+			]
+		},
+		{
+			"UserName": "pervusha.zaycev",
+			"Subjects": [
+				"RUSLANG",
+				"RUSLIT"
+			]
+		},
+		{
+			"UserName": "tihomir.gromyko",
+			"Subjects": [
+				"RUSLANG",
+				"RUSLIT"
+			]
+		},
+		{
+			"UserName": "vidana.kovalchuk",
+			"Subjects": [
+				"RUSLANG",
+				"RUSLIT"
+			]
+		},
+		{
+			"UserName": "dmitriy.tokarev",
+			"Subjects": [
+				"WORKART"
+			]
+		},
+		{
+			"UserName": "svetozara.ilin",
+			"Subjects": [
+				"WORKART"
+			]
+		},
+		{
+			"UserName": "miloneg.nepeyvoda",
+			"Subjects": [
+				"PHYS"
+			]
+		},
+		{
+			"UserName": "mstislav.yastrzhembskiy",
+			"Subjects": [
+				"PE"
+			]
+		},
+		{
+			"UserName": "radost.bondarenko",
+			"Subjects": [
+				"PE"
+			]
+		},
+		{
+			"UserName": "venceslava.volkov",
+			"Subjects": [
+				"PE"
+			]
+		},
+		{
+			"UserName": "borislav.nepeyvoda",
+			"Subjects": [
+				"CHEM"
+			]
+		},
+		{
+			"UserName": "vyacheslav.melnikov",
+			"Subjects": [
+				"CHEM"
+			]
+		},
+		{
+			"UserName": "veselina.shevchenko",
+			"Subjects": [
+				"MAW"
+			]
+		},
+		{
+			"UserName": "velislava.bondarenko",
+			"Subjects": [
+				"TECHDRAW"
+			]
+		}
+	],
+	"ClassGroups": [
+		{
+			"Grade": 5,
+			"Letter": "А"
+		},
+		{
+			"Grade": 5,
+			"Letter": "Б"
+		},
+		{
+			"Grade": 5,
+			"Letter": "В"
+		},
+		{
+			"Grade": 5,
+			"Letter": "Г"
+		},
+		{
+			"Grade": 6,
+			"Letter": "А"
+		},
+		{
+			"Grade": 6,
+			"Letter": "Б"
+		},
+		{
+			"Grade": 6,
+			"Letter": "В"
+		},
+		{
+			"Grade": 7,
+			"Letter": "А"
+		},
+		{
+			"Grade": 7,
+			"Letter": "Б"
+		},
+		{
+			"Grade": 7,
+			"Letter": "В"
+		},
+		{
+			"Grade": 8,
+			"Letter": "А"
+		},
+		{
+			"Grade": 8,
+			"Letter": "Б"
+		},
+		{
+			"Grade": 8,
+			"Letter": "В"
+		},
+		{
+			"Grade": 9,
+			"Letter": "А"
+		},
+		{
+			"Grade": 9,
+			"Letter": "Б"
+		},
+		{
+			"Grade": 9,
+			"Letter": "В"
+		},
+		{
+			"Grade": 9,
+			"Letter": "Г"
+		},
+		{
+			"Grade": 10,
+			"Letter": "А"
+		},
+		{
+			"Grade": 10,
+			"Letter": "Б"
+		},
+		{
+			"Grade": 11,
+			"Letter": "А"
+		},
+		{
+			"Grade": 11,
+			"Letter": "Б"
+		}
+	],
+	"Subjects": [
+		{
+			"Name": "Математика",
+			"Code": "MATH"
+		},
+		{
+			"Name": "Физика",
+			"Code": "PHYS"
+		},
+		{
+			"Name": "Химия",
+			"Code": "CHEM"
+		},
+		{
+			"Name": "История",
+			"Code": "HIST"
+		},
+		{
+			"Name": "Физическая культура",
+			"Code": "PE"
+		},
+		{
+			"Name": "Русский язык",
+			"Code": "RUSLANG"
+		},
+		{
+			"Name": "Русская литература",
+			"Code": "RUSLIT"
+		},
+		{
+			"Name": "Английский язык",
+			"Code": "ENGLANG"
+		},
+		{
+			"Name": "Белорусский язык",
+			"Code": "BELLANG"
+		},
+		{
+			"Name": "Белорусская литература",
+			"Code": "BELLIT"
+		},
+		{
+			"Name": "Труды",
+			"Code": "WORKART"
+		},
+		{
+			"Name": "География",
+			"Code": "GEO"
+		},
+		{
+			"Name": "Информатика",
+			"Code": "IT"
+		},
+		{
+			"Name": "Черчение",
+			"Code": "TECHDRAW"
+		},
+		{
+			"Name": "Человек и Мир",
+			"Code": "MAW"
+		},
+		{
+			"Name": "История Беларуси",
+			"Code": "BELHIST"
+		},
+		{
+			"Name": "Обществоведение",
+			"Code": "CIVICS"
+		},
+		{
+			"Name": "Искусство",
+			"Code": "ART"
+		},
+		{
+			"Name": "Основы безопасности жизнедеятельности",
+			"Code": "SAFETY"
+		},
+		{
+			"Name": "Биология",
+			"Code": "BIO"
+		}
+	],
+	"Rooms": [
+		{
+			"Floor": 1,
+			"Number": 1,
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 15,
+			"Subjects": [
+				"ART",
+				"TECHDRAW",
+				"WORKART"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 18,
+			"Subjects": [
+				"ART",
+				"TECHDRAW",
+				"WORKART"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 23,
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 25,
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 26,
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 27,
+			"Subjects": [
+				"RUSLANG",
+				"RUSLIT"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 28,
+			"Subjects": [
+				"RUSLANG",
+				"RUSLIT"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 32,
+			"Subjects": [
+				"RUSLANG",
+				"RUSLIT"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 33,
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 34,
+			"Subjects": [
+				"BELHIST",
+				"GEO",
+				"HIST"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 35,
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"Floor": 1,
+			"Number": 37,
+			"Subjects": [
+				"ENGLANG"
+			]
+		},
+		{
+			"Floor": 2,
+			"Number": 10,
+			"Subjects": [
+				"PE"
+			]
+		},
+		{
+			"Floor": 2,
+			"Number": 27,
+			"Subjects": [
+				"PHYS"
+			]
+		},
+		{
+			"Floor": 2,
+			"Number": 28,
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"Floor": 2,
+			"Number": 29,
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"Floor": 2,
+			"Number": 30,
+			"Subjects": [
+				"BIO"
+			]
+		},
+		{
+			"Floor": 2,
+			"Number": 34,
+			"Subjects": [
+				"IT"
+			]
+		},
+		{
+			"Floor": 2,
+			"Number": 35,
+			"Subjects": [
+				"IT"
+			]
+		},
+		{
+			"Floor": 2,
+			"Number": 37,
+			"Subjects": [
+				"MATH"
+			]
+		},
+		{
+			"Floor": 3,
+			"Number": 24,
+			"Subjects": [
+				"CHEM"
+			]
+		},
+		{
+			"Floor": 3,
+			"Number": 26,
+			"Subjects": [
+				"BELLANG",
+				"BELLIT"
+			]
+		},
+		{
+			"Floor": 3,
+			"Number": 27,
+			"Subjects": [
+				"BELLANG",
+				"BELLIT"
+			]
+		},
+		{
+			"Floor": 3,
+			"Number": 28,
+			"Subjects": [
+				"CIVICS",
+				"MAW",
+				"SAFETY"
+			]
+		},
+		{
+			"Floor": 3,
+			"Number": 32,
+			"Subjects": [
+				"BELLANG",
+				"BELLIT"
+			]
+		},
+		{
+			"Floor": 3,
+			"Number": 33,
+			"Subjects": [
+				"CIVICS",
+				"MAW",
+				"SAFETY"
+			]
+		},
+		{
+			"Floor": 3,
+			"Number": 34,
+			"Subjects": [
+				"BELHIST",
+				"GEO",
+				"HIST"
+			]
+		},
+		{
+			"Floor": 3,
+			"Number": 36,
+			"Subjects": [
+				"BIO"
+			]
+		}
+	],
+	"TimeSlots": [
+		{
+			"DayOfWeek": 0,
+			"Period": 1
+		},
+		{
+			"DayOfWeek": 0,
+			"Period": 2
+		},
+		{
+			"DayOfWeek": 0,
+			"Period": 3
+		},
+		{
+			"DayOfWeek": 0,
+			"Period": 4
+		},
+		{
+			"DayOfWeek": 0,
+			"Period": 5
+		},
+		{
+			"DayOfWeek": 0,
+			"Period": 6
+		},
+		{
+			"DayOfWeek": 1,
+			"Period": 1
+		},
+		{
+			"DayOfWeek": 1,
+			"Period": 2
+		},
+		{
+			"DayOfWeek": 1,
+			"Period": 3
+		},
+		{
+			"DayOfWeek": 1,
+			"Period": 4
+		},
+		{
+			"DayOfWeek": 1,
+			"Period": 5
+		},
+		{
+			"DayOfWeek": 1,
+			"Period": 6
+		},
+		{
+			"DayOfWeek": 2,
+			"Period": 1
+		},
+		{
+			"DayOfWeek": 2,
+			"Period": 2
+		},
+		{
+			"DayOfWeek": 2,
+			"Period": 3
+		},
+		{
+			"DayOfWeek": 2,
+			"Period": 4
+		},
+		{
+			"DayOfWeek": 2,
+			"Period": 5
+		},
+		{
+			"DayOfWeek": 2,
+			"Period": 6
+		},
+		{
+			"DayOfWeek": 3,
+			"Period": 1
+		},
+		{
+			"DayOfWeek": 3,
+			"Period": 2
+		},
+		{
+			"DayOfWeek": 3,
+			"Period": 3
+		},
+		{
+			"DayOfWeek": 3,
+			"Period": 4
+		},
+		{
+			"DayOfWeek": 3,
+			"Period": 5
+		},
+		{
+			"DayOfWeek": 3,
+			"Period": 6
+		},
+		{
+			"DayOfWeek": 4,
+			"Period": 1
+		},
+		{
+			"DayOfWeek": 4,
+			"Period": 2
+		},
+		{
+			"DayOfWeek": 4,
+			"Period": 3
+		},
+		{
+			"DayOfWeek": 4,
+			"Period": 4
+		},
+		{
+			"DayOfWeek": 4,
+			"Period": 5
+		},
+		{
+			"DayOfWeek": 4,
+			"Period": 6
+		}
+	]
 }
