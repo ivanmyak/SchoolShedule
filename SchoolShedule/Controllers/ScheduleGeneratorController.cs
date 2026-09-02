@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Humanizer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using SchoolShedule.Data;
 using SchoolShedule.Entities;
 using SchoolShedule.Entities.Generation;
@@ -10,6 +13,7 @@ using SchoolShedule.Models;
 using System.ComponentModel;
 using System.Runtime.Serialization;
 using System.Text.Json;
+using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace SchoolShedule.Controllers
 {
@@ -113,6 +117,316 @@ namespace SchoolShedule.Controllers
             }
 
 
+        }
+
+        /// <summary>
+        /// Обработка загружаемого шаблона
+        /// </summary>
+        /// <param name="file">Шаблон в виде Excel-файла</param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> UploadTemplateExcel(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Файл не загружен.");
+
+            using var stream = file.OpenReadStream();
+            using var package = new ExcelPackage(stream);
+            var ws = package.Workbook.Worksheets[0];
+
+            // Загружаем справочники
+            var allClassesDict = _context.ClassGroups
+                .ToDictionary(c => c.Name.Trim(), c => c, StringComparer.OrdinalIgnoreCase);
+
+            var allSubjectsDict = _context.Subjects
+                .ToDictionary(s => s.Name.Trim(), s => s, StringComparer.OrdinalIgnoreCase);
+
+            // Шаблоны — ключ: (Name + PeriodType)
+            var allTemplatesDict = _context.ScheduleTemplates
+                .ToDictionary(
+                    t => $"{t.Name.Trim().ToLower()}|{t.PeriodType}",
+                    t => t
+                );
+
+            // Валидация Excel
+            var report = ValidateExcel(ws, allClassesDict, allSubjectsDict, allTemplatesDict);
+
+            if (report.HasErrors)
+            {
+                TempData["ExcelErrors"] = string.Join("\n", report.Errors);
+                return RedirectToAction("Wizard");
+            }
+
+            if (report.HasWarnings)
+            {
+                TempData["ExcelWarnings"] = string.Join("\n", report.Warnings);
+                // Можно сделать страницу подтверждения
+            }
+
+            // 1. Читаем период
+            var periodType = Enum.Parse<SchedulePeriodType>(ws.Cells["B1"].Text);
+
+            // 2. Читаем название шаблона
+            var templateName = ws.Cells["B2"].Text.Trim();
+
+            // 3. Проверка существующего шаблона
+            string templateKey = $"{templateName.ToLower()}|{periodType}";
+
+            if (allTemplatesDict.ContainsKey(templateKey))
+            {
+                TempData["ExcelErrors"] =
+                    $"Уже существует шаблон с именем '{templateName}' и периодом '{periodType}'.\n" +
+                    $"Перед загрузкой такого же шаблона — либо переименуйте Excel-файл, либо удалите существующий.\n" +
+                    $"Настоятельно рекомендуем перед удалением — выгрузить шаблон.";
+                return RedirectToAction("Wizard");
+            }
+
+            // 4. Создаём шаблон
+            var template = new ScheduleTemplate
+            {
+                Name = templateName,
+                PeriodType = periodType,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.ScheduleTemplates.Add(template);
+            await _context.SaveChangesAsync();
+
+            // 5. Читаем таблицу предмет × класс
+            int row = 5;
+
+            while (!string.IsNullOrWhiteSpace(ws.Cells[row, 1].Text))
+            {
+                string subjectName = ws.Cells[row, 1].Text.Trim();
+                var subject = allSubjectsDict[subjectName];
+
+                int col = 2;
+
+                while (!string.IsNullOrWhiteSpace(ws.Cells[4, col].Text))
+                {
+                    string className = ws.Cells[4, col].Text.Trim();
+                    var classGroup = allClassesDict[className];
+
+                    int hours = int.Parse(ws.Cells[row, col].Text);
+
+                    var rule = new HoursRule
+                    {
+                        Hours = hours,
+                        PeriodType = periodType,
+                        SubjectId = subject.Id
+                    };
+
+                    var container = new LessonRuleContainer
+                    {
+                        TemplateId = template.Id,
+                        SubjectId = subject.Id,
+                        ClassGroupId = classGroup.Id,
+                        RulesJson = JsonSerializer.Serialize(new List<HoursRule> { rule })
+                    };
+
+                    _context.LessonRuleContainers.Add(container);
+
+                    col++;
+                }
+
+                row++;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Wizard");
+        }
+
+
+        /// <summary>
+        /// Экспорт в Excel-файл выбранный шаблон
+        /// </summary>
+        /// <param name="templateId">ID выбранного шаблона</param>
+        /// <returns></returns>
+        public async Task<IActionResult> DownloadTemplateExcel(int templateId)
+        {
+            if (templateId == 0)
+                return NotFound("Не выбран шаблон");
+
+            var containers = await _context.LessonRuleContainers
+                .Where(c => c.TemplateId == templateId)
+                .Include(c => c.ClassGroup)
+                .Include(c => c.Subject)
+                .Include(c => c.Template)
+                .ToListAsync();
+
+            if (!containers.Any())
+                return NotFound("У шаблона нет данных.");
+
+            var template = containers.First().Template;
+
+            using var package = new ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("Template");
+
+            // Заголовки
+            ws.Cells["A1"].Value = "Период:";
+            ws.Cells["B1"].Value = template.PeriodType;
+
+            ws.Cells["A2"].Value = "Название:";
+            ws.Cells["B2"].Value = template.Name;
+
+            // -----------------------------
+            // 1. Собираем классы из контейнеров
+            // -----------------------------
+            var classGroups = containers
+                .Select(c => c.ClassGroup)
+                .Distinct()
+                .OrderBy(c => c.Grade)
+                .ThenBy(c => c.Letter)
+                .ToList();
+
+            // Заголовок таблицы
+            ws.Cells[4, 1].Value = "Предмет";
+
+            int col = 2;
+            foreach (var cg in classGroups)
+            {
+                ws.Cells[4, col].Value = cg.Name;
+                col++;
+            }
+
+            // -----------------------------
+            // 2. Собираем предметы из контейнеров
+            // -----------------------------
+            var subjects = containers
+                .Select(c => c.Subject)
+                .Distinct()
+                .OrderBy(s => s.Name)
+                .ToList();
+
+            // -----------------------------
+            // 3. Заполняем таблицу предмет × класс
+            // -----------------------------
+            int row = 5;
+
+            foreach (var subject in subjects)
+            {
+                ws.Cells[row, 1].Value = subject.Name;
+
+                col = 2;
+
+                foreach (var cg in classGroups)
+                {
+                    var cont = containers
+                        .FirstOrDefault(c => c.SubjectId == subject.Id &&
+                                             c.ClassGroupId == cg.Id);
+
+                    int hours = 0;
+
+                    if (cont != null)
+                    {
+                        var rules = JsonSerializer.Deserialize<List<HoursRule>>(cont.RulesJson);
+                        hours = rules?.FirstOrDefault()?.Hours ?? 0;
+                    }
+
+                    ws.Cells[row, col].Value = hours;
+                    col++;
+                }
+
+                row++;
+            }
+
+            var bytes = package.GetAsByteArray();
+
+            return File(
+                bytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"{template.Name}.xlsx"
+            );
+        }
+
+        private ExcelImportReport ValidateExcel(
+    ExcelWorksheet ws,
+    Dictionary<string, ClassGroup> allClassesDict,
+    Dictionary<string, Subject> allSubjectsDict,
+    Dictionary<string, ScheduleTemplate> allTemplatesDict)
+        {
+            var report = new ExcelImportReport();
+
+            // Проверка структуры
+            if (ws.Cells["A1"].Text != "Период:")
+                report.Errors.Add("Ячейка A1 должна содержать текст 'Период:'.");
+
+            if (string.IsNullOrWhiteSpace(ws.Cells["B1"].Text))
+                report.Errors.Add("Не указан период в ячейке B1.");
+
+            if (!Enum.TryParse<SchedulePeriodType>(ws.Cells["B1"].Text, out var period))
+                report.Errors.Add($"Период '{ws.Cells["B1"].Text}' не соответствует типам SchedulePeriodType.");
+
+            if (string.IsNullOrWhiteSpace(ws.Cells["B2"].Text))
+                report.Errors.Add("Название шаблона (ячейка B2) пустое.");
+
+            string templateName = ws.Cells["B2"].Text.Trim();
+            string templateKey = $"{templateName.ToLower()}|{period}";
+
+            if (allTemplatesDict.ContainsKey(templateKey))
+            {
+                report.Errors.Add(
+                    $"Уже существует шаблон '{templateName}' для периода '{period}'. " +
+                    $"Переименуйте Excel-файл или удалите существующий шаблон."
+                );
+            }
+
+            // Чтение классов
+            var classNames = new List<string>();
+            int col = 2;
+
+            while (!string.IsNullOrWhiteSpace(ws.Cells[4, col].Text))
+            {
+                classNames.Add(ws.Cells[4, col].Text.Trim());
+                col++;
+            }
+
+            if (!classNames.Any())
+                report.Errors.Add("Не найдено ни одного класса в строке 4.");
+
+            foreach (var name in classNames)
+            {
+                if (!allClassesDict.ContainsKey(name))
+                    report.Errors.Add($"Класс '{name}' отсутствует в базе данных.");
+            }
+
+            // Чтение предметов
+            int row = 5;
+
+            while (!string.IsNullOrWhiteSpace(ws.Cells[row, 1].Text))
+            {
+                string subjectName = ws.Cells[row, 1].Text.Trim();
+
+                if (!allSubjectsDict.ContainsKey(subjectName))
+                    report.Errors.Add($"Предмет '{subjectName}' отсутствует в базе данных.");
+
+                col = 2;
+
+                foreach (var className in classNames)
+                {
+                    string raw = ws.Cells[row, col].Text.Trim();
+
+                    if (string.IsNullOrWhiteSpace(raw))
+                        report.Errors.Add($"Пустая ячейка часов для '{subjectName}' и класса '{className}'.");
+                    else if (!int.TryParse(raw, out int hours))
+                        report.Errors.Add($"Некорректное значение часов '{raw}' для '{subjectName}' и класса '{className}'.");
+                    else
+                    {
+                        if (hours < 0)
+                            report.Errors.Add($"Отрицательное количество часов ({hours}) для '{subjectName}' и класса '{className}'.");
+
+                        if (hours > 20)
+                            report.Warnings.Add($"Подозрительно большое количество часов ({hours}) для '{subjectName}' и класса '{className}'.");
+                    }
+
+                    col++;
+                }
+
+                row++;
+            }
+
+            return report;
         }
 
 
@@ -255,7 +569,7 @@ namespace SchoolShedule.Controllers
         /// <returns></returns>
         /// <exception cref="KeyNotFoundException"></exception>
         /// <exception cref="SerializationException"></exception>
-        public IActionResult BuildManualSchedule(int templateId, int classid = 0)
+        public IActionResult BuildManualSchedule(int templateId)
         {
             var classGroupContainers = _context.LessonRuleContainers
     .Where(c => c.TemplateId == templateId)
@@ -350,30 +664,29 @@ namespace SchoolShedule.Controllers
             var classWorkDays = CalculateDailyLessonLimits(freedomHours);
             // Коллекция ячеек для формирования Уроков по классам
             var baseForLessons = BuildDailyLessonLimits(classWorkDays);
+            // 
 
-
-            currentClassGroup =  
-                classid == 0 ?
-                allClassGroups.FirstOrDefault(cg => cg.Id == baseForLessons.First().Key) ?? throw new KeyNotFoundException($"Не удалось найти класс по ID = {currentClassId}!")
-                : 
-                allClassGroups.FirstOrDefault(cg => cg.Id == classid) ?? throw new KeyNotFoundException($"Не удалось найти класс по ID = {currentClassId}!");
-
-            var subjectsForLessons = BuildLessonTasksForClass(currentClassId, rulesByClass[currentClassId], allSubjects, false)
+            var models = new List<ManualGenerateViewModel>();
+            foreach (var classGroup in allClassGroups)
+            {
+                var subjectsForLessons = BuildLessonTasksForClass(currentClassId, rulesByClass[currentClassId], allSubjects, false)
                 .GroupBy(s => s.Id)
                 .Select(g => (SubjectId: g.Key, Hours: g.Count()))
                 .ToList();
-            var model = new ManualGenerateViewModel
-            {
-                ClassGroup = currentClassGroup,
-                Teachers = allTeachers,
-                Rooms = allRooms,
-                Subjects = allSubjects,
-                CalculatedTimeSlots = baseForLessons[currentClassGroup.Id],
-                SelectedSchedulePeriod = selectedSchedulePeriodType,
-                SubjectHours = subjectsForLessons
-            };
+                var model = new ManualGenerateViewModel
+                {
+                    ClassGroup = currentClassGroup,
+                    Teachers = allTeachers,
+                    Rooms = allRooms,
+                    Subjects = allSubjects,
+                    CalculatedTimeSlots = baseForLessons[currentClassGroup.Id],
+                    SelectedSchedulePeriod = selectedSchedulePeriodType,
+                    SubjectHours = subjectsForLessons
+                };
+                models.Add(model);
+            }
 
-            return View("Manual", model);
+            return View("Manual", models);
         }
 
         [HttpPost]
@@ -405,7 +718,7 @@ namespace SchoolShedule.Controllers
         public class ManualScheduleSaveRequest
         {
             public int ClassId { get; set; }
-            public string Period { get; set; }
+            public string Period { get; set; } = string.Empty;
             public List<ManualLessonDto> Lessons { get; set; } = new();
         }
 

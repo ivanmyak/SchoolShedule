@@ -1,6 +1,4 @@
 ﻿let draggedSubject = null;
-let draggedHours = 0;
-let draggedSubjectId = 0;
 let currentCell = null;
 
 // === DRAG START ===
@@ -9,10 +7,6 @@ document.addEventListener("dragstart", function (e) {
     if (!item) return;
 
     draggedSubject = item;
-    draggedSubjectId = item.dataset.subjectId;
-    draggedHours = parseInt(item.dataset.hours);
-
-    e.dataTransfer.effectAllowed = "move";
 });
 
 // === DRAG OVER ===
@@ -30,7 +24,6 @@ document.addEventListener("drop", function (e) {
     e.preventDefault();
     currentCell = dropzone.closest(".schedule-cell");
 
-    // Открываем модалку выбора преподавателя
     const modal = new bootstrap.Modal(document.getElementById("teacherModal"));
     modal.show();
 });
@@ -42,12 +35,10 @@ document.getElementById("teacher-select-confirm").addEventListener("click", func
     const modal = bootstrap.Modal.getInstance(document.getElementById("teacherModal"));
     modal.hide();
 
-    // Открываем модалку выбора кабинета
+    currentCell.dataset.teacherId = teacherId;
+
     const roomModal = new bootstrap.Modal(document.getElementById("roomModal"));
     roomModal.show();
-
-    // Сохраняем выбранного преподавателя
-    currentCell.dataset.teacherId = teacherId;
 });
 
 // === CONFIRM ROOM ===
@@ -57,11 +48,9 @@ document.getElementById("room-select-confirm").addEventListener("click", functio
     const modal = bootstrap.Modal.getInstance(document.getElementById("roomModal"));
     modal.hide();
 
-    // Сохраняем кабинет
     currentCell.dataset.roomId = roomId;
 
-    // Вставляем предмет в ячейку
-    const subjectName = draggedSubject.querySelector("span").innerText;
+    const subjectName = draggedSubject.dataset.subjectName;
 
     currentCell.querySelector(".cell-content").innerHTML = `
         <div class="p-1 bg-light border rounded">
@@ -71,25 +60,23 @@ document.getElementById("room-select-confirm").addEventListener("click", functio
         </div>
     `;
 
-    // Уменьшаем количество часов
-    draggedHours -= 1;
-    draggedSubject.dataset.hours = draggedHours;
-    draggedSubject.querySelector(".badge").innerText = draggedHours;
+    let hours = parseInt(draggedSubject.dataset.hours);
+    hours -= 1;
+    draggedSubject.dataset.hours = hours;
+    draggedSubject.querySelector(".badge").innerText = hours;
 
-    // Если часов больше нет — блокируем предмет
-    if (draggedHours <= 0) {
+    if (hours <= 0) {
         draggedSubject.setAttribute("draggable", "false");
         draggedSubject.classList.add("disabled");
     }
 
     draggedSubject = null;
 
-    // Проверяем, все ли предметы распределены
-    checkAllSubjectsPlaced();
+    checkClassFilled();
 });
 
-// === Проверка, все ли предметы распределены ===
-function checkAllSubjectsPlaced() {
+// === Проверка заполненности текущего класса ===
+function checkClassFilled() {
     const items = document.querySelectorAll(".subject-item");
     const allZero = Array.from(items).every(i => parseInt(i.dataset.hours) === 0);
 
@@ -110,23 +97,31 @@ document.getElementById("save-schedule-btn").addEventListener("click", function 
         lessons.push({
             day: cell.dataset.day,
             period: cell.dataset.period,
-            subjectId: content.querySelector("strong").innerText,
+            subjectName: content.querySelector("strong").innerText,
             teacherId: cell.dataset.teacherId,
             roomId: cell.dataset.roomId
         });
     });
 
-    const payload = {
-        classId: window.manualClassId,
-        period: window.manualPeriod,
-        lessons: lessons
-    };
+    const currentModel = window.manualModels[window.manualIndex];
+
+    currentModel.FilledLessons = lessons;
+
+    const allFilled = window.manualModels.every(m => m.FilledLessons && m.FilledLessons.length > 0);
+
+    if (!allFilled) {
+        if (!confirm(`Вы пытаетесь сохранить расписание только для класса ${currentModel.ClassGroup.Name}. Продолжить?`)) {
+            return;
+        }
+    } else {
+        alert("Все классы заполнены. Сохраняем расписание всех классов.");
+    }
 
     $.ajax({
         url: '/ScheduleGenerator/SaveManualSchedule',
         method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify(payload),
+        data: JSON.stringify(window.manualModels),
         success: function () {
             alert("Расписание сохранено!");
         },

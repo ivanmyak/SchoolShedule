@@ -1,18 +1,47 @@
-﻿@model ManualGenerateViewModel
+﻿@model List<ManualGenerateViewModel>
 @using SchoolShedule.Extensions
 
 @{
     ViewData["Title"] = "Ручное составление расписания";
-    var slotsPerDay = Model.CalculatedTimeSlots
-            .GroupBy(ts => ts.DayOfWeek);
+
+    // индекс текущего класса
+    int index = ViewBag.Index ?? 0;
+    var current = Model[index];
+
+    var slotsPerDay = current.CalculatedTimeSlots
+        .GroupBy(ts => ts.DayOfWeek);
 }
 
 <div class="container-fluid mt-3">
 
+    <!-- Пагинация -->
+    <div class="d-flex justify-content-between mb-3">
+
+        @if (index > 0)
+        {
+            <a class="btn btn-outline-primary"
+               href="@Url.Action("Manual", new { templateId = ViewBag.TemplateId, index = index - 1 })">
+                ← @Model[index - 1].ClassGroup.Name
+            </a>
+        }
+        else
+        {
+            <span></span>
+        }
+
+        @if (index < Model.Count - 1)
+        {
+            <a class="btn btn-outline-primary"
+               href="@Url.Action("Manual", new { templateId = ViewBag.TemplateId, index = index + 1 })">
+                @Model[index + 1].ClassGroup.Name →
+            </a>
+        }
+    </div>
+
     <!-- Заголовок -->
     <h1 class="text-center mb-4">
-        Расписание для класса @Model.ClassGroup.Name
-        <small class="text-muted">(@Model.SelectedSchedulePeriod.GetDisplayName())</small>
+        Расписание для класса @current.ClassGroup.Name
+        <small class="text-muted">(@current.SelectedSchedulePeriod.GetDisplayName())</small>
     </h1>
 
     <div class="row">
@@ -22,16 +51,15 @@
             <h4>Предметы и часы</h4>
             <ul id="subjects-list" class="list-group">
 
-                @foreach (var (subjectId, hours) in Model.SubjectHours)
+                @foreach (var (subjectId, hours) in current.SubjectHours)
                 {
-                    var subject = Model.Subjects.First(s => s.Id == subjectId);
+                    var subject = current.Subjects.First(s => s.Id == subjectId);
 
                     <li class="list-group-item d-flex justify-content-between align-items-center subject-item"
                         draggable="true"
                         data-subject-id="@subject.Id"
                         data-subject-name="@subject.Name"
                         data-hours="@hours">
-
 
                         <span>@subject.Name</span>
                         <span class="badge bg-primary rounded-pill">@hours</span>
@@ -64,8 +92,10 @@
 
                             @foreach (var day in Enum.GetValues<SchoolShedule.Enums.Day>())
                             {
-                                var slot = Model.CalculatedTimeSlots.FirstOrDefault(cts => cts.Period == (i+1) && cts.DayOfWeek == day);
-                                @if (slot is not null)
+                                var slot = current.CalculatedTimeSlots
+                                    .FirstOrDefault(cts => cts.Period == (i + 1) && cts.DayOfWeek == day);
+
+                                if (slot is not null)
                                 {
                                     <td class="schedule-cell"
                                         data-day="@day"
@@ -74,21 +104,16 @@
                                         data-teacher-id=""
                                         data-room-id=""
                                         id="@slot.Id">
-                                        Вставь мне
+                                        <div class="cell-content dropzone"></div>
                                     </td>
                                 }
                                 else
                                 {
-                                    <td>
-                                        Пустой
-                                    </td>
+                                    <td class="bg-light text-muted">—</td>
                                 }
                             }
                         </tr>
-
                     }
-
-                    
                 </tbody>
             </table>
 
@@ -115,7 +140,7 @@
 
             <div class="modal-body">
                 <select id="teacher-select" class="form-select">
-                    @foreach (var teacher in Model.Teachers)
+                    @foreach (var teacher in current.Teachers)
                     {
                         <option value="@teacher.UserId">@teacher.User.GetFIO</option>
                     }
@@ -142,7 +167,7 @@
 
             <div class="modal-body">
                 <select id="room-select" class="form-select">
-                    @foreach (var room in Model.Rooms)
+                    @foreach (var room in current.Rooms)
                     {
                         <option value="@room.Id">@room.RoomNumber</option>
                     }
@@ -159,8 +184,10 @@
 
 @section Scripts {
     <script>
-        window.manualClassId = "@Model.ClassGroup.Id";
-        window.manualPeriod = "@Model.SelectedSchedulePeriod";
+        window.manualModels = @Html.Raw(Json.Serialize(Model));
+        window.manualIndex = @index;
+        window.manualClassId = "@current.ClassGroup.Id";
+        window.manualPeriod = "@current.SelectedSchedulePeriod";
     </script>
 
     <script src="~/js/manual-schedule.js"></script>

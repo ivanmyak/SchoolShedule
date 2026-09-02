@@ -55,6 +55,14 @@ else
                             <i class="bi bi-trash"></i>
                         </button>
 
+                        <a asp-action="DownloadTemplateExcel"
+                           asp-route-templateId="@t.Id"
+                           class="btn btn-outline-secondary btn-sm me-2"
+                           data-bs-toggle="tooltip"
+                           title="Выгрузить шаблон в Excel">
+                            <i class="bi bi-file-earmark-excel"></i>
+                        </a>
+
                     </td>
                 </tr>
             }
@@ -62,9 +70,36 @@ else
     </table>
 }
 
-<a asp-action="WizardTemplateMinimum" class="btn btn-primary mt-3">
+<a asp-action="WizardTemplateMinimum" class="btn btn-primary mt-3 me-2">
     Создать новый шаблон
 </a>
+
+<form asp-action="UploadTemplateExcel"
+      method="post"
+      enctype="multipart/form-data"
+      class="d-inline">
+    <input type="file" name="file" accept=".xlsx" class="form-control d-inline w-auto" required />
+    <button type="submit" class="btn btn-success mt-3">
+        Загрузить новый шаблон (Excel)
+    </button>
+</form>
+
+
+@if (TempData["ExcelErrors"] != null)
+{
+    <div class="alert alert-danger">
+        <h5>Ошибки при загрузке Excel:</h5>
+        <pre>@TempData["ExcelErrors"]</pre>
+    </div>
+}
+
+@if (TempData["ExcelWarnings"] != null)
+{
+    <div class="alert alert-warning">
+        <h5>Предупреждения:</h5>
+        <pre>@TempData["ExcelWarnings"]</pre>
+    </div>
+}
 
 @section Scripts {
     <script>
