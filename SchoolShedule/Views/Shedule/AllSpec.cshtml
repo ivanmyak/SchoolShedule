@@ -4,7 +4,7 @@
 
 @{
     var days = Enum.GetValues(typeof(Day)).Cast<Day>().ToList();
-    int maxPeriods = 8;
+    int maxPeriods = 6;
 
     var rows = Model.Lessons
         .GroupBy(l => new { l.Subject, l.Room })
@@ -63,6 +63,7 @@
                             l.TimeSlot.Period == period);
 
                             <td class="lesson-cell"
+                                data-lessonid="@lesson?.Id"
                                 data-day="@day"
                                 data-period="@period"
                                 data-subject-id="@row.Key.Subject.Id"
@@ -98,8 +99,8 @@
 <!-- Контекстное меню -->
 <div id="contextMenu" class="context-menu shadow">
     <div class="context-item" data-action="create">Создать</div>
-    <div class="context-item disabled" data-action="edit">Изменить</div>
-    <div class="context-item disabled" data-action="delete">Удалить</div>
+    <div class="context-item disabled" data-action="edit" data-id="">Изменить</div>
+    <div class="context-item disabled" data-action="delete" data-id="">Удалить</div>
 </div>
 
 @section Scripts {
@@ -135,6 +136,7 @@
             const period = currentCell.dataset.period;
             const subject = currentCell.dataset.subjectId;
             const room = currentCell.dataset.roomId;
+            const lessonid = currentCell.dataset.lessonid;
 
             const params = new URLSearchParams();
             if (day) params.append("day", day);
@@ -144,6 +146,11 @@
 
             if (action === "create") {
             const url = `/Lesson/Create?${params.toString()}`;
+                window.open(url, "_blank");
+            }
+
+            if (action === "edit") {
+                const url = `/Lesson/Edit?id=${lessonid}`;
                 window.open(url, "_blank");
             }
 

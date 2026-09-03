@@ -1,62 +1,62 @@
 ﻿let draggedSubject = null;
 let currentCell = null;
+let usedTeachers = new Set();
 
-// === DRAG START ===
+// DRAG START
 document.addEventListener("dragstart", function (e) {
     const item = e.target.closest(".subject-item");
     if (!item) return;
 
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", item.dataset.subjectId);
+
     draggedSubject = item;
 });
 
-// === DRAG OVER ===
+// DRAG OVER
 document.addEventListener("dragover", function (e) {
-    if (e.target.closest(".dropzone")) {
-        e.preventDefault();
-    }
-});
+    const dz = e.target.closest(".dropzone");
+    const cell = e.target.closest(".schedule-cell");
 
-// === DROP ===
-document.addEventListener("drop", function (e) {
-    const dropzone = e.target.closest(".dropzone");
-    if (!dropzone || !draggedSubject) return;
+    if (!dz && !cell) return;
 
     e.preventDefault();
-    currentCell = dropzone.closest(".schedule-cell");
+    e.dataTransfer.dropEffect = "move";
+});
+
+// DROP
+document.addEventListener("drop", function (e) {
+    const dz = e.target.closest(".dropzone");
+    const cell = e.target.closest(".schedule-cell");
+
+    if ((!dz && !cell) || !draggedSubject) return;
+
+    e.preventDefault();
+
+    currentCell = cell ?? dz.closest(".schedule-cell");
+
+    $('#teacher-select').val(null).trigger('change');
 
     const modal = new bootstrap.Modal(document.getElementById("teacherModal"));
     modal.show();
 });
 
-// === CONFIRM TEACHER ===
+// CONFIRM TEACHER
 document.getElementById("teacher-select-confirm").addEventListener("click", function () {
     const teacherId = document.getElementById("teacher-select").value;
 
     const modal = bootstrap.Modal.getInstance(document.getElementById("teacherModal"));
     modal.hide();
 
-    currentCell.dataset.teacherId = teacherId;
-
-    const roomModal = new bootstrap.Modal(document.getElementById("roomModal"));
-    roomModal.show();
-});
-
-// === CONFIRM ROOM ===
-document.getElementById("room-select-confirm").addEventListener("click", function () {
-    const roomId = document.getElementById("room-select").value;
-
-    const modal = bootstrap.Modal.getInstance(document.getElementById("roomModal"));
-    modal.hide();
-
-    currentCell.dataset.roomId = roomId;
+    usedTeachers.add(teacherId);
 
     const subjectName = draggedSubject.dataset.subjectName;
+    const teacherText = document.querySelector(`#teacher-select option[value="${teacherId}"]`).innerText;
 
     currentCell.querySelector(".cell-content").innerHTML = `
         <div class="p-1 bg-light border rounded">
             <strong>${subjectName}</strong><br/>
-            <small>Преп.: ${document.querySelector(`#teacher-select option[value="${currentCell.dataset.teacherId}"]`).innerText}</small><br/>
-            <small>Каб.: ${document.querySelector(`#room-select option[value="${roomId}"]`).innerText}</small>
+            <small>${teacherText}</small>
         </div>
     `;
 
@@ -71,62 +71,65 @@ document.getElementById("room-select-confirm").addEventListener("click", functio
     }
 
     draggedSubject = null;
-
-    checkClassFilled();
 });
 
-// === Проверка заполненности текущего класса ===
-function checkClassFilled() {
-    const items = document.querySelectorAll(".subject-item");
-    const allZero = Array.from(items).every(i => parseInt(i.dataset.hours) === 0);
+// SELECT2: подсветка и сортировка
 
-    if (allZero) {
-        document.getElementById("save-schedule-btn").removeAttribute("disabled");
-    }
+function highlightTeachers(option) {
+    if (!option.id) return option.text;
+
+    const subjects = ($(option.element).data('subjects') || '')
+        .toString()
+        .split(',')
+        .filter(x => x);
+
+    const selectedSubjectId = draggedSubject
+        ? draggedSubject.dataset.subjectId
+        : null;
+
+    const isProfile = selectedSubjectId && subjects.includes(selectedSubjectId);
+    const isUsed = usedTeachers.has(option.id);
+
+    let cls = '';
+    if (isUsed) cls = 'bg-success text-white px-1';
+    else if (!isProfile) cls = 'bg-warning px-1';
+
+    if (!cls)
+        return option.text;
+
+    return $('<span class="' + cls + '">' + option.text + '</span>');
 }
 
-// === Сохранение расписания ===
-document.getElementById("save-schedule-btn").addEventListener("click", function () {
+function teacherSorter(data) {
+    if (!draggedSubject) return data;
 
-    const lessons = [];
+    const subjectId = draggedSubject.dataset.subjectId;
 
-    document.querySelectorAll(".schedule-cell").forEach(cell => {
-        const content = cell.querySelector(".cell-content div");
-        if (!content) return;
+    return data.sort((a, b) => {
+        const aId = a.id;
+        const bId = b.id;
 
-        lessons.push({
-            day: cell.dataset.day,
-            period: cell.dataset.period,
-            subjectName: content.querySelector("strong").innerText,
-            teacherId: cell.dataset.teacherId,
-            roomId: cell.dataset.roomId
-        });
+        const aSubjects = ($(a.element).data('subjects') || '')
+            .toString()
+            .split(',')
+            .filter(x => x);
+        const bSubjects = ($(b.element).data('subjects') || '')
+            .toString()
+            .split(',')
+            .filter(x => x);
+
+        const aUsed = usedTeachers.has(aId);
+        const bUsed = usedTeachers.has(bId);
+
+        const aProfile = aSubjects.includes(subjectId);
+        const bProfile = bSubjects.includes(subjectId);
+
+        if (aUsed && !bUsed) return -1;
+        if (!aUsed && bUsed) return 1;
+
+        if (aProfile && !bProfile) return -1;
+        if (!aProfile && bProfile) return 1;
+
+        return a.text.localeCompare(b.text);
     });
-
-    const currentModel = window.manualModels[window.manualIndex];
-
-    currentModel.FilledLessons = lessons;
-
-    const allFilled = window.manualModels.every(m => m.FilledLessons && m.FilledLessons.length > 0);
-
-    if (!allFilled) {
-        if (!confirm(`Вы пытаетесь сохранить расписание только для класса ${currentModel.ClassGroup.Name}. Продолжить?`)) {
-            return;
-        }
-    } else {
-        alert("Все классы заполнены. Сохраняем расписание всех классов.");
-    }
-
-    $.ajax({
-        url: '/ScheduleGenerator/SaveManualSchedule',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(window.manualModels),
-        success: function () {
-            alert("Расписание сохранено!");
-        },
-        error: function () {
-            alert("Ошибка сохранения расписания.");
-        }
-    });
-});
+}

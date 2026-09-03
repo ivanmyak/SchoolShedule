@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "Ручное составление расписания";
 
-    // индекс текущего класса
     int index = ViewBag.Index ?? 0;
     var current = Model[index];
 
@@ -13,44 +12,15 @@
 }
 
 <div class="container-fluid mt-3">
-
-    <!-- Пагинация -->
-    <div class="d-flex justify-content-between mb-3">
-
-        @if (index > 0)
-        {
-            <a class="btn btn-outline-primary"
-               href="@Url.Action("Manual", new { templateId = ViewBag.TemplateId, index = index - 1 })">
-                ← @Model[index - 1].ClassGroup.Name
-            </a>
-        }
-        else
-        {
-            <span></span>
-        }
-
-        @if (index < Model.Count - 1)
-        {
-            <a class="btn btn-outline-primary"
-               href="@Url.Action("Manual", new { templateId = ViewBag.TemplateId, index = index + 1 })">
-                @Model[index + 1].ClassGroup.Name →
-            </a>
-        }
-    </div>
-
-    <!-- Заголовок -->
     <h1 class="text-center mb-4">
         Расписание для класса @current.ClassGroup.Name
         <small class="text-muted">(@current.SelectedSchedulePeriod.GetDisplayName())</small>
     </h1>
 
     <div class="row">
-
-        <!-- Левая панель: предметы -->
         <div class="col-3">
             <h4>Предметы и часы</h4>
             <ul id="subjects-list" class="list-group">
-
                 @foreach (var (subjectId, hours) in current.SubjectHours)
                 {
                     var subject = current.Subjects.First(s => s.Id == subjectId);
@@ -68,9 +38,7 @@
             </ul>
         </div>
 
-        <!-- Центральная часть: таблица расписания -->
         <div class="col-9">
-
             <h4 class="mb-3">Таблица расписания</h4>
 
             <table class="table table-bordered text-center align-middle" id="schedule-table">
@@ -83,7 +51,6 @@
                         }
                     </tr>
                 </thead>
-
                 <tbody>
                     @for (int i = 0; i < slotsPerDay.Max(spd => spd.Count()); i++)
                     {
@@ -100,9 +67,6 @@
                                     <td class="schedule-cell"
                                         data-day="@day"
                                         data-period="@slot.Period"
-                                        data-subject-id=""
-                                        data-teacher-id=""
-                                        data-room-id=""
                                         id="@slot.Id">
                                         <div class="cell-content dropzone"></div>
                                     </td>
@@ -116,19 +80,10 @@
                     }
                 </tbody>
             </table>
-
-            <!-- Кнопка сохранения -->
-            <button id="save-schedule-btn"
-                    class="btn btn-success mt-3"
-                    disabled>
-                Сохранить расписание
-            </button>
-
         </div>
     </div>
 </div>
 
-<!-- Модальное окно выбора преподавателя -->
 <div class="modal fade" id="teacherModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -139,10 +94,15 @@
             </div>
 
             <div class="modal-body">
-                <select id="teacher-select" class="form-select">
+                <select id="teacher-select" class="teacher-select">
                     @foreach (var teacher in current.Teachers)
                     {
-                        <option value="@teacher.UserId">@teacher.User.GetFIO</option>
+                        var text = $"{teacher.User.GetFIO} ({teacher.SubjectsToString})";
+
+                        <option value="@teacher.UserId"
+                                data-subjects="@string.Join(",", teacher.Subjects.Select(s => s.Id))">
+                            @text
+                        </option>
                     }
                 </select>
             </div>
@@ -155,39 +115,18 @@
     </div>
 </div>
 
-<!-- Модальное окно выбора кабинета -->
-<div class="modal fade" id="roomModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">Выбор кабинета</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                <select id="room-select" class="form-select">
-                    @foreach (var room in current.Rooms)
-                    {
-                        <option value="@room.Id">@room.RoomNumber</option>
-                    }
-                </select>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="room-select-confirm">Выбрать</button>
-            </div>
-
-        </div>
-    </div>
-</div>
-
 @section Scripts {
+    <script src="~/lib/select2/js/select2.min.js"></script>
+
     <script>
-        window.manualModels = @Html.Raw(Json.Serialize(Model));
-        window.manualIndex = @index;
-        window.manualClassId = "@current.ClassGroup.Id";
-        window.manualPeriod = "@current.SelectedSchedulePeriod";
+        $(function () {
+            $('#teacher-select').select2({
+                width: '100%',
+                templateResult: highlightTeachers,
+                templateSelection: highlightTeachers,
+                sorter: teacherSorter
+            });
+        });
     </script>
 
     <script src="~/js/manual-schedule.js"></script>

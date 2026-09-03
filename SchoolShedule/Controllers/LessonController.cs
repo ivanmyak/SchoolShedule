@@ -120,112 +120,60 @@ namespace SchoolShedule.Controllers
             return RedirectToAction("AllSpec", "Shedule");
         }
 
-        // GET: Lesson/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var lesson = await _context.Lessons
+                .Include(l => l.Teacher).ThenInclude(t => t.User)
+                .Include(l => l.Teacher).ThenInclude(t => t.Subjects)
+                .Include(l => l.ClassGroup)
+                .Include(l => l.Room)
+                .Include(l => l.Subject)
+                .Include(l => l.TimeSlot)
+                .FirstOrDefaultAsync(l => l.Id == id);
 
-            var lesson = await _context.Lessons.FindAsync(id);
             if (lesson == null)
-            {
                 return NotFound();
-            }
-            ViewData["SubjectId"] = new SelectList(_context.Subjects, "Id", "Name", lesson.SubjectId);
-            ViewData["TeacherId"] = new SelectList(_context.Teachers.Include("User").Include("Subjects"), "UserId", "TeacherString", lesson.TeacherId);
-            ViewData["ClassGroupId"] = new SelectList(_context.ClassGroups, "Id", "Name", lesson.ClassGroupId, "Grade");
 
-            var rooms = _context.Rooms
-    .OrderBy(r => r.Floor)
-    .ThenBy(r => r.Number)
-    .ToList();
+            var vm = new LessonCreateViewModel
+            {
+                SelectedDay = lesson.TimeSlot.DayOfWeek,
+                SelectedPeriod = lesson.TimeSlot.Period,
+                SelectedSubjectId = lesson.SubjectId,
+                SelectedTeacherId = lesson.TeacherId,
+                SelectedClassGroupId = lesson.ClassGroupId,
+                SelectedRoomId = lesson.RoomId
+            };
 
-            var roomgroups = rooms
-                .Select(r => r.Floor)
-                .Distinct()
-                .OrderBy(f => f)
-                .ToDictionary(
-                    floor => floor,
-                    floor => new SelectListGroup { Name = $"Этаж {floor}" }
-                );
+            vm.Teachers = _context.Teachers.Include(t => t.User).Include(t => t.Subjects).ToList();
+            vm.Subjects = _context.Subjects.ToList();
+            vm.Rooms = _context.Rooms.Include(r => r.AssignedSubjects).ToList();
+            vm.ClassGroups = _context.ClassGroups.ToList();
+            vm.TimeSlots = _context.TimeSlots.ToList();
 
-            ViewData["RoomId"] = rooms
-                .Select(r => new SelectListItem
-                {
-                    Value = r.Id.ToString(),
-                    Text = r.RoomNumber,
-                    Group = roomgroups[r.Floor]
-                })
-                .ToList();
-
-            var slots = _context.TimeSlots
-    .OrderBy(ts => ts.DayOfWeek)
-    .ThenBy(ts => ts.Period)
-    .ToList();
-
-            // создаём группы с русскими названиями
-            var slotgroups = slots
-                .Select(ts => ts.DayOfWeek)
-                .Distinct()
-                .OrderBy(day => day)
-                .ToDictionary(
-                    day => day,
-                    day => new SelectListGroup { Name = day.GetDisplayName() }
-                );
-
-            // формируем SelectListItem
-            ViewData["TimeSlotId"] = slots
-                .Select(ts => new SelectListItem
-                {
-                    Value = ts.Id.ToString(),
-                    Text = ts.TimeSlotString,
-                    Group = slotgroups[ts.DayOfWeek]
-                })
-                .ToList();
-
-            return View(lesson);
+            return View(vm);
         }
 
-        // POST: Lesson/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,SubjectId,TeacherId,ClassGroupId,RoomId,TimeSlotId")] Lesson lesson)
+        public async Task<IActionResult> Edit(int id, LessonCreateViewModel vm)
         {
-            if (id != lesson.Id)
-            {
-                return NotFound();
-            }
+            var lesson = await _context.Lessons.FindAsync(id);
+            if (lesson == null)
+                return NotFound($"Не найден урок с текушим ID {id}");
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(lesson);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!LessonExists(lesson.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ClassGroupId"] = new SelectList(_context.ClassGroups, "Id", "Id", lesson.ClassGroupId);
-            ViewData["RoomId"] = new SelectList(_context.Rooms, "Id", "Id", lesson.RoomId);
-            ViewData["SubjectId"] = new SelectList(_context.Subjects, "Id", "Code", lesson.SubjectId);
-            ViewData["TeacherId"] = new SelectList(_context.Teachers, "UserId", "UserId", lesson.TeacherId);
-            ViewData["TimeSlotId"] = new SelectList(_context.TimeSlots, "Id", "Id", lesson.TimeSlotId);
-            return View(lesson);
+            lesson.SubjectId = vm.SelectedSubjectId!.Value;
+            lesson.TeacherId = vm.SelectedTeacherId!.Value;
+            lesson.ClassGroupId = vm.SelectedClassGroupId!.Value;
+            lesson.RoomId = vm.SelectedRoomId!.Value;
+
+            var slot = _context.TimeSlots
+                .First(ts => ts.DayOfWeek == vm.SelectedDay && ts.Period == vm.SelectedPeriod);
+
+            lesson.TimeSlotId = slot.Id;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(All));
         }
 
         // GET: Lesson/Delete/5

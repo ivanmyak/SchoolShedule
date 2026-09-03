@@ -86,13 +86,15 @@
         <div class="col-md-4">
             <label class="form-label">Кабинет</label>
             <select asp-for="SelectedRoomId" class="form-select room-select">
-                @foreach (var room in Model.Rooms)
+                @foreach (var room in Model.GetRoomsSorted())
                 {
-                    <option value="@room.Id" selected="@(Model.SelectedRoomId == room.Id)">
+                    <option value="@room.Id"
+                            data-subjects="@string.Join(",", room.AssignedSubjects.Select(s => s.Id))">
                         @room.RoomNumber
                     </option>
                 }
             </select>
+
         </div>
 
     </div>
@@ -108,7 +110,7 @@
 
     <script>
 
-        // ======= TEMPLATE: ПОДСВЕТКА УЧИТЕЛЕЙ =======
+        // ======= ПОДСВЕТКА ПРЕПОДАВАТЕЛЕЙ =======
         function highlightTeachers(option) {
             if (!option.id) return option.text;
 
@@ -127,7 +129,7 @@
             return option.text;
         }
 
-        // ======= TEMPLATE: ПОДСВЕТКА ПРЕДМЕТОВ =======
+        // ======= ПОДСВЕТКА ПРЕДМЕТОВ =======
         function highlightSubjects(option) {
             if (!option.id) return option.text;
 
@@ -145,6 +147,43 @@
             return option.text;
         }
 
+        // ======= ПОДСВЕТКА КАБИНЕТОВ =======
+        function highlightRooms(option) {
+            if (!option.id) return option.text;
+
+            const subjects = ($(option.element).data('subjects') || '')
+                .toString()
+                .split(',')
+                .filter(x => x);
+
+            const selectedSubject = $('.subject-select').val();
+            const isProfile = subjects.includes(selectedSubject);
+
+            if (!isProfile) {
+                return $('<span class="bg-warning px-1">' + option.text + '</span>');
+            }
+
+            return option.text;
+        }
+
+        // ======= СОРТИРОВКА КАБИНЕТОВ =======
+        function roomSorter(data) {
+            const selectedSubject = $('.subject-select').val();
+
+            return data.sort((a, b) => {
+                const aSubjects = ($(a.element).data('subjects') || '').toString().split(',');
+                const bSubjects = ($(b.element).data('subjects') || '').toString().split(',');
+
+                const aProfile = aSubjects.includes(selectedSubject);
+                const bProfile = bSubjects.includes(selectedSubject);
+
+                if (aProfile && !bProfile) return -1;
+                if (!aProfile && bProfile) return 1;
+
+                return a.text.localeCompare(b.text);
+            });
+        }
+
         // ======= ИНИЦИАЛИЗАЦИЯ SELECT2 =======
         $(".teacher-select").select2({
             width: '100%',
@@ -159,18 +198,36 @@
         });
 
         $(".class-select").select2({ width: '100%' });
-        $(".room-select").select2({ width: '100%' });
 
-        // ======= ОБНОВЛЕНИЕ ПОДСВЕТКИ =======
-        $('.subject-select').on('change', function () {
+        $(".room-select").select2({
+            width: '100%',
+            templateResult: highlightRooms,
+            templateSelection: highlightRooms,
+            sorter: roomSorter
+        });
+
+        // ======= ОБНОВЛЕНИЕ ПОДСВЕТКИ И СОРТИРОВКИ =======
+        $('.subject-select').on('change', function() {
+
+            // обновляем преподавателей
             $(".teacher-select").select2('destroy').select2({
                 width: '100%',
                 templateResult: highlightTeachers,
                 templateSelection: highlightTeachers
             });
+
+            // обновляем кабинеты
+            $(".room-select").select2('destroy').select2({
+                width: '100%',
+                templateResult: highlightRooms,
+                templateSelection: highlightRooms,
+                sorter: roomSorter
+            });
         });
 
-        $('.teacher-select').on('change', function () {
+        $('.teacher-select').on('change', function() {
+
+            // обновляем предметы
             $(".subject-select").select2('destroy').select2({
                 width: '100%',
                 templateResult: highlightSubjects,
@@ -180,3 +237,4 @@
 
     </script>
 }
+

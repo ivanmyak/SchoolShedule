@@ -5,6 +5,7 @@ namespace SchoolShedule.Models
 
     public class LessonCreateViewModel
     {
+        public int Id { get; set; } = 0;
         // --------------------------
         // 1. Предзаполняемые значения
         // --------------------------
@@ -82,7 +83,15 @@ namespace SchoolShedule.Models
         /// Сортировка кабинетов: сначала по этажу, затем по номеру.
         /// </summary>
         public IEnumerable<Room> GetRoomsSorted() =>
-            Rooms.OrderBy(r => r.Floor).ThenBy(r => r.Number);
+    SelectedSubjectId is null
+        ? Rooms.OrderBy(r => r.Floor).ThenBy(r => r.Number)
+        : Rooms
+            .OrderByDescending(r => r.AssignedSubjects.Any(rs => rs.Id == SelectedSubjectId))
+            .ThenBy(r => r.Floor)
+            .ThenBy(r => r.Number);
+
+
+
 
         /// <summary>
         /// Сортировка классов: 1А, 1Б, 2А, 2Б...
