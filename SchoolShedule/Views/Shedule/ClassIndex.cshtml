@@ -1,0 +1,14 @@
+﻿@model IEnumerable<SchoolShedule.Entities.ClassGroup>
+
+<h2 class="mb-4 text-center">Выберите класс</h2>
+
+<form method="get" asp-action="ClassShedule" class="w-25 mx-auto">
+    <select name="classId" class="form-select" onchange="this.form.submit()">
+        <option value="">— выберите класс —</option>
+
+        @foreach (var c in Model)
+        {
+            <option value="@c.Id">@c.Name</option>
+        }
+    </select>
+</form>

@@ -12,6 +12,7 @@ using SchoolShedule.Extensions;
 using SchoolShedule.Models;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Text.Json;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
@@ -840,10 +841,7 @@ namespace SchoolShedule.Controllers
             // Группированная по Классу коллекция Уроков для итогового расписания
             var classLessons = new Dictionary<int, List<Lesson>>();
 
-            //Группированный список связей Класс, Предмет+Учитель+Кабинет - то, что нужно будет использовать и учитывать при генерации расписания
-            //и с каким списком мы будем сравнивать при поиске подходящих учителей.
-            // Правило сравнений: при выборе учителя мы смотрим (из нижеиспользуемого списка matchingTeachers)
-            // какой учитель уже задействован и сколько раз - выбираем минимально-задействованного из подходящих
+            //Группированный список связей Класс, Предмет+Учитель+Кабинет.
             var suitableTeachers = new List<SubjectTeacherRoom>();
 
             try
@@ -924,8 +922,32 @@ namespace SchoolShedule.Controllers
 
                         if (assignment == null)
                         {
+                            StringBuilder stringBuilder = new();
                             string msg = $"[WIZARD-GENERATE-MINIMUM] Не удалось разместить предмет [{currentSubject.Name}] в классе {currentClassGroup.Name}.";
-                            _logger.LogError(msg);
+                            stringBuilder.AppendLine(msg);
+
+                            stringBuilder.AppendLine("На текущий момент вот список расписания:");
+                            foreach (var classesId in classLessons.Keys)
+                            {
+                                stringBuilder.AppendLine($"\tКласс {classLessons[classesId].First().ClassGroup.Name}:");
+                                var currentDay = classLessons[classesId].First().TimeSlot.DayOfWeek;
+
+                                foreach (var classLesson in classLessons[classesId].OrderBy(cl => cl.TimeSlot.DayOfWeek).ThenBy(cl => cl.TimeSlot.Period))
+                                {
+                                    if (currentDay != classLesson.TimeSlot.DayOfWeek)
+                                    {
+                                        currentDay = classLesson.TimeSlot.DayOfWeek;
+                                        stringBuilder.AppendLine($"\t\t {currentDay.GetDisplayName()}:");
+                                        stringBuilder.AppendLine($"\t\t\t {classLesson.TimeSlot.Period}. {classLesson.Subject.Name} | {classLesson.Teacher.User.GetFIO} | {classLesson.Room.RoomNumber}");
+                                    }
+                                    else
+                                    {
+                                        stringBuilder.AppendLine($"\t\t\t {classLesson.TimeSlot.Period}. {classLesson.Subject.Name} | {classLesson.Teacher.User.GetFIO} | {classLesson.Room.RoomNumber}");
+                                    }
+                                }
+                            }
+
+                            _logger.LogError(stringBuilder.ToString());
                             return BadRequest(new { error = msg });
                         }
                     }
@@ -938,7 +960,6 @@ namespace SchoolShedule.Controllers
                     foreach (var lesson in kvp.Value)
                         _context.Lessons.Add(lesson);
                 }
-
                 _context.SaveChanges();
             }
             catch (Exception)
@@ -1116,28 +1137,27 @@ namespace SchoolShedule.Controllers
 
                 selectedTeacher = teacherLoad.First().Teacher;
 
-                //_logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] SELECT TEACHER FROM SUBJECT LINKS: {selectedTeacher.User.GetFIO} subject={subject.Name}");
+                _logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] Выбран учитель {selectedTeacher.User.GetFIO} для предмета {subject.Name}.");
             }
             else
             {
                 var teacherLoad = matchingTeachers
-    .Select(t => new
-    {
-        Teacher = t,
-        Count = suitableTeachers.Count(st => st.Teacher.UserId == t.UserId)
-    })
-    .OrderBy(x => x.Count)
-    .ToList();
+                    .Select(t => new
+                    {
+                        Teacher = t,
+                        Count = suitableTeachers.Count(st => st.Teacher.UserId == t.UserId)
+                    })
+                    .OrderBy(x => x.Count)
+                    .ToList();
 
                 selectedTeacher = teacherLoad.First().Teacher;
 
-
-                //_logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] SELECT TEACHER FROM MATCHING: {selectedTeacher.User.GetFIO} subject={subject.Name}");
+                _logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] Выбран учитель {selectedTeacher.User.GetFIO} для предмета {subject.Name}.");
             }
 
             if (IsTeacherBusy(selectedTeacher.UserId, slot.Id, lessons))
             {
-                //_logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] Учитель {selectedTeacher.User.GetFIO} для слота {slot.TimeSlotString} занят");
+                _logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] Учитель {selectedTeacher.User.GetFIO} для слота {slot.TimeSlotString} занят");
                 return null;
             }
 
@@ -1151,7 +1171,7 @@ namespace SchoolShedule.Controllers
             if (teacherPreferredRoom != null)
             {
                 selectedRoom = teacherPreferredRoom;
-                //_logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] ROOM FROM TEACHER PREFERRED: {selectedRoom.RoomNumber}" );
+                _logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] Предпочтительный кабинет учителя: {selectedRoom.RoomNumber}.");
             }
             else
             {
@@ -1159,19 +1179,19 @@ namespace SchoolShedule.Controllers
                 if (subjectPreferredRoom != null)
                 {
                     selectedRoom = subjectPreferredRoom;
-                    //_logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] ROOM FROM SUBJECT MATCHING: {selectedRoom.RoomNumber}" );
+                    _logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] Предпочтительный кабинет предмета: {selectedRoom.RoomNumber}.");
                 }
                 else
                 {
                     selectedRoom = matchingRooms.FirstOrDefault()
-                        ?? throw new KeyNotFoundException(
-                            $"[WIZARD-CHECKTEACHROOMBUSIES] Не удалось найти кабинет для предмета {subject.Name}");
+                        ?? throw new KeyNotFoundException($"[WIZARD-CHECKTEACHROOMBUSIES] Не удалось найти кабинет для предмета {subject.Name}");
                 }
             }
 
             if (IsRoomBusy(selectedRoom.Id, slot.Id, lessons))
             {
-                //_logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] ROOM BUSY: {selectedRoom.RoomNumber} slot={slot.TimeSlotString}");
+                _logger.LogDebug($"[WIZARD-CHECKTEACHROOMBUSIES] Кабинет {selectedRoom.RoomNumber} занят в слот {slot.TimeSlotString}.");
+
                 return null;
             }
 

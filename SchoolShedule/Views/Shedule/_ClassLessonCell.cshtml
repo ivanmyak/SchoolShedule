@@ -1,0 +1,58 @@
+﻿@model SchoolShedule.Entities.Lesson?
+
+@if (Model is null)
+{
+    <span class="text-muted">—</span>
+}
+else
+{
+    bool isOwnSubject = Model.Teacher.Subjects.Any(s => s.Code == Model.Subject.Code);
+
+    var fio = Model.Teacher.User.GetFIO;
+    var modalId = $"modal_{Model.Id}";
+    var specialization = Model.Teacher.SubjectsToString;
+
+    <div class="p-1 rounded small"
+         data-lesson-id="@Model.Id"
+         style="@(isOwnSubject ? "" : "background-color:#ffe08a;")">
+
+        <!-- Предмет -->
+        <div class="fw-bold fs-6">
+            @Model.Subject.Name
+        </div>
+
+        <!-- Учитель -->
+        <div>@fio</div>
+
+        <!-- Кабинет -->
+        <div class="text-muted small">
+            Каб.: @Model.Room.RoomNumber
+        </div>
+
+        @if (!isOwnSubject)
+        {
+            <button type="button"
+                    class="btn btn-sm btn-link p-0 text-dark"
+                    data-bs-toggle="modal"
+                    data-bs-target="#@modalId"
+                    title="Подробнее">
+                ❓
+            </button>
+
+            <div class="modal fade" id="@modalId" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Специализация преподавателя</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>@Model.Teacher.User.LastName @Model.Teacher.User.FirstName @Model.Teacher.User.MiddleName</strong></p>
+                            <p>Основные предметы: @specialization</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

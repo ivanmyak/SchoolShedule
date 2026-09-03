@@ -1,7 +1,11 @@
-﻿<li class="nav-item">
-    <a class="nav-link text-dark" asp-controller="Shedule" asp-action="AllSpec">Расписание на полугодие</a>
-</li>
-
-<li class="nav-item">
-    <a class="nav-link text-dark" asp-controller="Shedule" asp-action="My">Моё расписание</a>
+﻿<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+        Расписания
+    </a>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" asp-controller="Shedule" asp-action="All">Общее расписание</a></li>
+        <li><a class="dropdown-item" asp-controller="Shedule" asp-action="TeacherIndex">Моё расписание</a></li>
+        <li><a class="dropdown-item" asp-controller="Shedule" asp-action="ClassIndex">Расписание по Классу</a></li>
+        <li><a class="dropdown-item" asp-controller="Shedule" asp-action="AllSpec">Расписание по Предметам</a></li>
+    </ul>
 </li>

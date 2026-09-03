@@ -1,0 +1,51 @@
+﻿@model SchoolShedule.Models.ClassScheduleViewModel
+@using SchoolShedule.Enums
+@using SchoolShedule.Extensions
+
+@{
+    var days = Enum.GetValues(typeof(Day)).Cast<Day>().ToList();
+    int maxPeriods = Model.Lessons.Max(l => l.TimeSlot.Period);
+}
+
+<h2 class="mb-4 text-center">
+    Расписание класса @Model.SelectedСlassGroup.Name
+</h2>
+
+<div class="table-responsive">
+    <table class="table table-bordered text-center align-middle shadow-sm schedule-table">
+        <thead class="table-primary">
+            <tr>
+                <th>Урок</th>
+                @foreach (var day in days)
+                {
+                    <th>@day.GetDisplayName()</th>
+                }
+            </tr>
+        </thead>
+
+        <tbody>
+            @for (int period = 1; period <= maxPeriods; period++)
+            {
+                <tr>
+                    <td><strong>@period</strong></td>
+
+                    @foreach (var day in days)
+                    {
+                        var lesson = Model.Lessons
+                            .FirstOrDefault(l =>
+                                l.TimeSlot.DayOfWeek == day &&
+                                l.TimeSlot.Period == period);
+
+                        <td class="schedule-cell"
+                            data-day="@day"
+                            data-period="@period"
+                            data-lesson-id="@lesson?.Id">
+
+                            @await Html.PartialAsync("_ClassLessonCell", lesson)
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

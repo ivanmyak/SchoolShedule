@@ -1,0 +1,21 @@
+﻿@model IEnumerable<SchoolShedule.Entities.Teacher>
+
+<h2 class="mb-4 text-center">Выберите класс</h2>
+
+<form method="get" asp-action="TeacherShedule" class="w-25 mx-auto">
+    <select name="teacherId" class="form-select" onchange="this.form.submit()">
+        <option value="">— выберите учителя —</option>
+        @if (User.IsInRole("Teacher"))
+        {
+            var currUser = Model.FirstOrDefault(t => string.Equals(t.User.UserName, User.Identity?.Name, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception();
+            <option value="@currUser.UserId">Я (@currUser.User.GetFIO)</option>
+        }
+        else
+        {
+            foreach (var c in Model)
+            {
+                <option value="@c.UserId">@c.TeacherString</option>
+            }
+        }
+    </select>
+</form>

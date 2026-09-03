@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolShedule.Data;
 using SchoolShedule.Entities;
@@ -14,6 +15,37 @@ namespace SchoolShedule.Controllers
         public SheduleController(SheduleDbContext context)
         {
             _context = context;
+        }
+
+        [AllowAnonymous]
+        public IActionResult Index()
+        {
+            return RedirectToAction(nameof(ClassIndex));
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> ClassIndex()
+        {
+            var classes = await _context.ClassGroups
+                .OrderBy(c => c.Grade)
+                .ThenBy(c => c.Letter)
+                .ToListAsync();
+
+            ViewData["Title"] = $"Выбор класса для расписания";
+            return View(classes);
+        }
+
+        [Authorize(Roles = "Administrator, Teacher")]
+        public async Task<IActionResult> TeacherIndex()
+        {
+            var teachers = await _context.Teachers
+                .Include(t => t.User)
+                .Include(t => t.Subjects)
+                .OrderBy(t => t.User.LastName)
+                .ToListAsync();
+
+            ViewData["Title"] = $"Выбор учителя для расписания";
+            return View(teachers);
         }
 
         /// <summary> 
@@ -54,30 +86,83 @@ namespace SchoolShedule.Controllers
         /// <summary> 
         /// Расписание по классу на четверть
         /// </summary> 
-        /// <param name="classid">Класс, чьё расписание мы желаем</param>
-        public async Task<IActionResult> ClassShedule(int classid)
+        /// <param name="classId">Класс, чьё расписание мы желаем</param>
+        public async Task<IActionResult> ClassShedule(int? classId)
         {
-            ClassGroup classGroup = await _context.ClassGroups.FindAsync(classid) ?? throw new Exception("Не удалось найти класс");
+            if (classId is null)
+                return BadRequest("Класс не выбран.");
+
+            var classGroup = await _context.ClassGroups
+                .FirstOrDefaultAsync(c => c.Id == classId);
+
+            if (classGroup is null)
+                return NotFound("Класс не найден.");
 
             var lessons = await _context.Lessons
-                            .Include(l => l.Subject)
-                            .Include(l => l.Teacher)
-                                .ThenInclude(t => t.User)
-                            .Include(l => l.Teacher)
-                                .ThenInclude(t => t.Subjects)
-                            .Include(l => l.ClassGroup)
-                            .Include(l => l.Room)
-                            .Include(l => l.TimeSlot)
-                            .Where(l => l.ClassGroup.Id == classid)
-                            .OrderBy(l => l.ClassGroup.Grade)
-                                .ThenBy(l => l.ClassGroup.Letter)
-                                .ThenBy(l => l.TimeSlot.DayOfWeek)
-                                .ThenBy(l => l.TimeSlot.Period)
-                                .ToListAsync();
+                .Include(l => l.Subject)
+                .Include(l => l.Teacher).ThenInclude(t => t.User)
+                .Include(l => l.Teacher).ThenInclude(t => t.Subjects)
+                .Include(l => l.Room)
+                .Include(l => l.TimeSlot)
+                .Where(l => l.ClassGroupId == classId)
+                .OrderBy(l => l.TimeSlot.DayOfWeek)
+                .ThenBy(l => l.TimeSlot.Period)
+                .ToListAsync();
 
-            ViewData["Title"] = $"Расписание по классу {classGroup.Name} на текущую четверть";
-            ClassScheduleViewModel model = new() { Lessons = lessons, SelectedСlassGroup = classGroup };
-            return View(model);
+            if (!lessons.Any())
+            {
+                ViewData["Title"] = $"Расписание для класса {classGroup.Name}";
+                return View("ClassTableEmpty", classGroup);
+            }
+
+            var vm = new ClassScheduleViewModel
+            {
+                SelectedСlassGroup = classGroup,
+                Lessons = lessons
+            };
+
+            ViewData["Title"] = $"Расписание для класса {classGroup.Name}";
+            return View(vm);
+        }
+
+        /// <summary> 
+        /// Расписание по преподавателю на четверть
+        /// </summary> 
+        /// <param name="teacherId">Преподаватель, чьё расписание мы желаем</param>
+        public async Task<IActionResult> TeacherShedule(Guid? teacherId)
+        {
+            if (teacherId is null)
+                return BadRequest("Учитель не выбран.");
+
+            var teacher = await _context.Teachers
+                .Include(t => t.User)
+                .Include(t => t.Subjects)
+                .FirstOrDefaultAsync(t => t.UserId == teacherId);
+
+            if (teacher is null)
+                return NotFound("Учитель не найден.");
+
+            var lessons = await _context.Lessons
+                .Include(l => l.Subject)
+                .Include(l => l.ClassGroup)
+                .Include(l => l.Room)
+                .Include(l => l.TimeSlot)
+                .Where(l => l.TeacherId == teacherId)
+                .OrderBy(l => l.TimeSlot.DayOfWeek)
+                .ThenBy(l => l.TimeSlot.Period)
+                .ToListAsync();
+
+            if (!lessons.Any())
+                return NotFound($"У учителя {teacher.TeacherString} не найдено расписание...");
+
+            var vm = new TeacherScheduleViewModel
+            {
+                Teacher = teacher,
+                Lessons = lessons
+            };
+            ViewData["Title"] = $"Расписание {teacher.User.GetFIO}";
+
+            return View(vm);
         }
 
         /// <summary> 

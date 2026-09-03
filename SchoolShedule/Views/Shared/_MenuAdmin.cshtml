@@ -5,13 +5,23 @@
 <li class="nav-item">
     <details class="nav-details">
         <summary class="nav-link text-dark">Управление</summary>
-        <ul class="dropdown-list">
+        <ul>
             <li><a class="dropdown-item" asp-controller="Teacher" asp-action="All">Учителя</a></li>
             <li><a class="dropdown-item" asp-controller="Subject" asp-action="All">Предметы</a></li>
             <li><a class="dropdown-item" asp-controller="Room" asp-action="All">Кабинеты</a></li>
             <li><a class="dropdown-item" asp-controller="ClassGroup" asp-action="All">Классы</a></li>
             <li><a class="dropdown-item" asp-controller="Lesson" asp-action="All">Уроки</a></li>
-            <li><a class="dropdown-item" asp-controller="Shedule" asp-action="All">Расписания</a></li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    Расписания
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-controller="Shedule" asp-action="All">Общее расписание</a></li>
+                    <li><a class="dropdown-item" asp-controller="Shedule" asp-action="AllSpec">Расписание по Предметам</a></li>
+                    <li><a class="dropdown-item" asp-controller="Shedule" asp-action="ClassIndex">Расписание по Классу</a></li>
+                    <li><a class="dropdown-item" asp-controller="Shedule" asp-action="TeacherIndex">Расписание по Учителю</a></li>
+                </ul>
+            </li>
             <li><a class="dropdown-item" asp-controller="ScheduleGenerator" asp-action="Index">Генерация расписания</a></li>
         </ul>
     </details>
