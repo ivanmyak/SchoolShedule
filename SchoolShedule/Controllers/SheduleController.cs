@@ -195,7 +195,7 @@ namespace SchoolShedule.Controllers
                                 .ThenBy(l => l.TimeSlot.Period)
                                 .ToListAsync();
 
-            ViewData["Title"] = "Расписание на четверть";
+            ViewData["Title"] = "Расписание Предметов";
             AllSchedulesViewModel model = new() { Lessons = lessons, SelectedGroupType = groupType };
             return View(model);
         }

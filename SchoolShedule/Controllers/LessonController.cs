@@ -47,8 +47,14 @@ namespace SchoolShedule.Controllers
             var lesson = await _context.Lessons
                 .Include(l => l.ClassGroup)
                 .Include(l => l.Room)
+                    .ThenInclude(r => r.AssignedSubjects)
                 .Include(l => l.Subject)
                 .Include(l => l.Teacher)
+                    .ThenInclude(t => t.User)
+                .Include(l => l.Teacher)
+                    .ThenInclude(t => t.Subjects)
+                .Include(l => l.Teacher)
+                    .ThenInclude(t => t.AssignedRooms)
                 .Include(l => l.TimeSlot)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lesson == null)
@@ -123,13 +129,14 @@ namespace SchoolShedule.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var lesson = await _context.Lessons
+                .Include(l => l.ClassGroup)
+                .Include(l => l.Room).ThenInclude(r => r.AssignedSubjects)
+                .Include(l => l.Subject)
                 .Include(l => l.Teacher).ThenInclude(t => t.User)
                 .Include(l => l.Teacher).ThenInclude(t => t.Subjects)
-                .Include(l => l.ClassGroup)
-                .Include(l => l.Room)
-                .Include(l => l.Subject)
+                .Include(l => l.Teacher).ThenInclude(t => t.AssignedRooms)
                 .Include(l => l.TimeSlot)
-                .FirstOrDefaultAsync(l => l.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (lesson == null)
                 return NotFound();
@@ -144,11 +151,7 @@ namespace SchoolShedule.Controllers
                 SelectedRoomId = lesson.RoomId
             };
 
-            vm.Teachers = _context.Teachers.Include(t => t.User).Include(t => t.Subjects).ToList();
-            vm.Subjects = _context.Subjects.ToList();
-            vm.Rooms = _context.Rooms.Include(r => r.AssignedSubjects).ToList();
-            vm.ClassGroups = _context.ClassGroups.ToList();
-            vm.TimeSlots = _context.TimeSlots.ToList();
+            FillLists(vm);
 
             return View(vm);
         }
@@ -183,14 +186,16 @@ namespace SchoolShedule.Controllers
             {
                 return NotFound();
             }
-
             var lesson = await _context.Lessons
                 .Include(l => l.ClassGroup)
-                .Include(l => l.Room)
+                .Include(l => l.Room).ThenInclude(r => r.AssignedSubjects)
                 .Include(l => l.Subject)
-                .Include(l => l.Teacher)
+                .Include(l => l.Teacher).ThenInclude(t => t.User)
+                .Include(l => l.Teacher).ThenInclude(t => t.Subjects)
+                .Include(l => l.Teacher).ThenInclude(t => t.AssignedRooms)
                 .Include(l => l.TimeSlot)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (lesson == null)
             {
                 return NotFound();
@@ -211,7 +216,7 @@ namespace SchoolShedule.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(controllerName: "Shedule", actionName: "AllSpec");
         }
 
         private bool LessonExists(int id)
@@ -221,9 +226,9 @@ namespace SchoolShedule.Controllers
 
         private void FillLists(LessonCreateViewModel vm)
         {
-            vm.Teachers = _context.Teachers.Include(t => t.User).Include(t => t.Subjects).ToList();
             vm.Subjects = _context.Subjects.ToList();
-            vm.Rooms = _context.Rooms.ToList();
+            vm.Rooms = _context.Rooms.Include(r => r.AssignedSubjects).ToList();
+            vm.Teachers = _context.Teachers.Include(t => t.User).Include(t => t.Subjects).Include(t => t.AssignedRooms).ToList();
             vm.ClassGroups = _context.ClassGroups.ToList();
             vm.TimeSlots = _context.TimeSlots.ToList();
         }

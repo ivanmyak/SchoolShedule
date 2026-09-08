@@ -13,9 +13,6 @@
         .ThenBy(g => g.Key.Room.Number)
         .ToList();
 }
-
-<h2 class="mb-4 text-center">📚 Расписание на полугодие</h2>
-
 <div class="d-flex justify-content-center mb-4">
     <form method="get" asp-action="AllSpec" class="w-auto">
         <select name="groupType" asp-for="SelectedGroupType"
@@ -151,6 +148,11 @@
 
             if (action === "edit") {
                 const url = `/Lesson/Edit?id=${lessonid}`;
+                window.open(url, "_blank");
+            }
+
+            if (action === "delete") {
+                const url = `/Lesson/Delete?id=${lessonid}`;
                 window.open(url, "_blank");
             }
 
