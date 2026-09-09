@@ -140,7 +140,33 @@ function onGenerate() {
         .get();
 
     if (manualMode) {
-        window.open('/ScheduleGenerator/BuildManualSchedule?templateId=' + templateId, '_blank');
+        // Создаём форму для POST
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/ScheduleGenerator/BuildManualSchedule";
+        form.target = "_blank"; // новая вкладка
+
+        // templateId — обычное поле
+        const templateInput = document.createElement("input");
+        templateInput.type = "hidden";
+        templateInput.name = "templateId";
+        templateInput.value = templateId;
+        form.appendChild(templateInput);
+
+        // selectedIds — массив, как ожидает ASP.NET Core
+        selectedClasses.forEach(id => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "selectedIds"; // важно: без []
+            input.value = id;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+
+        return;
+
     }
     else {
         $.ajax({

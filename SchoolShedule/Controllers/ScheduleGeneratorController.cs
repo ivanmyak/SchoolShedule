@@ -570,22 +570,26 @@ namespace SchoolShedule.Controllers
         /// <returns></returns>
         /// <exception cref="KeyNotFoundException"></exception>
         /// <exception cref="SerializationException"></exception>
-        public IActionResult BuildManualSchedule(int templateId)
+        public IActionResult BuildManualSchedule(int templateId, List<int> selectedIds)
         {
+            if (selectedIds == null || selectedIds.Count == 0)
+                return BadRequest(new { error = "Не выбран ни один класс или не удалось получить ID выбранных классов" });
+
             var classGroupContainers = _context.LessonRuleContainers
-    .Where(c => c.TemplateId == templateId)
-    .Include(c => c.ClassGroup)
-    .Include(c => c.Subject)
-    .Include(c => c.Template)
-    .OrderBy(c => c.ClassGroup.Grade)
-        .ThenBy(c => c.ClassGroup.Letter)
-    .GroupBy(ar => ar.ClassGroupId)
-    .ToList();
+                .Where(c => c.TemplateId == templateId && selectedIds.Contains(c.ClassGroupId))
+                .Include(c => c.ClassGroup)
+                .Include(c => c.Subject)
+                .Include(c => c.Template)
+                .OrderBy(c => c.ClassGroup.Grade)
+                    .ThenBy(c => c.ClassGroup.Letter)
+                .GroupBy(ar => ar.ClassGroupId)
+                .ToList();
 
             var allRooms = _context.Rooms.Include(r => r.AssignedSubjects).ToList();
             var allTeachers = _context.Teachers.Include(t => t.User).Include(t => t.Subjects).ToList();
             var allSubjects = _context.Subjects.ToList();
             var allClassGroups = _context.ClassGroups.ToList();
+            var selectedClassGroups = allClassGroups.Where(cg => selectedIds.Contains(cg.Id)).OrderBy(cg => cg.Grade).ThenBy(cg => cg.Letter);
 
             if (!classGroupContainers.Any())
                 throw new KeyNotFoundException($"[WIZARD-GENERATE-MINIMUM] Не найдены правила для выбранного шаблона (ID = {templateId}) в БД");
@@ -617,7 +621,7 @@ namespace SchoolShedule.Controllers
             int maxLessonCountPerPeriod = countWorkWeeks * _maxCountLessonsPerWeek;
 
             // ID класса, с которым мы сейчас работаем
-            int currentClassId = 0;
+            int currentClassId = selectedIds.First();
             ClassGroup currentClassGroup = new();
 
             // Группированные правила для класса. ClassGroupId является ключём.
@@ -630,7 +634,7 @@ namespace SchoolShedule.Controllers
             foreach (var classContainers in classGroupContainers)
             {
                 currentClassId = classContainers.Key;
-                currentClassGroup = allClassGroups.FirstOrDefault(cg => cg.Id == currentClassId) ?? throw new KeyNotFoundException($"Не удалось найти класс по ID = {currentClassId}!");
+                currentClassGroup = selectedClassGroups.FirstOrDefault(cg => cg.Id == currentClassId) ?? throw new KeyNotFoundException($"Не удалось найти класс по ID = {currentClassId}!");
                 rulesByClass[currentClassId] = new List<HoursRule>();
 
                 foreach (var container in classContainers)
@@ -668,8 +672,10 @@ namespace SchoolShedule.Controllers
             // 
 
             var models = new List<ManualGenerateViewModel>();
-            foreach (var classGroup in allClassGroups)
+            foreach (var classGroup in selectedClassGroups)
             {
+                currentClassId = classGroup.Id;
+                currentClassGroup = classGroup;
                 var subjectsForLessons = BuildLessonTasksForClass(currentClassId, rulesByClass[currentClassId], allSubjects, false)
                 .GroupBy(s => s.Id)
                 .Select(g => (SubjectId: g.Key, Hours: g.Count()))
@@ -686,7 +692,6 @@ namespace SchoolShedule.Controllers
                 };
                 models.Add(model);
             }
-            models.OrderBy(m => m.ClassGroup.Grade).ThenBy(m => m.ClassGroup.Letter);
 
             return View("Manual", models);
         }

@@ -1,0 +1,35 @@
+﻿@model ManualGenerateViewModel
+@{
+    var lesson = new Lesson();
+}
+
+<div class="modal fade" id="teacherModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Выбор преподавателя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <select id="teacher-select" class="teacher-select">
+                    @foreach (var teacher in Model.Teachers)
+                    {
+                        var text = $"{teacher.User.GetFIO} ({teacher.SubjectsToString})";
+
+                        <option value="@teacher.UserId"
+                                data-subjects="@string.Join(",", teacher.Subjects.Select(s => s.Id))">
+                            @text
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="teacher-select-confirm">Выбрать</button>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -4,130 +4,118 @@
 @{
     ViewData["Title"] = "Ручное составление расписания";
 
-    int index = ViewBag.Index ?? 0;
-    var current = Model[index];
-
-    var slotsPerDay = current.CalculatedTimeSlots
-        .GroupBy(ts => ts.DayOfWeek);
+    int currentIndex = ViewBag.Index ?? 0;
+    int lastIndex = Model.Count - 1;
 }
 
-<div class="container-fluid mt-3">
-    <h1 class="text-center mb-4">
-        Расписание для класса @current.ClassGroup.Name
-        <small class="text-muted">(@current.SelectedSchedulePeriod.GetDisplayName())</small>
-    </h1>
+<div class="container-fluid mt-4">
 
-    <div class="row">
-        <div class="col-3">
-            <h4>Предметы и часы</h4>
-            <ul id="subjects-list" class="list-group">
-                @foreach (var (subjectId, hours) in current.SubjectHours)
-                {
-                    var subject = current.Subjects.First(s => s.Id == subjectId);
+    <!-- Навигация между классами -->
+    <div class="d-flex justify-content-center align-items-center mb-4">
 
-                    <li class="list-group-item d-flex justify-content-between align-items-center subject-item"
-                        draggable="true"
-                        data-subject-id="@subject.Id"
-                        data-subject-name="@subject.Name"
-                        data-hours="@hours">
+        <!-- Левая стрелка -->
+        <button class="btn btn-outline-secondary me-3"
+                id="prev-class-btn"
+            @(currentIndex == 0 ? "disabled" : "")>
+            ←
+        </button>
 
-                        <span>@subject.Name</span>
-                        <span class="badge bg-primary rounded-pill">@hours</span>
-                    </li>
-                }
-            </ul>
-        </div>
+        <!-- Название текущего класса -->
+        <h3 class="m-0" id="current-class-name">
+            @Model[currentIndex].ClassGroup.Name
+        </h3>
 
-        <div class="col-9">
-            <h4 class="mb-3">Таблица расписания</h4>
-
-            <table class="table table-bordered text-center align-middle" id="schedule-table">
-                <thead>
-                    <tr>
-                        <th>Урок</th>
-                        @foreach (var day in Enum.GetValues<SchoolShedule.Enums.Day>())
-                        {
-                            <th>@day.GetDisplayName()</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (int i = 0; i < slotsPerDay.Max(spd => spd.Count()); i++)
-                    {
-                        <tr>
-                            <td><strong>@(i + 1).</strong></td>
-
-                            @foreach (var day in Enum.GetValues<SchoolShedule.Enums.Day>())
-                            {
-                                var slot = current.CalculatedTimeSlots
-                                    .FirstOrDefault(cts => cts.Period == (i + 1) && cts.DayOfWeek == day);
-
-                                if (slot is not null)
-                                {
-                                    <td class="schedule-cell"
-                                        data-day="@day"
-                                        data-period="@slot.Period"
-                                        id="@slot.Id">
-                                        <div class="cell-content dropzone"></div>
-                                    </td>
-                                }
-                                else
-                                {
-                                    <td class="bg-light text-muted">—</td>
-                                }
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <!-- Правая стрелка -->
+        <button class="btn btn-outline-primary ms-3"
+                id="next-class-btn"
+            @(currentIndex == lastIndex ? "disabled" : "")>
+            →
+        </button>
     </div>
-</div>
 
-<div class="modal fade" id="teacherModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">Выбор преподавателя</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Частичное представление -->
+    <div id="manual-partial-container">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <div id="partial-@i" class="manual-partial @(i == currentIndex ? "" : "d-none")">
+                @await Html.PartialAsync("_WizardManualPartial", Model[i])
             </div>
-
-            <div class="modal-body">
-                <select id="teacher-select" class="teacher-select">
-                    @foreach (var teacher in current.Teachers)
-                    {
-                        var text = $"{teacher.User.GetFIO} ({teacher.SubjectsToString})";
-
-                        <option value="@teacher.UserId"
-                                data-subjects="@string.Join(",", teacher.Subjects.Select(s => s.Id))">
-                            @text
-                        </option>
-                    }
-                </select>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="teacher-select-confirm">Выбрать</button>
-            </div>
-
-        </div>
+        }
     </div>
+
 </div>
 
 @section Scripts {
-    <script src="~/lib/select2/js/select2.min.js"></script>
-
     <script>
-        $(function () {
-            $('#teacher-select').select2({
-                width: '100%',
-                templateResult: highlightTeachers,
-                templateSelection: highlightTeachers,
-                sorter: teacherSorter
-            });
-        });
-    </script>
+        let currentIndex = @currentIndex;
+        const total = @Model.Count;
 
-    <script src="~/js/manual-schedule.js"></script>
+        // Локальное состояние уроков
+        window.manualLessons = {}; // Dictionary<int, List<Lesson>>
+
+        function renderPartial() {
+
+            // скрываем все частичные
+            document.querySelectorAll(".manual-partial")
+                .forEach(el => el.classList.add("d-none"));
+
+            // показываем нужный
+            document.getElementById("partial-" + currentIndex)
+                .classList.remove("d-none");
+
+            // обновляем название класса
+            const className = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Select(m => m.ClassGroup.Name).ToList()));
+
+            document.getElementById("current-class-name").innerText = className[currentIndex];
+
+            // обновляем состояние стрелок
+            document.getElementById("prev-class-btn").disabled = currentIndex === 0;
+            document.getElementById("next-class-btn").disabled = currentIndex === total - 1;
+
+            updateArrows();
+        }
+
+        // Переключение классов
+        document.getElementById("prev-class-btn").addEventListener("click", () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderPartial();
+            }
+        });
+
+        document.getElementById("next-class-btn").addEventListener("click", () => {
+            if (currentIndex < total - 1) {
+                currentIndex++;
+                renderPartial();
+            }
+        });
+        function updateArrows() {
+
+            const prev = document.getElementById("prev-class-btn");
+            const next = document.getElementById("next-class-btn");
+
+            // ЛЕВАЯ СТРЕЛКА
+            if (currentIndex === 0) {
+                prev.disabled = true;
+                prev.classList.remove("btn-outline-primary");
+                prev.classList.add("btn-outline-secondary");
+            } else {
+                prev.disabled = false;
+                prev.classList.remove("btn-outline-secondary");
+                prev.classList.add("btn-outline-primary");
+            }
+
+            // ПРАВАЯ СТРЕЛКА
+            if (currentIndex === total - 1) {
+                next.disabled = true;
+                next.classList.remove("btn-outline-primary");
+                next.classList.add("btn-outline-secondary");
+            } else {
+                next.disabled = false;
+                next.classList.remove("btn-outline-secondary");
+                next.classList.add("btn-outline-primary");
+            }
+        }
+
+    </script>
 }
