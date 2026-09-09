@@ -8,6 +8,8 @@
     int lastIndex = Model.Count - 1;
 }
 
+<link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
+
 <div class="container-fluid mt-4">
 
     <!-- Навигация между классами -->
@@ -44,14 +46,109 @@
     </div>
 
 </div>
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ СОЗДАНИЯ УРОКА -->
+<div class="modal fade" id="manualLessonModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Создание урока</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="manual-lesson-form">
+
+                    <!-- Класс (неактивный) -->
+                    <div class="mb-3">
+                        <label class="form-label">Класс</label>
+                        <input type="text" class="form-control" id="modal-class-name" disabled />
+                        <input type="hidden" id="modal-class-id" />
+                    </div>
+
+                    <!-- Предмет (неактивный) -->
+                    <div class="mb-3">
+                        <label class="form-label">Предмет</label>
+                        <input type="text" class="form-control" id="modal-subject-name" disabled />
+                        <input type="hidden" id="modal-subject-id" />
+                    </div>
+
+                    <!-- День и урок (неактивные) -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">День</label>
+                            <input type="text" class="form-control" id="modal-day" disabled />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Урок</label>
+                            <input type="text" class="form-control" id="modal-period" disabled />
+                        </div>
+
+                        <input type="hidden" id="modal-timeslot-id" />
+                    </div>
+
+                    <!-- Преподаватель -->
+                    <div class="mb-3">
+                        <label class="form-label">Преподаватель</label>
+                        <select id="modal-teacher-select" class="form-select"></select>
+                    </div>
+
+                    <!-- Кабинет -->
+                    <div class="mb-3">
+                        <label class="form-label">Кабинет</label>
+                        <select id="modal-room-select" class="form-select"></select>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="modal-save-btn">Сохранить</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
 @section Scripts {
+
+    <script src="~/lib/select2/js/select2.min.js"></script>
+
+    <!-- ========================================================= -->
+    <!-- === 0. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ РАБОТЫ РУЧНОГО РАСПИСАНИЯ === -->
+    <!-- ========================================================= -->
+
     <script>
+
+
+        // Текущий индекс класса (переключение стрелками)
         let currentIndex = @currentIndex;
         const total = @Model.Count;
 
-        // Локальное состояние уроков
-        window.manualLessons = {}; // Dictionary<int, List<Lesson>>
+        // Глобальные модели (все классы)
+        window.manualModels = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+
+        // Глобальное хранилище уроков по классам
+        window.manualLessons = {}; // { classId: [ {lesson} ] }
+
+        // История выбора преподавателей и кабинетов по классам
+        let usedTeachers = {};   // { classId: Set<teacherId> }
+        let usedRooms = {};      // { classId: Set<roomId> }
+
+        // Перетаскиваемый предмет
+        let draggedSubject = null;
+
+        // Ячейка расписания, куда бросили предмет
+        let currentCell = null;
+
+
+        /* =========================================================
+           === 1. ПЕРЕКЛЮЧЕНИЕ КЛАССОВ (СТРЕЛКИ) ===
+           ========================================================= */
 
         function renderPartial() {
 
@@ -64,18 +161,26 @@
                 .classList.remove("d-none");
 
             // обновляем название класса
-            const className = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Select(m => m.ClassGroup.Name).ToList()));
-
-            document.getElementById("current-class-name").innerText = className[currentIndex];
-
-            // обновляем состояние стрелок
-            document.getElementById("prev-class-btn").disabled = currentIndex === 0;
-            document.getElementById("next-class-btn").disabled = currentIndex === total - 1;
+            const classNames = window.manualModels.map(m => m.ClassGroup.Name);
+            document.getElementById("current-class-name").innerText = classNames[currentIndex];
 
             updateArrows();
         }
 
-        // Переключение классов
+        function updateArrows() {
+            const prev = document.getElementById("prev-class-btn");
+            const next = document.getElementById("next-class-btn");
+
+            prev.disabled = currentIndex === 0;
+            next.disabled = currentIndex === total - 1;
+
+            prev.classList.toggle("btn-outline-secondary", currentIndex === 0);
+            prev.classList.toggle("btn-outline-primary", currentIndex !== 0);
+
+            next.classList.toggle("btn-outline-secondary", currentIndex === total - 1);
+            next.classList.toggle("btn-outline-primary", currentIndex !== total - 1);
+        }
+
         document.getElementById("prev-class-btn").addEventListener("click", () => {
             if (currentIndex > 0) {
                 currentIndex--;
@@ -89,33 +194,377 @@
                 renderPartial();
             }
         });
-        function updateArrows() {
 
-            const prev = document.getElementById("prev-class-btn");
-            const next = document.getElementById("next-class-btn");
 
-            // ЛЕВАЯ СТРЕЛКА
-            if (currentIndex === 0) {
-                prev.disabled = true;
-                prev.classList.remove("btn-outline-primary");
-                prev.classList.add("btn-outline-secondary");
-            } else {
-                prev.disabled = false;
-                prev.classList.remove("btn-outline-secondary");
-                prev.classList.add("btn-outline-primary");
-            }
+        /* =========================================================
+           === 2. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ ===
+           ========================================================= */
 
-            // ПРАВАЯ СТРЕЛКА
-            if (currentIndex === total - 1) {
-                next.disabled = true;
-                next.classList.remove("btn-outline-primary");
-                next.classList.add("btn-outline-secondary");
-            } else {
-                next.disabled = false;
-                next.classList.remove("btn-outline-secondary");
-                next.classList.add("btn-outline-primary");
-            }
+        function ensureHistory(classId) {
+            if (!usedTeachers[classId]) usedTeachers[classId] = new Set();
+            if (!usedRooms[classId]) usedRooms[classId] = new Set();
         }
 
+        function getCurrentClassId() {
+            return window.manualModels[currentIndex].ClassGroup.Id;
+        }
+
+        function getCurrentClassName() {
+            return window.manualModels[currentIndex].ClassGroup.Name;
+        }
+
+        function getTeachersForClass(classId) {
+            return window.manualModels[currentIndex].Teachers.map(t => ({
+                userId: t.UserId,
+                fio: t.User.GetFIO,
+                subjectsCsv: t.Subjects.map(s => s.Id).join(","),
+                subjectsString: t.SubjectsToString
+            }));
+        }
+
+        function getRoomsForClass(classId) {
+            return window.manualModels[currentIndex].Rooms.map(r => ({
+                id: r.Id,
+                roomNumber: r.RoomNumber,
+                subjectsCsv: r.AssignedSubjects.map(s => s.Id).join(",")
+            }));
+        }
+
+
+        /* =========================================================
+           === 3. DRAG & DROP ПРЕДМЕТОВ ===
+           ========================================================= */
+
+        // Начало перетаскивания предмета
+        document.addEventListener("dragstart", function(e) {
+            const item = e.target.closest(".subject-item");
+            if (!item) return;
+
+            draggedSubject = {
+                id: item.dataset.subjectId,
+                name: item.dataset.subjectName,
+                hours: parseInt(item.dataset.hours),
+                element: item
+            };
+
+            e.dataTransfer.effectAllowed = "move";
+        });
+
+        // Разрешаем бросать в ячейки
+        document.addEventListener("dragover", function(e) {
+            const cell = e.target.closest(".schedule-cell");
+            if (!cell) return;
+
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+        });
+
+        // Бросили предмет в ячейку → открываем модалку
+        document.addEventListener("drop", function(e) {
+            const cell = e.target.closest(".schedule-cell");
+            if (!cell || !draggedSubject) return;
+
+            e.preventDefault();
+
+            currentCell = cell;
+
+            const classId = getCurrentClassId();
+            const className = getCurrentClassName();
+
+            const subjectId = draggedSubject.id;
+            const subjectName = draggedSubject.name;
+
+            const day = cell.dataset.day;
+            const dayDisplay = cell.dataset.dayDisplay;
+
+            const period = cell.dataset.period;
+            const timeslotId = cell.dataset.timeslotId;
+
+            const teachers = getTeachersForClass(classId);
+            const rooms = getRoomsForClass(classId);
+
+            openLessonModal(
+                classId,
+                className,
+                subjectId,
+                subjectName,
+                day,
+                dayDisplay,
+                period,
+                timeslotId,
+                teachers,
+                rooms
+            );
+        });
+
+
+        /* =========================================================
+           === 4. МОДАЛЬНОЕ ОКНО: ПОДСВЕТКА И СОРТИРОВКА ===
+           ========================================================= */
+
+        function formatTeacher(option) {
+            if (!option.id) return option.text;
+
+            const teacherId = option.id;
+            const subjects = (option.element.dataset.subjects || "").split(",");
+            const subjectId = $("#modal-subject-id").val();
+            const classId = $("#modal-class-id").val();
+
+            ensureHistory(classId);
+
+            const isUsed = usedTeachers[classId].has(teacherId);
+            const isProfile = subjects.includes(subjectId);
+
+            let bg = "";
+
+            if (isProfile && isUsed) {
+                bg = "#d4f7d4"; // зелёный — профильный + ранее выбранный
+            }
+            else if (!isProfile) {
+                bg = "#fff7d1"; // жёлтый — не профильный
+            }
+            // профильный, но не выбранный → белый (без заливки)
+
+            return $('<span style="background:' + bg + '; padding:3px 6px; border-radius:4px;">' + option.text + '</span>');
+        }
+
+
+        function teacherSorter(data) {
+            const subjectId = $("#modal-subject-id").val();
+            const classId = $("#modal-class-id").val();
+
+            ensureHistory(classId);
+
+            return data.sort((a, b) => {
+                const aId = a.id;
+                const bId = b.id;
+
+                const aSubjects = (a.element.dataset.subjects || "").split(",");
+                const bSubjects = (b.element.dataset.subjects || "").split(",");
+
+                const aUsed = usedTeachers[classId].has(aId);
+                const bUsed = usedTeachers[classId].has(bId);
+
+                const aProfile = aSubjects.includes(subjectId);
+                const bProfile = bSubjects.includes(subjectId);
+
+                // 1. Профильные + ранее выбранные
+                if (aProfile && aUsed && !(bProfile && bUsed)) return -1;
+                if (bProfile && bUsed && !(aProfile && aUsed)) return 1;
+
+                // 2. Профильные
+                if (aProfile && !bProfile) return -1;
+                if (!aProfile && bProfile) return 1;
+
+                // 3. Остальные
+                return a.text.localeCompare(b.text);
+            });
+        }
+
+
+        function formatRoom(option) {
+            if (!option.id) return option.text;
+
+            const roomId = option.id;
+            const subjects = (option.element.dataset.subjects || "").split(",");
+            const subjectId = $("#modal-subject-id").val();
+            const classId = $("#modal-class-id").val();
+
+            ensureHistory(classId);
+
+            const isUsed = usedRooms[classId].has(roomId);
+            const isProfile = subjects.includes(subjectId);
+
+            let bg = "";
+
+            if (isProfile && isUsed) {
+                bg = "#d4f7d4"; // зелёный — профильный + ранее выбранный
+            }
+            else if (!isProfile) {
+                bg = "#fff7d1"; // жёлтый — не профильный
+            }
+            // профильный, но не выбранный → белый
+
+            return $('<span style="background:' + bg + '; padding:3px 6px; border-radius:4px;">' + option.text + '</span>');
+        }
+
+
+        function roomSorter(data) {
+            const subjectId = $("#modal-subject-id").val();
+            const classId = $("#modal-class-id").val();
+
+            ensureHistory(classId);
+
+            return data.sort((a, b) => {
+                const aId = a.id;
+                const bId = b.id;
+
+                const aSubjects = (a.element.dataset.subjects || "").split(",");
+                const bSubjects = (b.element.dataset.subjects || "").split(",");
+
+                const aUsed = usedRooms[classId].has(aId);
+                const bUsed = usedRooms[classId].has(bId);
+
+                const aProfile = aSubjects.includes(subjectId);
+                const bProfile = bSubjects.includes(subjectId);
+
+                // 1. Профильные + ранее выбранные
+                if (aProfile && aUsed && !(bProfile && bUsed)) return -1;
+                if (bProfile && bUsed && !(aProfile && aUsed)) return 1;
+
+                // 2. Профильные
+                if (aProfile && !bProfile) return -1;
+                if (!aProfile && bProfile) return 1;
+
+                // 3. Остальные
+                return a.text.localeCompare(b.text);
+            });
+        }
+
+
+
+        /* =========================================================
+           === 5. ОТКРЫТИЕ МОДАЛКИ ===
+           ========================================================= */
+
+        function openLessonModal(classId, className, subjectId, subjectName, day, dayDisplay, period, timeslotId, teachers, rooms) {
+
+            ensureHistory(classId);
+
+            $("#modal-class-id").val(classId);
+            $("#modal-class-name").val(className);
+
+            $("#modal-subject-id").val(subjectId);
+            $("#modal-subject-name").val(subjectName);
+
+            $("#modal-day").val(dayDisplay);
+            $("#modal-period").val(period);
+            $("#modal-timeslot-id").val(timeslotId);
+
+            // ====== ПРЕПОДАВАТЕЛИ ======
+            const teacherSelect = $("#modal-teacher-select");
+            teacherSelect.empty();
+
+            teachers.forEach(t => {
+                teacherSelect.append(
+                    `<option value="${t.userId}" data-subjects="${t.subjectsCsv}">
+                                                    ${t.fio} (${t.subjectsString})
+                                                </option>`
+                );
+            });
+
+            teacherSelect.select2({
+                width: '100%',
+                templateResult: formatTeacher,
+                sorter: teacherSorter,
+                dropdownParent: $('#manualLessonModal')
+            });
+
+            // ====== КАБИНЕТЫ ======
+            const roomSelect = $("#modal-room-select");
+            roomSelect.empty();
+
+            rooms.forEach(r => {
+                roomSelect.append(
+                    `<option value="${r.id}" data-subjects="${r.subjectsCsv}">
+                                                    ${r.roomNumber}
+                                                </option>`
+                );
+            });
+
+            roomSelect.select2({
+                width: '100%',
+                templateResult: formatRoom,
+                sorter: roomSorter,
+                dropdownParent: $('#manualLessonModal')
+            });
+
+            // Открываем модалку
+            const modal = new bootstrap.Modal(document.getElementById("manualLessonModal"));
+            modal.show();
+        }
+
+
+        /* =========================================================
+           === 6. СОХРАНЕНИЕ УРОКА И ОТРИСОВКА В ЯЧЕЙКЕ ===
+           ========================================================= */
+
+        document.getElementById("modal-save-btn").addEventListener("click", function() {
+
+            const classId = $("#modal-class-id").val();
+            const subjectId = $("#modal-subject-id").val();
+            const teacherId = $("#modal-teacher-select").val();
+            const roomId = $("#modal-room-select").val();
+            const timeslotId = $("#modal-timeslot-id").val();
+
+            ensureHistory(classId);
+
+            usedTeachers[classId].add(teacherId);
+            usedRooms[classId].add(roomId);
+
+            // сохраняем урок в глобальном списке
+            if (!window.manualLessons[classId]) window.manualLessons[classId] = [];
+
+            window.manualLessons[classId].push({
+                classId,
+                subjectId,
+                teacherId,
+                roomId,
+                timeslotId
+            });
+
+            // отрисовываем в ячейке
+            currentCell.querySelector(".cell-content").innerHTML = `
+                                            <div class="p-1 bg-light border rounded">
+                                                <strong>${$("#modal-subject-name").val()}</strong><br/>
+                                                <small>Преп.: ${$("#modal-teacher-select option:selected").text()}</small><br/>
+                                                <small>Каб.: ${$("#modal-room-select option:selected").text()}</small>
+                                            </div>
+                                                `;
+            // === ДЕЛАЕМ ЯЧЕЙКУ НЕАКТИВНОЙ ===
+            currentCell.classList.add("cell-filled");
+            currentCell.classList.remove("dropzone");
+
+            // запрещаем dragover/drop
+            currentCell.addEventListener("dragover", e => e.preventDefault(), { capture: true });
+            currentCell.addEventListener("drop", e => e.preventDefault(), { capture: true });
+
+            // уменьшаем часы
+            draggedSubject.hours -= 1;
+            draggedSubject.element.dataset.hours = draggedSubject.hours;
+            draggedSubject.element.querySelector(".badge").innerText = draggedSubject.hours;
+
+            if (draggedSubject.hours <= 0) {
+                draggedSubject.element.setAttribute("draggable", "false");
+                draggedSubject.element.classList.add("disabled");
+            }
+
+            draggedSubject = null;
+
+            bootstrap.Modal.getInstance(document.getElementById("manualLessonModal")).hide();
+        });
+
+        $(document).on('select2:open', function(e) {
+
+            const selectId = e.target.id;
+
+            // Сбрасываем выбранный элемент
+            const select = $('#' + selectId);
+            select.val(null).trigger('change.select2');
+
+            // Прокручиваем вверх
+            const dropdown = document.querySelector('.select2-container--open .select2-results__options');
+            if (dropdown) dropdown.scrollTop = 0;
+        });
+
     </script>
+    <style>
+        .cell-filled {
+            background-color: #e9ecef !important;
+            cursor: not-allowed;
+            opacity: 0.85;
+        }
+
+    </style>
 }
+
