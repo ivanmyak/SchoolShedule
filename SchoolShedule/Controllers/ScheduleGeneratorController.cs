@@ -686,6 +686,7 @@ namespace SchoolShedule.Controllers
                 };
                 models.Add(model);
             }
+            models.OrderBy(m => m.ClassGroup.Grade).ThenBy(m => m.ClassGroup.Letter);
 
             return View("Manual", models);
         }
@@ -740,12 +741,16 @@ namespace SchoolShedule.Controllers
 
         /// <summary>
         /// Запуск минимальной генерации расписания на основе сохранённых HoursRule.
-        /// </summary>
+        /// </summary>        
+        /// <param name="minimumDTO">Наша модель с выбранным ID шаблона и классами из представления</param>
         [HttpPost]
-        public IActionResult WizardTemplateMinimumGenerate([FromBody] int templateId)
+        public IActionResult WizardTemplateMinimumGenerate([FromBody] WizardGenerateMinimumDTO minimumDTO)
         {
+            if (minimumDTO.SelectedIds == null || minimumDTO.SelectedIds.Count == 0)
+                return BadRequest(new { error = "Не выбран ни один класс или не удалось получить ID выбранных классов" });
+
             var classGroupContainers = _context.LessonRuleContainers
-                .Where(c => c.TemplateId == templateId)
+                .Where(c => c.TemplateId == minimumDTO.TemplateId && minimumDTO.SelectedIds.Contains(c.ClassGroupId))
                 .Include(c => c.ClassGroup)
                 .Include(c => c.Subject)
                 .Include(c => c.Template)
@@ -760,7 +765,7 @@ namespace SchoolShedule.Controllers
             var allClassGroups = _context.ClassGroups.ToList();
 
             if (!classGroupContainers.Any())
-                throw new KeyNotFoundException($"[WIZARD-GENERATE-MINIMUM] Не найдены правила для выбранного шаблона (ID = {templateId}) в БД");
+                throw new KeyNotFoundException($"[WIZARD-GENERATE-MINIMUM] Не найдены правила для выбранного шаблона (ID = {minimumDTO.TemplateId}) в БД");
 
             // Проверяем, что у каждого предмета есть хотя бы один кабинет
             foreach (var subject in allSubjects)
@@ -773,7 +778,6 @@ namespace SchoolShedule.Controllers
                     return BadRequest(new { error = msg });
                 }
             }
-
 
             // Количество рабочих недель выбираем исходя из выбранного периода
             int countWorkWeeks = classGroupContainers.First().First().Template.PeriodType switch

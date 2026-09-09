@@ -8,7 +8,10 @@
 
 <div class="mb-3">
     <label class="form-label">Период</label>
-    <select asp-for="PeriodType" id="period" asp-items="Html.GetEnumSelectList<SchoolShedule.Enums.SchedulePeriodType>()" class="form-select"></select>
+    <select asp-for="PeriodType"
+            id="period"
+            asp-items="Html.GetEnumSelectList<SchoolShedule.Enums.SchedulePeriodType>()"
+            class="form-select"></select>
 </div>
 
 <table class="table table-bordered">
@@ -17,15 +20,24 @@
             <th>Предмет</th>
             @foreach (var c in Model.ClassGroups)
             {
-                <th>@c.Name</th>
+                <th class="text-center">
+                    <input type="checkbox"
+                           name="SelectedIds"
+                           class="class-select"
+                           data-class-id="@c.Id" />
+
+                    <div>@c.Name</div>
+                </th>
             }
         </tr>
     </thead>
+
     <tbody>
         @foreach (var s in Model.Subjects)
         {
             <tr>
                 <td>@s.Name</td>
+
                 @foreach (var c in Model.ClassGroups)
                 {
                     <td>
@@ -43,12 +55,9 @@
     </tbody>
 </table>
 
-<!-- Кнопки -->
 <div class="mt-3">
-
     <button class="btn btn-primary" id="btnSave">Сохранить шаблон</button>
 
-    <!-- Чекбокс ручной настройки -->
     <div class="form-check form-check-inline ms-3">
         <input class="form-check-input" type="checkbox" id="manualModeCheckbox" checked>
         <label class="form-check-label" for="manualModeCheckbox">Ручная настройка</label>
@@ -57,13 +66,13 @@
     <button class="btn btn-success ms-2 d-none" id="btnGenerate">Сгенерировать</button>
 </div>
 
-<!-- Модальное окно ввода имени шаблона -->
-<div class="modal fade" id="templateNameModal" tabindex="-1" aria-labelledby="templateNameModalLabel" aria-hidden="true">
+<!-- Модальное окно -->
+<div class="modal fade" id="templateNameModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 class="modal-title" id="templateNameModalLabel">Имя шаблона</h5>
+                <h5 class="modal-title">Имя шаблона</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
@@ -81,158 +90,10 @@
     </div>
 </div>
 
-
 @section Scripts {
-<script>
-    let templateId = @Model.TemplateId;
-    let originalName = @Json.Serialize(Model.TemplateId != 0 ? Model.TemplateName : "");
-
-    $(document).ready(function () {
-        if (templateId !== 0) {
-            $("#btnGenerate").removeClass("d-none");
-        }
-    });
-
-    $(".hours-input, #period").on("input change", function () {
-        $("#btnGenerate").addClass("d-none");
-    });
-
-    function openNameModal(initialName) {
-        $("#templateNameInput").val(initialName);
-        $("#templateNameError").hide();
-        const modal = new bootstrap.Modal(document.getElementById("templateNameModal"));
-        modal.show();
-    }
-
-    function checkTemplateName(name) {
-        return $.ajax({
-            url: '/ScheduleGenerator/CheckTemplateName',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                name: name,
-                templateId: templateId
-            })
-        });
-    }
-
-    $("#btnSave").on("click", function () {
-        const period = parseInt($("#period").val());
-
-        const cells = [];
-        $(".hours-input").each(function () {
-            const hours = parseInt($(this).val());
-            if (!isNaN(hours) && hours > 0) {
-                cells.push({
-                    subjectId: $(this).data("subject"),
-                    classGroupId: $(this).data("class"),
-                    hours: hours
-                });
-            }
-        });
-
-        openNameModal(originalName);
-
-        $("#templateNameConfirmBtn").off("click").on("click", async function () {
-            const name = $("#templateNameInput").val().trim();
-            if (!name) {
-                $("#templateNameError").text("Введите имя шаблона.").show();
-                return;
-            }
-
-            const check = await checkTemplateName(name);
-
-            if (check.status === "OK") {
-                submitTemplate(name, period, cells, false);
-            }
-            else if (check.status === "NAME_EXISTS") {
-                $("#templateNameError").html(`
-                    Шаблон с именем <b>${name}</b> уже существует.<br>
-                    Хотите <b>заменить</b> его или <b>сохранить как новый</b>?
-                    <div class="mt-2">
-                        <button class="btn btn-warning btn-sm me-2" id="replaceBtn">Заменить</button>
-                        <button class="btn btn-secondary btn-sm" id="newNameBtn">Новое имя</button>
-                    </div>
-                `).show();
-
-                $("#replaceBtn").on("click", function () {
-                    submitTemplate(name, period, cells, true);
-                });
-
-                $("#newNameBtn").on("click", function () {
-                    $("#templateNameInput").val("");
-                    $("#templateNameError").hide();
-                });
-            }
-            else {
-                alert("Неизвестный ответ сервера.");
-            }
-        });
-    });
-
-    function submitTemplate(name, period, cells, replace) {
-        const data = {
-            name: name,
-            periodType: period,
-            cells: cells,
-            replaceExisting: replace,
-            templateId: templateId
-        };
-
-        $.ajax({
-            url: '/ScheduleGenerator/WizardTemplateMinimumSave',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function (resp) {
-                templateId = resp.templateId;
-                originalName = name;
-
-                $("#btnGenerate").removeClass("d-none");
-
-                const modal = bootstrap.Modal.getInstance(document.getElementById("templateNameModal"));
-                modal.hide();
-
-                alert("Шаблон сохранён.");
-            }
-        });
-    }
-
-    // Генерация расписания (авто или ручная)
-    $("#btnGenerate").on("click", function () {
-
-    const manualMode = $("#manualModeCheckbox").is(":checked");
-
-    if (manualMode) {
-        // Открываем ручной режим в новой вкладке
-        window.open('/ScheduleGenerator/BuildManualSchedule?templateId=' + templateId, '_blank');
-    }
-    else {
-        // Автоматическая генерация
-        $.ajax({
-            url: '/ScheduleGenerator/WizardTemplateMinimumGenerate',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(templateId),
-            success: function () {
-                alert("Расписание сгенерировано.");
-            },
-            error: function (xhr) {
-                let msg = "Ошибка генерации расписания.";
-
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    msg = xhr.responseJSON.error;
-
-                    if (xhr.responseJSON.required && xhr.responseJSON.maximum) {
-                        msg += `\nТребуется: ${xhr.responseJSON.required}, максимум: ${xhr.responseJSON.maximum}`;
-                    }
-                }
-
-                alert(msg);
-            }
-        });
-    }
-});
-
-</script>
+    <script>
+        window.templateIdValue = @Model.TemplateId;
+        window.originalTemplateName = @Json.Serialize(Model.TemplateName ?? "");
+    </script>
+    <script src="~/js/wizardminimumscript.js"></script>
 }
