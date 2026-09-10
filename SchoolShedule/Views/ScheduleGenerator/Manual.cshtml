@@ -117,6 +117,10 @@
     </div>
 </div>
 
+<div id="manualContextMenu" class="context-menu shadow">
+    <div class="context-item" data-action="edit">Изменить</div>
+    <div class="context-item" data-action="delete">Удалить</div>
+</div>
 
 @section Scripts {
 
@@ -488,6 +492,13 @@
            ========================================================= */
 
         document.getElementById("modal-save-btn").addEventListener("click", function() {
+            if (window.editMode) {
+    applyEditLesson();
+    window.editMode = false;
+    bootstrap.Modal.getInstance(document.getElementById("manualLessonModal")).hide();
+    return;
+}
+
 
             const classId = $("#modal-class-id").val();
             const subjectId = $("#modal-subject-id").val();
@@ -666,6 +677,153 @@
                 btn.classList.remove("disabled");
             }
         }
+        const manualMenu = document.getElementById("manualContextMenu");
+let contextCell = null;
+
+document.addEventListener("contextmenu", function (e) {
+    const cell = e.target.closest(".schedule-cell");
+    if (!cell) return;
+
+    // показываем меню только если ячейка заполнена
+    if (!cell.classList.contains("cell-filled")) {
+        return; // пустая ячейка → меню не показываем
+    }
+
+    e.preventDefault();
+    contextCell = cell;
+
+    manualMenu.style.top = e.pageY + "px";
+    manualMenu.style.left = e.pageX + "px";
+    manualMenu.style.display = "block";
+});
+
+
+document.addEventListener("click", () => manualMenu.style.display = "none");
+manualMenu.addEventListener("click", function (e) {
+    const item = e.target.closest(".context-item");
+    if (!item || item.classList.contains("disabled") || !contextCell) return;
+
+    const action = item.dataset.action;
+
+    if (action === "edit") {
+        openEditModal(contextCell);
+    }
+
+    if (action === "delete") {
+        deleteLesson(contextCell);
+    }
+});
+function openEditModal(cell) {
+
+    const classId = getCurrentClassId();
+    const timeslotId = cell.dataset.timeslotId;
+
+    const lesson = window.manualLessons[classId].find(l => l.timeslotId == timeslotId);
+    if (!lesson) return;
+
+    $("#modal-class-id").val(lesson.classId);
+    $("#modal-subject-id").val(lesson.subjectId);
+    $("#modal-timeslot-id").val(lesson.timeslotId);
+
+    $("#modal-subject-name").val(cell.querySelector("strong").innerText);
+
+    $("#modal-teacher-select").val(lesson.teacherId).trigger("change");
+    $("#modal-room-select").val(lesson.roomId).trigger("change");
+
+    window.editMode = true;
+    window.editTimeslotId = timeslotId;
+
+    new bootstrap.Modal(document.getElementById("manualLessonModal")).show();
+}
+
+function deleteLesson(cell) {
+
+    const classId = getCurrentClassId();
+    const timeslotId = cell.dataset.timeslotId;
+
+    const index = window.manualLessons[classId].findIndex(l => l.timeslotId == timeslotId);
+    if (index === -1) return;
+
+    const lesson = window.manualLessons[classId][index];
+
+    const subjectId = lesson.subjectId;
+    const teacherId = lesson.teacherId;
+    const roomId = lesson.roomId;
+
+    // 1. Удаляем урок из manualLessons
+    window.manualLessons[classId].splice(index, 1);
+
+    // 2. Освобождаем ячейку
+    cell.classList.remove("cell-filled");
+    cell.classList.add("dropzone");
+    cell.querySelector(".cell-content").innerHTML = "";
+
+    // 3. Возвращаем часы предмету
+    const subjectItem = document.querySelector(`.subject-item[data-subject-id="${subjectId}"]`);
+    if (subjectItem) {
+        let hours = parseInt(subjectItem.dataset.hours);
+        hours++;
+        subjectItem.dataset.hours = hours;
+        subjectItem.querySelector(".badge").innerText = hours;
+
+        subjectItem.classList.remove("disabled");
+        subjectItem.setAttribute("draggable", "true");
+    }
+
+    // 4. Проверяем, остались ли уроки с этим teacherId
+    const teacherStillUsed = window.manualLessons[classId].some(l => l.teacherId == teacherId);
+    if (!teacherStillUsed) {
+        usedTeachers[classId].delete(teacherId);
+    }
+
+    // 5. Проверяем, остались ли уроки с этим roomId
+    const roomStillUsed = window.manualLessons[classId].some(l => l.roomId == roomId);
+    if (!roomStillUsed) {
+        usedRooms[classId].delete(roomId);
+    }
+
+    // 6. Проверяем, остались ли уроки с этим subjectId
+    const subjectStillUsed = window.manualLessons[classId].some(l => l.subjectId == subjectId);
+    if (!subjectStillUsed) {
+        // если у тебя есть usedSubjects — удаляем
+        if (window.usedSubjects && window.usedSubjects[classId]) {
+            window.usedSubjects[classId].delete(subjectId);
+        }
+    }
+
+    updateSaveButtonState();
+}
+
+function applyEditLesson() {
+
+    const classId = $("#modal-class-id").val();
+    const subjectId = $("#modal-subject-id").val();
+    const teacherId = $("#modal-teacher-select").val();
+    const roomId = $("#modal-room-select").val();
+    const timeslotId = window.editTimeslotId;
+
+    const lesson = window.manualLessons[classId].find(l => l.timeslotId == timeslotId);
+
+    // обновляем usedTeachers / usedRooms
+    usedTeachers[classId].add(teacherId);
+    usedRooms[classId].add(roomId);
+
+    // обновляем lesson
+    lesson.subjectId = subjectId;
+    lesson.teacherId = teacherId;
+    lesson.roomId = roomId;
+
+    // обновляем DOM
+    const cell = document.querySelector(`.schedule-cell[data-timeslot-id="${timeslotId}"]`);
+    cell.querySelector(".cell-content").innerHTML = `
+        <div class="p-1 bg-light border rounded">
+            <strong>${$("#modal-subject-name").val()}</strong><br/>
+            <small>Преп.: ${$("#modal-teacher-select option:selected").text()}</small><br/>
+            <small>Каб.: ${$("#modal-room-select option:selected").text()}</small>
+        </div>
+    `;
+}
+
 
     </script>
     <style>
@@ -680,6 +838,31 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+
+        .context-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: .25rem;
+    display: none;
+    z-index: 9999; /* важно: выше модалки и таблицы */
+    min-width: 150px;
+}
+
+.context-item {
+    padding: .5rem 1rem;
+    cursor: pointer;
+}
+
+.context-item:hover:not(.disabled) {
+    background: #f0f0f0;
+}
+
+.context-item.disabled {
+    color: #aaa;
+    cursor: default;
+}
+
     </style>
 }
 
