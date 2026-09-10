@@ -697,30 +697,132 @@ namespace SchoolShedule.Controllers
         }
 
         [HttpPost]
-        public IActionResult SaveManualSchedule([FromBody] ManualScheduleSaveRequest req)
+        public async Task<IActionResult> SaveManualSchedule([FromBody] ManualScheduleSaveRequest dto)
         {
-            var classGroup = _context.ClassGroups.FirstOrDefault(c => c.Id == req.ClassId)
-                ?? throw new KeyNotFoundException("Класс не найден");
+            var classId = dto.ClassId;
+            var lessons = dto.Lessons;
 
-            foreach (var lesson in req.Lessons)
+            // === Группы конфликтов ===
+            var conflicts = new Dictionary<string, List<string>>
             {
-                var timeSlot = _context.TimeSlots.First(ts =>
-                    ts.DayOfWeek == lesson.Day &&
-                    ts.Period == lesson.Period);
+                ["ClassCell"] = new(),
+                ["TeacherBusy"] = new(),
+                ["RoomBusy"] = new(),
+                ["SubjectPerDay"] = new()
+            };
 
-                _context.Lessons.Add(new Lesson
+            // === 1. Предзагрузка всех данных ===
+            var classGroup = await _context.ClassGroups
+                .FirstOrDefaultAsync(c => c.Id == classId);
+
+            if (classGroup == null)
+                return Json(new { success = false, message = "Класс не найден." });
+
+            var allLessons = await _context.Lessons
+                .Include(l => l.Subject)
+                .Include(l => l.Teacher).ThenInclude(t => t.User)
+                .Include(l => l.Teacher).ThenInclude(t => t.Subjects)
+                .Include(l => l.Teacher).ThenInclude(t => t.AssignedRooms)
+                .Include(l => l.Room).ThenInclude(r => r.AssignedSubjects)
+                .Include(l => l.ClassGroup)
+                .ToListAsync();
+
+            var timeSlots = await _context.TimeSlots.ToListAsync();
+            var subjects = await _context.Subjects.ToListAsync();
+
+            // === 2. Локальные структуры для проверки ===
+            var subjectPerDay = new Dictionary<Day, HashSet<int>>();
+
+            // === 3. Проверка всех уроков ===
+            foreach (var dtoLesson in lessons)
+            {
+                var subjectId = dtoLesson.SubjectId;
+                var teacherId = dtoLesson.TeacherId;
+                var roomId = dtoLesson.RoomId;
+                var timeslotId = dtoLesson.TimeSlotId;
+
+                var slot = timeSlots.First(ts => ts.Id == timeslotId);
+                var day = slot.DayOfWeek;
+                var period = slot.Period;
+
+                var subjectName = subjects.First(s => s.Id == subjectId).Name;
+
+                // === A. Предмет уже стоит в этот день ===
+                if (!subjectPerDay.ContainsKey(day))
+                    subjectPerDay[day] = new HashSet<int>();
+
+                if (subjectPerDay[day].Contains(subjectId))
                 {
-                    ClassGroupId = req.ClassId,
-                    SubjectId = lesson.SubjectId,
-                    TeacherId = lesson.TeacherId,
-                    RoomId = lesson.RoomId,
-                    TimeSlotId = timeSlot.Id
+                    conflicts["SubjectPerDay"].Add(
+                        $"Предмет '{subjectName}' уже стоит у класса '{classGroup.Name}' в день {day.GetDisplayName()}."
+                    );
+                    continue;
+                }
+                else
+                {
+                    subjectPerDay[day].Add(subjectId);
+                }
+
+                // === B. Ячейка у класса занята ===
+                var classCellBusy = allLessons.FirstOrDefault(l =>
+                    l.ClassGroupId == classId &&
+                    l.TimeSlotId == timeslotId);
+
+                if (classCellBusy != null)
+                {
+                    conflicts["ClassCell"].Add(
+    $"У класса '{classGroup.Name}' ячейка ({slot.TimeSlotString}) уже занята предметом '{classCellBusy.Subject.Name}'."
+);
+                    continue;
+                }
+
+                // === C. Учитель занят ===
+                var teacherBusy = allLessons.FirstOrDefault(l =>
+                    l.TeacherId == teacherId &&
+                    l.TimeSlotId == timeslotId);
+
+                if (teacherBusy != null)
+                {
+                    conflicts["TeacherBusy"].Add(
+     $"Учитель '{teacherBusy.Teacher.User.GetFIO}' уже ведёт урок '{teacherBusy.Subject.Name}' у класса '{teacherBusy.ClassGroup.Name}' в эту ячейку ({slot.TimeSlotString})."
+ );
+                    continue;
+                }
+
+                // === D. Кабинет занят ===
+                var roomBusy = allLessons.FirstOrDefault(l =>
+                    l.RoomId == roomId &&
+                    l.TimeSlotId == timeslotId);
+
+                if (roomBusy != null)
+                {
+                    conflicts["RoomBusy"].Add(
+    $"Кабинет '{roomBusy.Room.RoomNumber}' занят классом '{roomBusy.ClassGroup.Name}' — предмет '{roomBusy.Subject.Name}', преподаватель '{roomBusy.Teacher.User.GetFIO}', ячейка '({slot.TimeSlotString})'."
+);
+                    continue;
+                }
+            }
+
+            // === 4. Если есть конфликты — возвращаем их все сразу ===
+            bool hasConflicts = conflicts.Any(kvp => kvp.Value.Any());
+
+            if (hasConflicts)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Обнаружены конфликты.",
+                    conflicts
                 });
             }
 
-            _context.SaveChanges();
+            // === 5. Создаём уроки через фабрику ===
+            var newLessons = lessons.Select(dtoLesson => dtoLesson.ToLesson()).ToList();
 
-            return Ok();
+            _context.Lessons.AddRange(newLessons);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
         }
         public class ManualScheduleSaveRequest
         {
@@ -731,16 +833,22 @@ namespace SchoolShedule.Controllers
 
         public class ManualLessonDto
         {
-            /// <summary>
-            /// День недели
-            /// </summary>
-            /// <remarks>Ожидаем, что работать будем только в будние дни, т.е. ПН-ПТ</remarks>
-            [DisplayName("День недели")]
-            public Day Day { get; set; }
-            public int Period { get; set; }
+            public int ClassId { get; set; }
             public int SubjectId { get; set; }
             public Guid TeacherId { get; set; }
             public int RoomId { get; set; }
+            public int TimeSlotId { get; set; }
+            public Lesson ToLesson()
+            {
+                return new Lesson
+                {
+                    ClassGroupId = this.ClassId,
+                    SubjectId = this.SubjectId,
+                    TeacherId = this.TeacherId,
+                    RoomId = this.RoomId,
+                    TimeSlotId = this.TimeSlotId
+                };
+            }
         }
 
 

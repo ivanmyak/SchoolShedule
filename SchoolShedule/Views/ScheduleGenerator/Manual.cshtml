@@ -28,12 +28,16 @@
         </h3>
 
         <!-- Правая стрелка -->
-        <button class="btn btn-outline-primary ms-3"
+        <button class="btn @(currentIndex >= lastIndex ? "btn-outline-secondary" : "btn-outline-primary") ms-3"
                 id="next-class-btn"
             @(currentIndex == lastIndex ? "disabled" : "")>
             →
         </button>
     </div>
+
+    <button id="save-class-schedule-btn" class="btn btn-success mt-3" disabled>
+        Сохранить расписание для класса
+    </button>
 
     <!-- Частичное представление -->
     <div id="manual-partial-container">
@@ -165,6 +169,7 @@
             document.getElementById("current-class-name").innerText = classNames[currentIndex];
 
             updateArrows();
+            updateSaveButtonState();
         }
 
         function updateArrows() {
@@ -194,7 +199,6 @@
                 renderPartial();
             }
         });
-
 
         /* =========================================================
            === 2. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ ===
@@ -328,7 +332,6 @@
             return $('<span style="background:' + bg + '; padding:3px 6px; border-radius:4px;">' + option.text + '</span>');
         }
 
-
         function teacherSorter(data) {
             const subjectId = $("#modal-subject-id").val();
             const classId = $("#modal-class-id").val();
@@ -361,7 +364,6 @@
             });
         }
 
-
         function formatRoom(option) {
             if (!option.id) return option.text;
 
@@ -387,7 +389,6 @@
 
             return $('<span style="background:' + bg + '; padding:3px 6px; border-radius:4px;">' + option.text + '</span>');
         }
-
 
         function roomSorter(data) {
             const subjectId = $("#modal-subject-id").val();
@@ -421,8 +422,6 @@
             });
         }
 
-
-
         /* =========================================================
            === 5. ОТКРЫТИЕ МОДАЛКИ ===
            ========================================================= */
@@ -448,8 +447,8 @@
             teachers.forEach(t => {
                 teacherSelect.append(
                     `<option value="${t.userId}" data-subjects="${t.subjectsCsv}">
-                                                    ${t.fio} (${t.subjectsString})
-                                                </option>`
+                                                            ${t.fio} (${t.subjectsString})
+                                                        </option>`
                 );
             });
 
@@ -467,8 +466,8 @@
             rooms.forEach(r => {
                 roomSelect.append(
                     `<option value="${r.id}" data-subjects="${r.subjectsCsv}">
-                                                    ${r.roomNumber}
-                                                </option>`
+                                                            ${r.roomNumber}
+                                                        </option>`
                 );
             });
 
@@ -483,7 +482,6 @@
             const modal = new bootstrap.Modal(document.getElementById("manualLessonModal"));
             modal.show();
         }
-
 
         /* =========================================================
            === 6. СОХРАНЕНИЕ УРОКА И ОТРИСОВКА В ЯЧЕЙКЕ ===
@@ -515,12 +513,12 @@
 
             // отрисовываем в ячейке
             currentCell.querySelector(".cell-content").innerHTML = `
-                                            <div class="p-1 bg-light border rounded">
-                                                <strong>${$("#modal-subject-name").val()}</strong><br/>
-                                                <small>Преп.: ${$("#modal-teacher-select option:selected").text()}</small><br/>
-                                                <small>Каб.: ${$("#modal-room-select option:selected").text()}</small>
-                                            </div>
-                                                `;
+                                                    <div class="p-1 bg-light border rounded">
+                                                        <strong>${$("#modal-subject-name").val()}</strong><br/>
+                                                        <small>Преп.: ${$("#modal-teacher-select option:selected").text()}</small><br/>
+                                                        <small>Каб.: ${$("#modal-room-select option:selected").text()}</small>
+                                                    </div>
+                                                        `;
             // === ДЕЛАЕМ ЯЧЕЙКУ НЕАКТИВНОЙ ===
             currentCell.classList.add("cell-filled");
             currentCell.classList.remove("dropzone");
@@ -541,6 +539,8 @@
 
             draggedSubject = null;
 
+            updateSaveButtonState();
+
             bootstrap.Modal.getInstance(document.getElementById("manualLessonModal")).hide();
         });
 
@@ -557,6 +557,116 @@
             if (dropdown) dropdown.scrollTop = 0;
         });
 
+        document.getElementById("save-class-schedule-btn").addEventListener("click", function() {
+
+            const classId = getCurrentClassId();
+
+            const lessons = window.manualLessons[classId] || [];
+
+            if (lessons.length === 0) {
+                alert("Для этого класса нет созданных уроков.");
+                return;
+            }
+
+            // отправляем на сервер
+            fetch('/ScheduleGenerator/SaveManualSchedule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    classId: classId,
+                    lessons: lessons
+                })
+            })
+                .then(r => r.json())
+                .then(result => {
+
+                    if (result.success) {
+
+                        // делаем расписание неактивным
+                        disableClassSchedule(classId);
+
+                        // переключаемся на следующий класс
+                        if (currentIndex < total - 1) {
+                            currentIndex++;
+                            renderPartial();
+                        }
+                        else if (currentIndex > 0) {
+                            currentIndex--;
+                            renderPartial();
+                        }
+                        else {
+                            alert("Все расписания успешно сохранены!");
+                            window.location.href = "/Shedule/All";
+                        }
+                    }
+                    else {
+    if (result.conflicts) {
+        let text = "Обнаружены конфликты:\n\n";
+
+        for (const [type, list] of Object.entries(result.conflicts)) {
+            if (!list || list.length === 0) continue;
+
+            text += type + ":\n";
+            list.forEach(msg => {
+                text += "  - " + msg + "\n";
+            });
+            text += "\n";
+        }
+
+        alert(text);
+    } else {
+        alert("Ошибка: " + result.message);
+    }
+}
+                });
+        });
+        function disableClassSchedule(classId) {
+
+            // блокируем все ячейки
+            document.querySelectorAll(`#partial-${currentIndex} .schedule-cell`)
+                .forEach(cell => {
+                    cell.classList.add("cell-disabled");
+                    cell.removeAttribute("draggable");
+                });
+
+            // блокируем предметы
+            document.querySelectorAll(`#partial-${currentIndex} .subject-item`)
+                .forEach(item => {
+                    item.classList.add("disabled");
+                    item.setAttribute("draggable", "false");
+                });
+
+            // блокируем кнопку сохранения
+            document.getElementById("save-class-schedule-btn").disabled = true;
+        }
+        function updateSaveButtonState() {
+            const classId = getCurrentClassId();
+
+            // все предметы слева
+            const items = document.querySelectorAll(`#partial-${currentIndex} .subject-item`);
+
+            let hasRemaining = false;
+
+            items.forEach(item => {
+                const count = parseInt(item.dataset.count || "0");
+                if (count > 0) {
+                    hasRemaining = true;
+                }
+            });
+
+            const btn = document.getElementById("save-class-schedule-btn");
+
+            if (hasRemaining) {
+                btn.disabled = true;
+                btn.classList.add("disabled");
+            } else {
+                btn.disabled = false;
+                btn.classList.remove("disabled");
+            }
+        }
+
     </script>
     <style>
         .cell-filled {
@@ -565,6 +675,11 @@
             opacity: 0.85;
         }
 
+        .cell-disabled {
+            background-color: #f0f0f0 !important;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 }
 
